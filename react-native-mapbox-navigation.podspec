@@ -35,6 +35,28 @@ def $RNMBNAV.pre_install(installer)
   end
 end
 
+## RNMBNAVDownloadToken
+# expo does not supports `.netrc`, so we need to patch curl commend used by cocoapods to pass the credentials
+
+if $RNMBNAVDownloadToken
+  module AddCredentialsToCurlWhenDownloadingMapbox
+    def curl!(*args)
+      mapbox_download = args.flatten.any? { |i| i.to_s.start_with?('https://api.mapbox.com') }
+      if mapbox_download
+        arguments = args.flatten
+        arguments.prepend("-u","mapbox:#{$RNMBNAVDownloadToken}")
+        super(*arguments)
+      else
+        super
+      end
+    end
+  end
+
+  class Pod::Downloader::Http
+    prepend AddCredentialsToCurlWhenDownloadingMapbox
+  end
+end
+
 Pod::Spec.new do |s|
   s.name         = "react-native-mapbox-navigation"
   s.version      = package["version"]
