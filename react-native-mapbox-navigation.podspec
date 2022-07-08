@@ -39,7 +39,7 @@ end
 # expo does not supports `.netrc`, so we need to patch curl commend used by cocoapods to pass the credentials
 
 if $RNMBNAVDownloadToken
-  module AddCredentialsToCurlWhenDownloadingMapbox
+  module AddCredentialsToCurlWhenDownloadingMapboxNavigation
     def curl!(*args)
       mapbox_download = args.flatten.any? { |i| i.to_s.start_with?('https://api.mapbox.com') }
       if mapbox_download
@@ -53,7 +53,7 @@ if $RNMBNAVDownloadToken
   end
 
   class Pod::Downloader::Http
-    prepend AddCredentialsToCurlWhenDownloadingMapbox
+    prepend AddCredentialsToCurlWhenDownloadingMapboxNavigation
   end
 end
 
