@@ -310,7 +310,7 @@ const withAndroidAppGradle: ConfigPlugin<MapboxNavigationPlugProps> = (config) =
   return withAppBuildGradle(config, ({ modResults, ...config }) => {
     if (modResults.language !== 'groovy') {
       WarningAggregator.addWarningAndroid(
-        'withMapbox',
+        'withMapboxNavigation',
         `Cannot automatically configure app build.gradle if it's not groovy`,
       );
       return { modResults, ...config };
@@ -325,7 +325,7 @@ const withAndroidProjectGradle: ConfigPlugin<MapboxNavigationPlugProps> = (confi
   return withProjectBuildGradle(config, ({ modResults, ...config }) => {
     if (modResults.language !== 'groovy') {
       WarningAggregator.addWarningAndroid(
-        'withMapbox',
+        'withMapboxNavigation',
         `Cannot automatically configure app build.gradle if it's not groovy`,
       );
       return { modResults, ...config };
@@ -336,7 +336,7 @@ const withAndroidProjectGradle: ConfigPlugin<MapboxNavigationPlugProps> = (confi
   });
 };
 
-const withMapboxAndroid: ConfigPlugin<MapboxNavigationPlugProps> = (
+const withMapboxNavigationAndroid: ConfigPlugin<MapboxNavigationPlugProps> = (
   config,
   { RNMBNAVVersion, RNMBNAVDownloadToken },
 ) => {
@@ -349,12 +349,12 @@ const withMapboxAndroid: ConfigPlugin<MapboxNavigationPlugProps> = (
   return config;
 };
 
-const withMapbox: ConfigPlugin<MapboxNavigationPlugProps> = (
+const withMapboxNavigation: ConfigPlugin<MapboxNavigationPlugProps> = (
   config,
   { RNMBNAVVersion, RNMBNAVDownloadToken },
 ) => {
   config = withExcludedSimulatorArchitectures(config);
-  config = withMapboxAndroid(config, {
+  config = withMapboxNavigationAndroid(config, {
     RNMBNAVVersion,
     RNMBNAVDownloadToken,
   });
@@ -364,4 +364,4 @@ const withMapbox: ConfigPlugin<MapboxNavigationPlugProps> = (
   });
 };
 
-export default createRunOncePlugin(withMapbox, pkg.name, pkg.version);
+export default createRunOncePlugin(withMapboxNavigation, pkg.name, pkg.version);
