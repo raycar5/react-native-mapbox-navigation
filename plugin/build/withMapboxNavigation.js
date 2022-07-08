@@ -58,9 +58,9 @@ function addConstantBlock(src, RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMap
         tag,
         src,
         newSrc: [
-            `$RNMBNAVVersion = '${RNMBNAVVersion}'`,
-            `$RNMBNAVDownloadToken = '${RNMBNAVDownloadToken}'`,
-            `$RNMapboxMapsVersion = ''${RNMapboxMapsVersion}`
+            RNMBNAVVersion && RNMBNAVVersion.length > 0 ? `$RNMBNAVVersion = '${RNMBNAVVersion}'` : '',
+            RNMBNAVDownloadToken && RNMBNAVDownloadToken.length > 0 ? `$RNMBNAVDownloadToken = '${RNMBNAVDownloadToken}'` : '',
+            RNMapboxMapsVersion && RNMapboxMapsVersion.length > 0 ? `$RNMapboxMapsVersion = '${RNMapboxMapsVersion}'` : ''
         ].join('\n'),
         anchor: /target .+ do/,
         // We can't go after the use_react_native block because it might have parameters, causing it to be multi-line (see react-native template).
