@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setExcludedArchitectures = exports.addMapboxInstallerBlock = exports.addInstallerBlock = exports.addConstantBlock = exports.applyCocoaPodsModifications = void 0;
+exports.setExcludedArchitectures = exports.addMapboxInstallerBlock = exports.addInstallerBlock = exports.addDisableOutputPathsBlock = exports.addConstantBlock = exports.applyCocoaPodsModifications = void 0;
 const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
 const config_plugins_1 = require("@expo/config-plugins");
@@ -43,6 +43,7 @@ const withCocoaPodsInstallerBlocks = (c, { RNMBNAVVersion, RNMBNAVDownloadToken 
 function applyCocoaPodsModifications(contents, { RNMBNAVVersion, RNMBNAVDownloadToken }) {
     // Ensure installer blocks exist
     let src = addConstantBlock(contents, RNMBNAVVersion, RNMBNAVDownloadToken);
+    src = addDisableOutputPathsBlock(src);
     src = addInstallerBlock(src, 'pre');
     src = addInstallerBlock(src, 'post');
     src = addMapboxInstallerBlock(src, 'pre');
@@ -75,6 +76,19 @@ function addConstantBlock(src, RNMBNAVVersion, RNMBNAVDownloadToken) {
     }).contents;
 }
 exports.addConstantBlock = addConstantBlock;
+function addDisableOutputPathsBlock(src) {
+    const tag = `@hollertaxi/react-native-mapbox-navigation-rbmbnatop`;
+    return (0, generateCode_1.mergeContents)({
+        tag,
+        src,
+        newSrc: ':disable_input_output_paths => true, \n',
+        anchor: /:deterministic_uuids => false/,
+        // We can't go after the use_react_native block because it might have parameters, causing it to be multi-line (see react-native template).
+        offset: 0,
+        comment: '#',
+    }).contents;
+}
+exports.addDisableOutputPathsBlock = addDisableOutputPathsBlock;
 function addInstallerBlock(src, blockName) {
     const matchBlock = new RegExp(`${blockName}_install do \\|installer\\|`);
     const tag = `${blockName}_installer`;

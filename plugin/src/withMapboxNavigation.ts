@@ -76,6 +76,7 @@ export function applyCocoaPodsModifications(
     RNMBNAVVersion,
     RNMBNAVDownloadToken,
   );
+  src = addDisableOutputPathsBlock(src);
   src = addInstallerBlock(src, 'pre');
   src = addInstallerBlock(src, 'post');
   src = addMapboxInstallerBlock(src, 'pre');
@@ -107,6 +108,22 @@ export function addConstantBlock(
       `$RNMBNAVDownloadToken = '${RNMBNAVDownloadToken}'`,
     ].join('\n'),
     anchor: /target .+ do/,
+    // We can't go after the use_react_native block because it might have parameters, causing it to be multi-line (see react-native template).
+    offset: 0,
+    comment: '#',
+  }).contents;
+}
+
+export function addDisableOutputPathsBlock(
+  src: string
+): string {
+  const tag = `@hollertaxi/react-native-mapbox-navigation-rbmbnatop`;
+
+  return mergeContents({
+    tag,
+    src,
+    newSrc: ':disable_input_output_paths => true, \n',
+    anchor: /:deterministic_uuids => false/,
     // We can't go after the use_react_native block because it might have parameters, causing it to be multi-line (see react-native template).
     offset: 0,
     comment: '#',

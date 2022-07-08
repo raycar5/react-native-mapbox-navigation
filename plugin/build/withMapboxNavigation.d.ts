@@ -6,6 +6,7 @@ export declare type MapboxNavigationPlugProps = {
 };
 export declare function applyCocoaPodsModifications(contents: string, { RNMBNAVVersion, RNMBNAVDownloadToken }: MapboxNavigationPlugProps): string;
 export declare function addConstantBlock(src: string, RNMBNAVVersion?: string, RNMBNAVDownloadToken?: string): string;
+export declare function addDisableOutputPathsBlock(src: string): string;
 export declare function addInstallerBlock(src: string, blockName: InstallerBlockName): string;
 export declare function addMapboxInstallerBlock(src: string, blockName: InstallerBlockName): string;
 /**
