@@ -31,6 +31,7 @@ type InstallerBlockName = 'pre' | 'post';
 export type MapboxNavigationPlugProps = {
   RNMBNAVVersion?: string;
   RNMBNAVDownloadToken?: string;
+  RNMapboxMapsVersion?: string;
 };
 
 /**
@@ -42,7 +43,7 @@ export type MapboxNavigationPlugProps = {
  */
 const withCocoaPodsInstallerBlocks: ConfigPlugin<MapboxNavigationPlugProps> = (
   c,
-  { RNMBNAVVersion, RNMBNAVDownloadToken },
+  { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion },
 ) => {
   return withDangerousMod(c, [
     'ios',
@@ -56,6 +57,7 @@ const withCocoaPodsInstallerBlocks: ConfigPlugin<MapboxNavigationPlugProps> = (
         applyCocoaPodsModifications(contents, {
           RNMBNAVVersion,
           RNMBNAVDownloadToken,
+          RNMapboxMapsVersion
         }),
         'utf-8',
       );
@@ -68,13 +70,14 @@ const withCocoaPodsInstallerBlocks: ConfigPlugin<MapboxNavigationPlugProps> = (
 // used for spm (swift package manager) which Expo doesn't currently support.
 export function applyCocoaPodsModifications(
   contents: string,
-  { RNMBNAVVersion, RNMBNAVDownloadToken }: MapboxNavigationPlugProps,
+  { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion }: MapboxNavigationPlugProps,
 ): string {
   // Ensure installer blocks exist
   let src = addConstantBlock(
     contents,
     RNMBNAVVersion,
     RNMBNAVDownloadToken,
+    RNMapboxMapsVersion
   );
   src = addDisableOutputPathsBlock(src);
   src = addInstallerBlock(src, 'pre');
@@ -88,17 +91,9 @@ export function addConstantBlock(
   src: string,
   RNMBNAVVersion?: string,
   RNMBNAVDownloadToken?: string,
+  RNMapboxMapsVersion?: string
 ): string {
   const tag = `@hollertaxi/react-native-mapbox-navigation-rbmbnaversion`;
-
-  if (RNMBNAVVersion == null) {
-    const modified = removeGeneratedContents(src, tag);
-    if (!modified) {
-      return src;
-    } else {
-      return modified;
-    }
-  }
 
   return mergeContents({
     tag,
@@ -106,6 +101,7 @@ export function addConstantBlock(
     newSrc: [
       `$RNMBNAVVersion = '${RNMBNAVVersion}'`,
       `$RNMBNAVDownloadToken = '${RNMBNAVDownloadToken}'`,
+      `$RNMapboxMapsVersion = ''${RNMapboxMapsVersion}`
     ].join('\n'),
     anchor: /target .+ do/,
     // We can't go after the use_react_native block because it might have parameters, causing it to be multi-line (see react-native template).
@@ -259,7 +255,7 @@ const withAndroidPropertiesImpl2: ConfigPlugin<MapboxNavigationPlugProps> = (
 
 const withAndroidProperties: ConfigPlugin<MapboxNavigationPlugProps> = (
   config,
-  { RNMBNAVVersion, RNMBNAVDownloadToken },
+  { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion },
 ) => {
   config = withAndroidPropertiesDownloadToken(config, {
     RNMBNAVDownloadToken,
@@ -354,7 +350,7 @@ const withAndroidProjectGradle: ConfigPlugin<MapboxNavigationPlugProps> = (confi
 
 const withMapboxNavigationAndroid: ConfigPlugin<MapboxNavigationPlugProps> = (
   config,
-  { RNMBNAVVersion, RNMBNAVDownloadToken },
+  { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion },
 ) => {
   config = withAndroidProperties(config, {
     RNMBNAVVersion,

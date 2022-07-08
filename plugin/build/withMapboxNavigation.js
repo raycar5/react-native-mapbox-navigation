@@ -24,7 +24,7 @@ catch (_a) {
  * @param config
  * @returns
  */
-const withCocoaPodsInstallerBlocks = (c, { RNMBNAVVersion, RNMBNAVDownloadToken }) => {
+const withCocoaPodsInstallerBlocks = (c, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion }) => {
     return (0, config_plugins_1.withDangerousMod)(c, [
         'ios',
         async (config) => {
@@ -33,6 +33,7 @@ const withCocoaPodsInstallerBlocks = (c, { RNMBNAVVersion, RNMBNAVDownloadToken 
             await fs_1.promises.writeFile(file, applyCocoaPodsModifications(contents, {
                 RNMBNAVVersion,
                 RNMBNAVDownloadToken,
+                RNMapboxMapsVersion
             }), 'utf-8');
             return config;
         },
@@ -40,9 +41,9 @@ const withCocoaPodsInstallerBlocks = (c, { RNMBNAVVersion, RNMBNAVDownloadToken 
 };
 // Only the preinstaller block is required, the post installer block is
 // used for spm (swift package manager) which Expo doesn't currently support.
-function applyCocoaPodsModifications(contents, { RNMBNAVVersion, RNMBNAVDownloadToken }) {
+function applyCocoaPodsModifications(contents, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion }) {
     // Ensure installer blocks exist
-    let src = addConstantBlock(contents, RNMBNAVVersion, RNMBNAVDownloadToken);
+    let src = addConstantBlock(contents, RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion);
     src = addDisableOutputPathsBlock(src);
     src = addInstallerBlock(src, 'pre');
     src = addInstallerBlock(src, 'post');
@@ -51,23 +52,15 @@ function applyCocoaPodsModifications(contents, { RNMBNAVVersion, RNMBNAVDownload
     return src;
 }
 exports.applyCocoaPodsModifications = applyCocoaPodsModifications;
-function addConstantBlock(src, RNMBNAVVersion, RNMBNAVDownloadToken) {
+function addConstantBlock(src, RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion) {
     const tag = `@hollertaxi/react-native-mapbox-navigation-rbmbnaversion`;
-    if (RNMBNAVVersion == null) {
-        const modified = (0, generateCode_1.removeGeneratedContents)(src, tag);
-        if (!modified) {
-            return src;
-        }
-        else {
-            return modified;
-        }
-    }
     return (0, generateCode_1.mergeContents)({
         tag,
         src,
         newSrc: [
             `$RNMBNAVVersion = '${RNMBNAVVersion}'`,
             `$RNMBNAVDownloadToken = '${RNMBNAVDownloadToken}'`,
+            `$RNMapboxMapsVersion = ''${RNMapboxMapsVersion}`
         ].join('\n'),
         anchor: /target .+ do/,
         // We can't go after the use_react_native block because it might have parameters, causing it to be multi-line (see react-native template).
@@ -199,7 +192,7 @@ const withAndroidPropertiesImpl2 = (config, { RNMBNAVVersion }) => {
         return config;
     }
 };
-const withAndroidProperties = (config, { RNMBNAVVersion, RNMBNAVDownloadToken }) => {
+const withAndroidProperties = (config, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion }) => {
     config = withAndroidPropertiesDownloadToken(config, {
         RNMBNAVDownloadToken,
     });
@@ -276,7 +269,7 @@ const withAndroidProjectGradle = (config) => {
         return { modResults, ...config };
     });
 };
-const withMapboxNavigationAndroid = (config, { RNMBNAVVersion, RNMBNAVDownloadToken }) => {
+const withMapboxNavigationAndroid = (config, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion }) => {
     config = withAndroidProperties(config, {
         RNMBNAVVersion,
         RNMBNAVDownloadToken,
