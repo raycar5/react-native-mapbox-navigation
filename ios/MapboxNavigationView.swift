@@ -59,7 +59,7 @@ class MapboxNavigationView: UIView, NavigationMapViewDelegate, NavigationViewCon
   override func removeFromSuperview() {
     super.removeFromSuperview()
     // cleanup and teardown any existing resources
-    self.navigationMapView?.removeFromParent()
+    navigationMapView?.removeFromSuperview()
   }
   
   private func embed() {
@@ -69,7 +69,7 @@ class MapboxNavigationView: UIView, NavigationMapViewDelegate, NavigationViewCon
 
     embedding = true
 
-    navigationMapView = NavigationMapView(frame: self.bounds)
+    navigationMapView = NavigationMapView(frame: bounds)
     navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     navigationMapView.delegate = self
     navigationMapView.userLocationStyle = .puck2D()
