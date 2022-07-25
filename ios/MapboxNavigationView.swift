@@ -1,6 +1,7 @@
 import MapboxCoreNavigation
 import MapboxNavigation
 import MapboxDirections
+import MapboxMaps
 
 // // adapted from https://pspdfkit.com/blog/2017/native-view-controllers-and-react-native/ and https://github.com/mslabenyak/react-native-mapbox-navigation/blob/master/ios/Mapbox/MapboxNavigationView.swift
 extension UIView {
@@ -16,8 +17,9 @@ extension UIView {
   }
 }
 
-class MapboxNavigationView: UIView, NavigationViewControllerDelegate {
-  weak var navViewController: NavigationViewController?
+class MapboxNavigationView: UIViewController, NavigationMapViewDelegate, NavigationViewControllerDelegate {
+  var navigationMapView: NavigationMapView!
+  var navigationRouteOptions: NavigationRouteOptions!
   var embedded: Bool
   var embedding: Bool
   
@@ -53,65 +55,82 @@ class MapboxNavigationView: UIView, NavigationViewControllerDelegate {
   override func layoutSubviews() {
     super.layoutSubviews()
     
-    if (navViewController == nil && !embedding && !embedded) {
+    if (navigationMapView == nil && !embedding && !embedded) {
       embed()
     } else {
-      navViewController?.view.frame = bounds
+      navigationMapView?.frame = bounds
     }
   }
   
   override func removeFromSuperview() {
     super.removeFromSuperview()
     // cleanup and teardown any existing resources
-    self.navViewController?.removeFromParent()
+    self.navigationMapView?.removeFromParent()
   }
   
   private func embed() {
-    guard origin.count == 2 && destination.count == 2 else { return }
-    
     embedding = true
 
-    let originWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: origin[1] as! CLLocationDegrees, longitude: origin[0] as! CLLocationDegrees))
-    let destinationWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: destination[1] as! CLLocationDegrees, longitude: destination[0] as! CLLocationDegrees))
+    navigationMapView = NavigationMapView(frame: self.bounds)
+    navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+    navigationMapView.delegate = self
+    navigationMapView.userLocationStyle = .puck2D()
+
+    let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .raw)
+    navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = false
+    navigationViewportDataSource.followingMobileCamera.zoom = 13.0
+    navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
+
+    self.addSubview(navigationMapView)
+
+    embedding = false
+    embedded = true
+
+    //guard origin.count == 2 && destination.count == 2 else { return }
+    
+    //embedding = true
+
+    //let originWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: origin[1] as! CLLocationDegrees, longitude: origin[0] as! CLLocationDegrees))
+    //let destinationWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: destination[1] as! CLLocationDegrees, longitude: destination[0] as! CLLocationDegrees))
 
     // let options = NavigationRouteOptions(waypoints: [originWaypoint, destinationWaypoint])
-    let options = NavigationRouteOptions(waypoints: [originWaypoint, destinationWaypoint], profileIdentifier: .automobileAvoidingTraffic)
+    //let options = NavigationRouteOptions(waypoints: [originWaypoint, destinationWaypoint], profileIdentifier: .automobileAvoidingTraffic)
 
-    Directions.shared.calculate(options) { [weak self] (_, result) in
-      guard let strongSelf = self, let parentVC = strongSelf.parentViewController else {
-        return
-      }
+    //Directions.shared.calculate(options) { [weak self] (_, result) in
+      //guard let strongSelf = self, let parentVC = strongSelf.parentViewController else {
+        //return
+      //}
       
-      switch result {
-        case .failure(let error):
-          strongSelf.onError!(["message": error.localizedDescription])
-        case .success(let response):
-          guard let weakSelf = self else {
-            return
-          }
+      //switch result {
+        //case .failure(let error):
+          //strongSelf.onError!(["message": error.localizedDescription])
+        //case .success(let response):
+          //guard let weakSelf = self else {
+            //return
+          //}
           
-          let navigationService = MapboxNavigationService(routeResponse: response, routeIndex: 0, routeOptions: options, simulating: strongSelf.shouldSimulateRoute ? .always : .never)
+          //let navigationService = MapboxNavigationService(routeResponse: response, routeIndex: 0, routeOptions: options, simulating: strongSelf.shouldSimulateRoute ? .always : .never)
           
-          let navigationOptions = NavigationOptions(navigationService: navigationService)
-          let vc = NavigationViewController(for: response, routeIndex: 0, routeOptions: options, navigationOptions: navigationOptions)
+          //let navigationOptions = NavigationOptions(navigationService: navigationService)
+          //let vc = NavigationViewController(for: response, routeIndex: 0, routeOptions: options, navigationOptions: navigationOptions)
 
-          vc.showsEndOfRouteFeedback = strongSelf.showsEndOfRouteFeedback
-          StatusView.appearance().isHidden = strongSelf.hideStatusView
+          //vc.showsEndOfRouteFeedback = strongSelf.showsEndOfRouteFeedback
+          //StatusView.appearance().isHidden = strongSelf.hideStatusView
 
-          NavigationSettings.shared.voiceMuted = strongSelf.mute;
+          //NavigationSettings.shared.voiceMuted = strongSelf.mute;
           
-          vc.delegate = strongSelf
+          //vc.delegate = strongSelf
         
-          parentVC.addChild(vc)
-          strongSelf.addSubview(vc.view)
-          vc.view.frame = strongSelf.bounds
-          vc.didMove(toParent: parentVC)
-          strongSelf.navViewController = vc
-      }
+          //parentVC.addChild(vc)
+          //strongSelf.addSubview(vc.view)
+          //vc.view.frame = strongSelf.bounds
+          //vc.didMove(toParent: parentVC)
+          //strongSelf.navViewController = vc
+      //}
       
-      strongSelf.embedding = false
-      strongSelf.embedded = true
-    }
+      //strongSelf.embedding = false
+      //strongSelf.embedded = true
+    //}
   }
   
   func navigationViewController(_ navigationViewController: NavigationViewController, didUpdate progress: RouteProgress, with location: CLLocation, rawLocation: CLLocation) {
