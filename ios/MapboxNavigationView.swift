@@ -79,7 +79,10 @@ class MapboxNavigationView: UIView, NavigationMapViewDelegate, NavigationViewCon
     navigationViewportDataSource.followingMobileCamera.zoom = 13.0
     navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
 
-    parentVC.addSubview(navigationMapView)
+    //parentVC.addChild(navigationMapView)
+    addSubview(navigationMapView)
+    //navigationMapView.frame = bounds
+    //navigationMapView.didMove(toParentViewController: parentVC)
 
     embedding = false
     embedded = true
