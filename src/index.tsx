@@ -1,15 +1,24 @@
 import * as React from 'react';
 import { requireNativeComponent, StyleSheet } from 'react-native';
 
-import { IMapboxNavigationProps } from './typings';
+import { IMapboxNavigationProps, IMapboxNavigationFreeDriveProps } from './typings';
 
 const MapboxNavigation = (props: IMapboxNavigationProps) => {
   return <RNMapboxNavigation style={styles.container} {...props} />;
 };
 
+const MapboxNavigationFreeDrive = (props: IMapboxNavigationFreeDriveProps) => {
+  return <RNMapboxNavigationFreeDrive style={styles.container} {...props} />;
+};
+
 const RNMapboxNavigation = requireNativeComponent(
   'MapboxNavigation',
   MapboxNavigation
+);
+
+const RNMapboxNavigationFreeDrive = requireNativeComponent(
+  'MapboxNavigationFreeDrive',
+  MapboxNavigationFreeDrive
 );
 
 const styles = StyleSheet.create({
@@ -18,4 +27,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MapboxNavigation;
+export { MapboxNavigation, MapboxNavigationFreeDrive }

@@ -38,3 +38,7 @@ export interface IMapboxNavigationProps {
   hideStatusView?: boolean;
   mute?: boolean;
 }
+
+export interface IMapboxNavigationFreeDriveProps {
+  onLocationChange?: (event: OnLocationChangeEvent) => void;
+}
