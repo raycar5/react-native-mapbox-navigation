@@ -17,20 +17,14 @@ extension UIView {
   }
 }
 
-class MapboxNavigationView: UIViewController, NavigationMapViewDelegate, NavigationViewControllerDelegate {
+class MapboxNavigationView: UIView, NavigationMapViewDelegate, NavigationViewControllerDelegate {
   var navigationMapView: NavigationMapView!
   var navigationRouteOptions: NavigationRouteOptions!
   var embedded: Bool
   var embedding: Bool
   
-  @objc var origin: NSArray = [] {
-    didSet { setNeedsLayout() }
-  }
-  
-  @objc var destination: NSArray = [] {
-    didSet { setNeedsLayout() }
-  }
-  
+  @objc var origin: NSArray = []
+  @objc var destination: NSArray = []
   @objc var shouldSimulateRoute: Bool = false
   @objc var showsEndOfRouteFeedback: Bool = false
   @objc var hideStatusView: Bool = false
@@ -69,6 +63,10 @@ class MapboxNavigationView: UIViewController, NavigationMapViewDelegate, Navigat
   }
   
   private func embed() {
+    //guard let parentVC = parentViewController else {
+      //return
+    //}
+
     embedding = true
 
     navigationMapView = NavigationMapView(frame: self.bounds)
@@ -81,7 +79,7 @@ class MapboxNavigationView: UIViewController, NavigationMapViewDelegate, Navigat
     navigationViewportDataSource.followingMobileCamera.zoom = 13.0
     navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
 
-    self.addSubview(navigationMapView)
+    parentVC.addSubview(navigationMapView)
 
     embedding = false
     embedded = true
