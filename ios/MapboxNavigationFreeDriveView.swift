@@ -38,7 +38,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   override func removeFromSuperview() {
     super.removeFromSuperview()
     // cleanup and teardown any existing resources
-    //NotificationCenter.default.removeObeserver(self, name: .passiveLocationDataSourceDidUpdate, object: nil)
+    NotificationCenter.default.removeObserver(self, name: .passiveLocationDataSourceDidUpdate, object: nil)
     passiveLocationProvider.stopUpdatingLocation()
     passiveLocationProvider.stopUpdatingHeading()
     navigationMapView?.removeFromSuperview()
@@ -51,10 +51,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     embedding = true
 
-    navigationMapView = NavigationMapView(frame: bounds)
+    navigationMapView = NavigationMapView(frame: bounds, )
     navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     navigationMapView.delegate = self
     navigationMapView.userLocationStyle = .puck2D()
+    navigationMapView.mapView?.mapboxMap.style = StyleURI.light
 
     let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .raw)
     navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = false
@@ -67,10 +68,18 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationMapView.mapView.location.overrideLocationProvider(with: locationProvider)
     passiveLocationProvider.startUpdatingLocation()
 
-    speedLimitView = SpeedLimitView()
-
     addSubview(navigationMapView)
-    addSubview(speedLimitView)
+
+    if (showSpeedLimit) {
+      speedLimitView = SpeedLimitView()
+    
+      addSubview(speedLimitView)
+    }
+
+    NotificationCenter.default.addObserver(self,
+      selector: #selector(didUpdatePassiveLocation),
+      name: .passiveLocationDataSourceDidUpdate,
+      object: nil)
 
     embedding = false
     embedded = true
