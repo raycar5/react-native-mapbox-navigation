@@ -51,7 +51,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     embedding = true
 
-    navigationMapView = NavigationMapView(frame: bounds, styleU)
+    navigationMapView = NavigationMapView(frame: bounds)
     navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     navigationMapView.delegate = self
     navigationMapView.userLocationStyle = .puck2D()
