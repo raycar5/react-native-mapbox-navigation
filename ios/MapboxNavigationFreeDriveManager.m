@@ -3,5 +3,6 @@
 @interface RCT_EXTERN_MODULE(MapboxNavigationFreeDriveManager, RCTViewManager)
 
 RCT_EXPORT_VIEW_PROPERTY(onLocationChange, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(showSpeedLimit, BOOL)
 
 @end

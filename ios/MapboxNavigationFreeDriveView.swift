@@ -6,10 +6,14 @@ import MapboxMaps
 class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, NavigationViewControllerDelegate {
   var navigationMapView: NavigationMapView!
   var navigationRouteOptions: NavigationRouteOptions!
+  var passiveLocationManager: PassiveLocationManager!
+  var passiveLocationProvider: PassiveLocationProvider!
+  var speedLimitView: SpeedLimitView!
   var embedded: Bool
   var embedding: Bool
   
   @objc var onLocationChange: RCTDirectEventBlock?
+  @objc var showSpeedLimit: Bool = true
   
   override init(frame: CGRect) {
     self.embedded = false
@@ -34,13 +38,16 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   override func removeFromSuperview() {
     super.removeFromSuperview()
     // cleanup and teardown any existing resources
+    NotificationCenter.default.removeObeserver(self, name: .passiveLocationDataSourceDidUpdate, object: nil)
+    passiveLocationProvider.stopUpdatingLocation()
+    passiveLocationProvider.stopUpdatingHeading()
     navigationMapView?.removeFromSuperview()
   }
   
   private func embed() {
-    //guard let parentVC = parentViewController else {
-      //return
-    //}
+    guard let parentVC = parentViewController else {
+      return
+    }
 
     embedding = true
 
@@ -54,62 +61,27 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationViewportDataSource.followingMobileCamera.zoom = 13.0
     navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
 
-    //parentVC.addChild(navigationMapView)
+    passiveLocationManager = PassiveLocationManager()
+    passiveLocationProvider = PassiveLocationProvider(locationManager: passiveLocationManager)
+    let locationProvider: LocationProvider = passiveLocationProvider
+    navigationMapView.mapView.location.overrideLocationProvider(with: locationProvider)
+    passiveLocationProvider.startUpdatingLocation()
+
+    speedLimitView = SpeedLimitView()
+
     addSubview(navigationMapView)
-    //navigationMapView.frame = bounds
-    //navigationMapView.didMove(toParentViewController: parentVC)
+    addSubview(speedLimitView)
 
     embedding = false
     embedded = true
-
-    //guard origin.count == 2 && destination.count == 2 else { return }
-    
-    //embedding = true
-
-    //let originWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: origin[1] as! CLLocationDegrees, longitude: origin[0] as! CLLocationDegrees))
-    //let destinationWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: destination[1] as! CLLocationDegrees, longitude: destination[0] as! CLLocationDegrees))
-
-    // let options = NavigationRouteOptions(waypoints: [originWaypoint, destinationWaypoint])
-    //let options = NavigationRouteOptions(waypoints: [originWaypoint, destinationWaypoint], profileIdentifier: .automobileAvoidingTraffic)
-
-    //Directions.shared.calculate(options) { [weak self] (_, result) in
-      //guard let strongSelf = self, let parentVC = strongSelf.parentViewController else {
-        //return
-      //}
-      
-      //switch result {
-        //case .failure(let error):
-          //strongSelf.onError!(["message": error.localizedDescription])
-        //case .success(let response):
-          //guard let weakSelf = self else {
-            //return
-          //}
-          
-          //let navigationService = MapboxNavigationService(routeResponse: response, routeIndex: 0, routeOptions: options, simulating: strongSelf.shouldSimulateRoute ? .always : .never)
-          
-          //let navigationOptions = NavigationOptions(navigationService: navigationService)
-          //let vc = NavigationViewController(for: response, routeIndex: 0, routeOptions: options, navigationOptions: navigationOptions)
-
-          //vc.showsEndOfRouteFeedback = strongSelf.showsEndOfRouteFeedback
-          //StatusView.appearance().isHidden = strongSelf.hideStatusView
-
-          //NavigationSettings.shared.voiceMuted = strongSelf.mute;
-          
-          //vc.delegate = strongSelf
-        
-          //parentVC.addChild(vc)
-          //strongSelf.addSubview(vc.view)
-          //vc.view.frame = strongSelf.bounds
-          //vc.didMove(toParent: parentVC)
-          //strongSelf.navViewController = vc
-      //}
-      
-      //strongSelf.embedding = false
-      //strongSelf.embedded = true
-    //}
   }
   
-  func navigationViewController(_ navigationViewController: NavigationViewController, didUpdate progress: RouteProgress, with location: CLLocation, rawLocation: CLLocation) {
+  @objc func didUpdatePassiveLocation(_ notification: Notification) {
+    speedLimitView.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
+    speedLimitView.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
+
+    let location = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.locationKey] as? CLLocation
+
     onLocationChange?(["longitude": location.coordinate.longitude, "latitude": location.coordinate.latitude])
   }
 }
