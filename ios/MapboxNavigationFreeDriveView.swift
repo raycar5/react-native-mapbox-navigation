@@ -38,7 +38,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   override func removeFromSuperview() {
     super.removeFromSuperview()
     // cleanup and teardown any existing resources
-    NotificationCenter.default.removeObeserver(self, name: .passiveLocationDataSourceDidUpdate, object: nil)
+    //NotificationCenter.default.removeObeserver(self, name: .passiveLocationDataSourceDidUpdate, object: nil)
     passiveLocationProvider.stopUpdatingLocation()
     passiveLocationProvider.stopUpdatingHeading()
     navigationMapView?.removeFromSuperview()
@@ -82,6 +82,6 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     let location = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.locationKey] as? CLLocation
 
-    onLocationChange?(["longitude": location.coordinate.longitude, "latitude": location.coordinate.latitude])
+    onLocationChange?(["longitude": location?.coordinate.longitude, "latitude": location?.coordinate.latitude])
   }
 }
