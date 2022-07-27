@@ -60,9 +60,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     var puck2DConfiguration = Puck2DConfiguration()
     if (userPuckImage != nil) {
-      puck2DConfiguration.topImage = nil
-      puck2DConfiguration.bearingImage = userPuckImage
-      puck2DConfiguration.scale = .constant(2.0)
+      puck2DConfiguration.topImage = userPuckImage
+      puck2DConfiguration.scale = .constant(1.0)
     }
     navigationMapView.userLocationStyle = UserLocationStyle.puck2D(configuration: puck2DConfiguration)
 
