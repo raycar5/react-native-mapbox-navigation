@@ -4,5 +4,7 @@
 
 RCT_EXPORT_VIEW_PROPERTY(onLocationChange, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(showSpeedLimit, BOOL)
+RCT_EXPORT_VIEW_PROPERTY(followZoomLevel, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(userPuckImage, UIImage)
 
 @end

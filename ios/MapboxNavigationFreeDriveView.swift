@@ -12,8 +12,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   var embedded: Bool
   var embedding: Bool
   
+  @objc var followZoomLevel: NSNumber = 16.0
   @objc var onLocationChange: RCTDirectEventBlock?
   @objc var showSpeedLimit: Bool = true
+  @objc var userPuckImage: UIImage? = nil
   
   override init(frame: CGRect) {
     self.embedded = false
@@ -54,13 +56,23 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationMapView = NavigationMapView(frame: bounds)
     navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     navigationMapView.delegate = self
-    navigationMapView.userLocationStyle = .puck2D()
     navigationMapView.mapView?.mapboxMap.loadStyleURI(StyleURI.light)
 
+    var puck2DConfiguration = Puck2DConfiguration()
+    if (userPuckImage != nil) {
+      puck2DConfiguration.topImage = nil
+      puck2DConfiguration.bearingImage = userPuckImage
+      puck2DConfiguration.scale = .constant(2.0)
+    }
+    navigationMapView.userLocationStyle = UserLocationStyle.puck2D(configuration: puck2DConfiguration)
+
     let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .raw)
+    navigationViewportDataSource.options.followingCameraOptions.centerUpdatesAllowed = true
     navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = false
-    navigationViewportDataSource.followingMobileCamera.zoom = 13.0
+    navigationViewportDataSource.options.followingCameraOptions.bearingUpdatesAllowed = false
+    navigationViewportDataSource.followingMobileCamera.zoom = followZoomLevel
     navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
+    navigationMapView.navigationCamera.follow()
 
     passiveLocationManager = PassiveLocationManager()
     passiveLocationProvider = PassiveLocationProvider(locationManager: passiveLocationManager)
