@@ -42,4 +42,6 @@ export interface IMapboxNavigationProps {
 export interface IMapboxNavigationFreeDriveProps {
   onLocationChange?: (event: OnLocationChangeEvent) => void;
   showSpeedLimit?: boolean;
+  followZoomLevel?: number;
+  userPuckImage?: string;
 }
