@@ -70,7 +70,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationViewportDataSource.options.followingCameraOptions.centerUpdatesAllowed = true
     navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = false
     navigationViewportDataSource.options.followingCameraOptions.bearingUpdatesAllowed = false
-    navigationViewportDataSource.followingMobileCamera.zoom = followZoomLevel
+    navigationViewportDataSource.followingMobileCamera.zoom = followZoomLevel as CGFloat
     navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
     navigationMapView.navigationCamera.follow()
 
