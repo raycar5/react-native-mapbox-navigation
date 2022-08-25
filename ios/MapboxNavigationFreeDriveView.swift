@@ -9,6 +9,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   var passiveLocationManager: PassiveLocationManager!
   var passiveLocationProvider: PassiveLocationProvider!
   var speedLimitView: SpeedLimitView!
+  var routeResponse: RouteResponse!
   var embedded: Bool
   var embedding: Bool
   
@@ -62,11 +63,19 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     navigationMapView.delegate = self
     navigationMapView.mapView?.mapboxMap.loadStyleURI(StyleURI.light)
+    navigationMapView.mapView?.panEnabled = true
+    navigationMapView.mapView?.pinchEnabled = true
+    navigationMapView.mapView?.pinchRotateEnabled = false
+    navigationMapView.mapView?.rotateEnabled = false
+    navigationMapView.mapView?.simultaneousRotateAndPinchZoomEnabled = false
+    navigationMapView.mapView?.pinchZoomEnabled = true
+    navigationMapView.mapView?.pinchPanEnabled = false
+    navigationMapView.mapView?.pitchEnabled = false
 
     var puck2DConfiguration = Puck2DConfiguration()
     if (userPuckImage != nil) {
       puck2DConfiguration.topImage = userPuckImage
-      puck2DConfiguration.scale = .constant(Double(exactly: userPuckScale))
+      puck2DConfiguration.scale = .constant(Double(exactly: userPuckScale ?? 1.0))
     }
     navigationMapView.userLocationStyle = UserLocationStyle.puck2D(configuration: puck2DConfiguration)
 
@@ -101,10 +110,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     let originWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: origin[1] as! CLLocationDegrees, longitude: origin[0] as! CLLocationDegrees))
     let destinationWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: destination[1] as! CLLocationDegrees, longitude: destination[0] as! CLLocationDegrees))
-    let waypoints = [originWaypoint]
+    var waypoints = [originWaypoint]
 
-    if (stops?.isEmpty == false) {
-      for (stop in stops) {
+    if (stops != nil && stops.count > 0) {
+      for stop in stops {
         waypoints.append(Waypoint(coordinate: CLLocationCoordinate2D(latitude: stop[1] as! CLLocationDegrees, longitude: stop[0] as! CLLocationDegrees)))
       }
     }
@@ -116,13 +125,13 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     Directions.shared.calculate(options) { [weak self] (_, result) in
       switch result {
         case .failure(let error):
-          //print(error.localizedDescription)
+          print(error.localizedDescription)
         case .success(let response):
-          navigationRouteOptions = options
-          routeResponse = response
+          self.navigationRouteOptions = options
+          self.routeResponse = response
           
-          navigationMapView.show([response.routes.first])
-          navigationMapView.showWaypoints(on: response.routes.first)
+          navigationMapView.showcase([response?.routes?.first], animated: true)
+          //navigationMapView.showWaypoints(on: response?.routes?.first)
         }
       }
 
@@ -138,5 +147,36 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     let roadName = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.roadNameKey] as? String
 
     onLocationChange?(["longitude": location?.coordinate.longitude, "latitude": location?.coordinate.latitude, "roadName": roadName])
+  }
+ 
+  func navigationMapView(_ navigationMapView: NavigationMapView, routeLineLayerWithIdentifier identifier: String, sourceIdentifier: String) -> LineLayer? {
+    var lineLayer = LineLayer(id: identifier)
+    lineLayer.source = sourceIdentifier
+ 
+    // `identifier` parameter contains unique identifier of the route layer or its casing.
+    // Such identifier consists of several parts: unique address of route object, whether route is
+    // main or alternative, and whether route is casing or not. For example: identifier for
+    // main route line will look like this: `0x0000600001168000.main.route_line`, and for
+    // alternative route line casing will look like this: `0x0000600001ddee80.alternative.route_line_casing`.
+    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? #colorLiteral(red: 0.337254902, green: 0.6588235294, blue: 0.9843137255, alpha: 1) : #colorLiteral(red: 0.6, green: 0.6, blue: 0.6, alpha: 1)))
+    lineLayer.lineWidth = .expression(lineWidthExpression())
+    lineLayer.lineJoin = .constant(.round)
+    lineLayer.lineCap = .constant(.round)
+    
+    return lineLayer
+  }
+ 
+  func navigationMapView(_ navigationMapView: NavigationMapView, routeCasingLineLayerWithIdentifier identifier: String, sourceIdentifier: String) -> LineLayer? {
+    var lineLayer = LineLayer(id: identifier)
+    lineLayer.source = sourceIdentifier
+ 
+    // Based on information stored in `identifier` property (whether route line is main or not)
+    // route line will be colored differently.
+    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? #colorLiteral(red: 0.1843137255, green: 0.4784313725, blue: 0.7764705882, alpha: 1) : #colorLiteral(red: 0.4, green: 0.4, blue: 0.4, alpha: 1)))
+    lineLayer.lineWidth = .expression(lineWidthExpression(1.2))
+    lineLayer.lineJoin = .constant(.round)
+    lineLayer.lineCap = .constant(.round)
+    
+    return lineLayer
   }
 }
