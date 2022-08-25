@@ -11,6 +11,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   var speedLimitView: SpeedLimitView!
   var embedded: Bool
   var embedding: Bool
+  var currentOrigin: [NSNumber] = []
+  var currentDestination: [NSNumber] = []
+  var currentWaypoints: [[NSNumber]] = []
   var currentRouteIndex = 0 {
     didSet {
       showCurrentRoute()
@@ -37,9 +40,53 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var showSpeedLimit: Bool = true
   @objc var userPuckImage: UIImage? = nil
   @objc var userPuckScale: NSNumber = 1.0
-  @objc var origin: [NSNumber] = []
-  @objc var destination: [NSNumber] = []
-  @objc var stops: [[NSNumber]] = []
+
+  @objc func showRoute(_ origin: [NSNumber], withDestination destination: [NSNumber], withWaypoints waypoints: [[NSNumber]]) {
+    currentOrigin = origin
+    currentDestination = destination
+    currentWaypoints = waypoints
+    var routeWaypoints = [Waypoint]()
+
+    if (origin != nil && origin.isEmpty == false) {
+      let originWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: origin[1] as! CLLocationDegrees, longitude: origin[0] as! CLLocationDegrees))
+      routeWaypoints.append(originWaypoint)
+    }
+
+    if (waypoints != nil && waypoints.isEmpty == false) {
+      for waypoint in waypoints {
+        if (waypoint != nil && waypoint.isEmpty == false) {
+          routeWaypoints.append(Waypoint(coordinate: CLLocationCoordinate2D(latitude: waypoint[1] as! CLLocationDegrees, longitude: waypoint[0] as! CLLocationDegrees)))
+        }
+      }
+    }
+
+    if (destination != nil && destination.isEmpty == false) {
+      let destinationWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: destination[1] as! CLLocationDegrees, longitude: destination[0] as! CLLocationDegrees))
+      routeWaypoints.append(destinationWaypoint)
+    }
+
+    if (routeWaypoints.isEmpty == false) {
+      let options = NavigationRouteOptions(waypoints: routeWaypoints, profileIdentifier: .automobileAvoidingTraffic)
+
+      Directions.shared.calculate(options) { [weak self] (_, result) in
+        switch result {
+          case .failure(let error):
+            print(error.localizedDescription)
+          case .success(let response):
+            guard let self = self else { return }
+
+            self.navigationRouteOptions = options
+            self.routeResponse = response
+            
+            if let routes = self.routes, let currentRoute = self.currentRoute {
+              self.navigationMapView.showcase(routes)
+              //self.navigationMapView.show(routes)
+              //self.navigationMapView.showWaypoints(on: currentRoute)
+            }
+          }
+        }
+    }
+  }
  
   func showCurrentRoute() {
     guard let currentRoute = currentRoute else { return }
@@ -136,48 +183,6 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       selector: #selector(didUpdatePassiveLocation),
       name: .passiveLocationManagerDidUpdate,
       object: nil)
-    
-    var waypoints = [Waypoint]()
-
-    if (origin != nil && origin.isEmpty == false) {
-      let originWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: origin[1] as! CLLocationDegrees, longitude: origin[0] as! CLLocationDegrees))
-      waypoints.append(originWaypoint)
-    }
-
-    if (stops != nil && stops.isEmpty == false) {
-      for stop in stops {
-        if (stop != nil && stop.isEmpty == false) {
-          waypoints.append(Waypoint(coordinate: CLLocationCoordinate2D(latitude: stop[1] as! CLLocationDegrees, longitude: stop[0] as! CLLocationDegrees)))
-        }
-      }
-    }
-
-    if (destination != nil && destination.isEmpty == false) {
-      let destinationWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: destination[1] as! CLLocationDegrees, longitude: destination[0] as! CLLocationDegrees))
-      waypoints.append(destinationWaypoint)
-    }
-
-    if  (waypoints.isEmpty == false) {
-      let options = NavigationRouteOptions(waypoints: waypoints, profileIdentifier: .automobileAvoidingTraffic)
-
-      Directions.shared.calculate(options) { [weak self] (_, result) in
-        switch result {
-          case .failure(let error):
-            print(error.localizedDescription)
-          case .success(let response):
-            guard let self = self else { return }
-
-            self.navigationRouteOptions = options
-            self.routeResponse = response
-            
-            if let routes = self.routes, let currentRoute = self.currentRoute {
-              self.navigationMapView.showcase(routes)
-              //self.navigationMapView.show(routes)
-              //self.navigationMapView.showWaypoints(on: currentRoute)
-            }
-          }
-        }
-    }
 
     embedding = false
     embedded = true
