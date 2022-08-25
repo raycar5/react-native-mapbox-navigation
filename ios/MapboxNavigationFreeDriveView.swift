@@ -38,7 +38,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var userPuckImage: UIImage? = nil
   @objc var userPuckScale: NSNumber = 1.0
   @objc var origin: [NSNumber] = []
-  @objc var destination: [NSNumber]= []
+  @objc var destination: [NSNumber] = []
   @objc var stops: [[NSNumber]] = []
  
   func showCurrentRoute() {
@@ -167,7 +167,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
           case .success(let response):
             guard let self = self else { return }
 
-            self.navigationRouteOptions = navigationRouteOptions
+            self.navigationRouteOptions = options
             self.routeResponse = response
             
             if let routes = self.routes, let currentRoute = self.currentRoute {
