@@ -16,6 +16,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var onLocationChange: RCTDirectEventBlock?
   @objc var showSpeedLimit: Bool = true
   @objc var userPuckImage: UIImage? = nil
+  @objc var userPuckScale: NSNumber = 1.0
+  @objc var origin: NSArray = []
+  @objc var destination: NSArray = []
+  @objc var stops: NSArray = []
   
   override init(frame: CGRect) {
     self.embedded = false
@@ -44,6 +48,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     passiveLocationProvider.stopUpdatingLocation()
     passiveLocationProvider.stopUpdatingHeading()
     navigationMapView?.removeFromSuperview()
+    navigationMapView = nil
   }
   
   private func embed() {
@@ -61,7 +66,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     var puck2DConfiguration = Puck2DConfiguration()
     if (userPuckImage != nil) {
       puck2DConfiguration.topImage = userPuckImage
-      puck2DConfiguration.scale = .constant(1.0)
+      puck2DConfiguration.scale = .constant(Double(exactly: userPuckScale))
     }
     navigationMapView.userLocationStyle = UserLocationStyle.puck2D(configuration: puck2DConfiguration)
 
@@ -83,6 +88,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     if (showSpeedLimit) {
       speedLimitView = SpeedLimitView()
+
+      speedLimitView.shouldShowUnknownSpeedLimit = true
     
       addSubview(speedLimitView)
     }
@@ -91,6 +98,33 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       selector: #selector(didUpdatePassiveLocation),
       name: .passiveLocationManagerDidUpdate,
       object: nil)
+
+    let originWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: origin[1] as! CLLocationDegrees, longitude: origin[0] as! CLLocationDegrees))
+    let destinationWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: destination[1] as! CLLocationDegrees, longitude: destination[0] as! CLLocationDegrees))
+    let waypoints = [originWaypoint]
+
+    if (stops?.isEmpty == false) {
+      for (stop in stops) {
+        waypoints.append(Waypoint(coordinate: CLLocationCoordinate2D(latitude: stop[1] as! CLLocationDegrees, longitude: stop[0] as! CLLocationDegrees)))
+      }
+    }
+
+    waypoints.append(destinationWaypoint)
+
+    let options = NavigationRouteOptions(waypoints: waypoints, profileIdentifier: .automobileAvoidingTraffic)
+
+    Directions.shared.calculate(options) { [weak self] (_, result) in
+      switch result {
+        case .failure(let error):
+          //print(error.localizedDescription)
+        case .success(let response):
+          navigationRouteOptions = options
+          routeResponse = response
+          
+          navigationMapView.show([response.routes.first])
+          navigationMapView.showWaypoints(on: response.routes.first)
+        }
+      }
 
     embedding = false
     embedded = true
@@ -101,7 +135,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     speedLimitView.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
 
     let location = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.locationKey] as? CLLocation
+    let roadName = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.roadNameKey] as? String
 
-    onLocationChange?(["longitude": location?.coordinate.longitude, "latitude": location?.coordinate.latitude])
+    onLocationChange?(["longitude": location?.coordinate.longitude, "latitude": location?.coordinate.latitude, "roadName": roadName])
   }
 }
