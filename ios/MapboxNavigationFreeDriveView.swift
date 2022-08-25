@@ -37,9 +37,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var showSpeedLimit: Bool = true
   @objc var userPuckImage: UIImage? = nil
   @objc var userPuckScale: NSNumber = 1.0
-  @objc var origin: NSArray = []
-  @objc var destination: NSArray = []
-  @objc var stops: NSArray = []
+  @objc var origin: [NSNumber] = []
+  @objc var destination: [NSNumber]= []
+  @objc var stops: [[NSNumber]] = []
  
   func showCurrentRoute() {
     guard let currentRoute = currentRoute else { return }
@@ -97,8 +97,6 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationMapView.mapView.gestures.options.panEnabled = true
     navigationMapView.mapView.gestures.options.pinchEnabled = true
     navigationMapView.mapView.gestures.options.pinchRotateEnabled = false
-    navigationMapView.mapView.gestures.options.rotateEnabled = false
-    navigationMapView.mapView.gestures.options.simultaneousRotateAndPinchZoomEnabled = false
     navigationMapView.mapView.gestures.options.pinchZoomEnabled = true
     navigationMapView.mapView.gestures.options.pinchPanEnabled = false
     navigationMapView.mapView.gestures.options.pitchEnabled = false
@@ -139,27 +137,27 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       name: .passiveLocationManagerDidUpdate,
       object: nil)
     
-    var waypoints = []
+    var waypoints = [Waypoint]()
 
-    if (origin != nil && origin.count > 0) {
+    if (origin != nil && origin.isEmpty == false) {
       let originWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: origin[1] as! CLLocationDegrees, longitude: origin[0] as! CLLocationDegrees))
       waypoints.append(originWaypoint)
     }
 
-    if (stops != nil && stops.count > 0) {
+    if (stops != nil && stops.isEmpty == false) {
       for stop in stops {
-        if ((stop as NSArray) != nil && (stop as NSArray).count > 0) {
-          waypoints.append(Waypoint(coordinate: CLLocationCoordinate2D(latitude: (stop as NSArray)[1] as! CLLocationDegrees, longitude: (stop as NSArray)[0] as! CLLocationDegrees)))
+        if (stop != nil && stop.isEmpty == false) {
+          waypoints.append(Waypoint(coordinate: CLLocationCoordinate2D(latitude: stop[1] as! CLLocationDegrees, longitude: stop[0] as! CLLocationDegrees)))
         }
       }
     }
 
-    if (destination != nil && destination.count > 0) {
+    if (destination != nil && destination.isEmpty == false) {
       let destinationWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: destination[1] as! CLLocationDegrees, longitude: destination[0] as! CLLocationDegrees))
       waypoints.append(destinationWaypoint)
     }
 
-    if (!waypoints.isEmpty) {
+    if  (waypoints.isEmpty == false) {
       let options = NavigationRouteOptions(waypoints: waypoints, profileIdentifier: .automobileAvoidingTraffic)
 
       Directions.shared.calculate(options) { [weak self] (_, result) in
