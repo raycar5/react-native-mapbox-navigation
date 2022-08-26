@@ -15,4 +15,8 @@ RCT_EXTERN_METHOD(
   waypoints: (NSArray *)waypoints
 )
 
+RCT_EXTERN_METHOD(
+  clearRouteViaManager: (nonnull NSNumber *)node
+)
+
 @end

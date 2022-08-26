@@ -40,16 +40,6 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var showSpeedLimit: Bool = true
   @objc var userPuckImage: UIImage? = nil
   @objc var userPuckScale: NSNumber = 1.0
-  
-  @objc func didUpdatePassiveLocation(_ notification: Notification) {
-    speedLimitView.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
-    speedLimitView.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
-
-    let location = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.locationKey] as? CLLocation
-    let roadName = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.roadNameKey] as? String
-
-    onLocationChange?(["longitude": location?.coordinate.longitude, "latitude": location?.coordinate.latitude, "roadName": roadName])
-  }
 
   @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]]) {
     currentOrigin = origin
@@ -96,6 +86,21 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
           }
         }
     }
+  }
+
+  @objc func clearRoute() {
+    routeResponse = nil
+  }
+  
+  @objc func didUpdatePassiveLocation(_ notification: Notification) {
+    let location = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.locationKey] as? CLLocation
+    let roadName = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.roadNameKey] as? String
+    
+    speedLimitView.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
+    speedLimitView.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
+    speedLimitView.currentSpeed = location?.speed
+
+    onLocationChange?(["longitude": location?.coordinate.longitude, "latitude": location?.coordinate.latitude, "roadName": roadName])
   }
  
   func showCurrentRoute() {
@@ -149,6 +154,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     navigationMapView = NavigationMapView(frame: bounds)
     navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+    navigationMapView.showsRestrictedAreasOnRoute = true
     navigationMapView.delegate = self
     navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
     navigationMapView.mapView.gestures.options.panEnabled = true
@@ -185,8 +191,14 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       speedLimitView = SpeedLimitView()
 
       speedLimitView.shouldShowUnknownSpeedLimit = true
+      speedLimitView.translatesAutoresizingMaskIntoConstraints = false
     
       addSubview(speedLimitView)
+      
+      speedLimitView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 50).isActive = true
+      speedLimitView.widthAnchor.constraint(equalToConstant: 50).isActive = true
+      speedLimitView.heightAnchor.constraint(equalToConstant: 50).isActive = true
+      speedLimitView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 10).isActive = true
     }
 
     NotificationCenter.default.addObserver(self,
@@ -254,5 +266,22 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     lineLayer.lineCap = .constant(.round)
     
     return lineLayer
+  }
+
+  func navigationMapView(_ navigationMapView: NavigationMapView, didAdd finalDestinationAnnotation: PointAnnotation, pointAnnotationManager: PointAnnotationManager) {
+    var finalDestinationAnnotation = finalDestinationAnnotation
+
+    if (userPuckImage != nil) {
+      finalDestinationAnnotation.image = .init(image: userPuckImage, name: "marker")
+    } else {
+      let image = UIImage(named: "default_marker", in: .mapboxNavigation, compatibleWith: nil)!
+      finalDestinationAnnotation.image = .init(image: image, name: "marker")
+    }
+ 
+    // `PointAnnotationManager` is used to manage `PointAnnotation`s and is also exposed as
+    // a property in `NavigationMapView.pointAnnotationManager`. After any modifications to the
+    // `PointAnnotation` changes must be applied to `PointAnnotationManager.annotations`
+    // array. To remove all annotations for specific `PointAnnotationManager`, set an empty array.
+    pointAnnotationManager.annotations = [finalDestinationAnnotation]
   }
 }
