@@ -51,7 +51,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     onLocationChange?(["longitude": location?.coordinate.longitude, "latitude": location?.coordinate.latitude, "roadName": roadName])
   }
 
-  @objc func showRoute(_ origin: [NSNumber], withDestination destination: [NSNumber], withWaypoints waypoints: [[NSNumber]]) {
+  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]]) {
     currentOrigin = origin
     currentDestination = destination
     currentWaypoints = waypoints

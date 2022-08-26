@@ -1,22 +1,15 @@
 import * as React from 'react';
-import { Platform, findNodeHandle, requireNativeComponent, NativeModules, UIManager, StyleSheet } from 'react-native';
+import { findNodeHandle, requireNativeComponent, UIManager, StyleSheet } from 'react-native';
 const MapboxNavigation = (props) => {
     return <RNMapboxNavigation style={styles.container} {...props}/>;
 };
 const MapboxNavigationFreeDrive = React.forwardRef((props, ref) => {
     const mapboxNavigationFreeDriveRef = React.useRef();
     React.useImperativeHandle(ref, () => ({
-        showRoute: (origin = [], destination = [], waypoints = []) => {
-            showRoute(origin, destination, waypoints);
-        }
+        showRoute
     }));
     const showRoute = (origin = [], destination = [], waypoints = []) => {
-        if (Platform.OS === "android") {
-            UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.getViewManagerConfig("RNMapboxNavigationFreeDrive").Commands.showRoute, [origin, destination, waypoints]);
-        }
-        else if (Platform.OS === "ios") {
-            return NativeModules.MapboxNavigationFreeDriveManager.showRoute(origin, destination, waypoints, findNodeHandle(mapboxNavigationFreeDriveRef.current));
-        }
+        UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.RNMapboxNavigationFreeDrive.Commands.showRouteViaManager, [origin, destination, waypoints]);
     };
     return <RNMapboxNavigationFreeDrive ref={mapboxNavigationFreeDriveRef} style={styles.container} {...props}/>;
 });
