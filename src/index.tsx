@@ -11,7 +11,8 @@ const MapboxNavigationFreeDrive = React.forwardRef((props: IMapboxNavigationFree
   const mapboxNavigationFreeDriveRef = React.useRef()
 
   React.useImperativeHandle(ref, () => ({
-    showRoute
+    showRoute,
+    clearRoute
   }))
 
   const showRoute = (origin = [], destination = [], waypoints = []) => {
@@ -26,6 +27,22 @@ const MapboxNavigationFreeDrive = React.forwardRef((props: IMapboxNavigationFree
         findNodeHandle(mapboxNavigationFreeDriveRef.current),
         UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager,
         [origin, destination, waypoints]
+      )
+    }
+  }
+
+  const clearRoute = () => {
+    if (Platform.OS === "android") {
+      UIManager.dispatchViewManagerCommand(
+        findNodeHandle(mapboxNavigationFreeDriveRef.current),
+        UIManager.MapboxNavigationFreeDrive.Commands.clearRouteViaManager,
+        []
+      )
+    } else if (Platform.OS === "ios") {
+      UIManager.dispatchViewManagerCommand(
+        findNodeHandle(mapboxNavigationFreeDriveRef.current),
+        UIManager.MapboxNavigationFreeDrive.Commands.clearRouteViaManager,
+        []
       )
     }
   }
