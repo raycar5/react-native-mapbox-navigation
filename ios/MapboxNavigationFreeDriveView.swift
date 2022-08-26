@@ -249,7 +249,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     // main or alternative, and whether route is casing or not. For example: identifier for
     // main route line will look like this: `0x0000600001168000.main.route_line`, and for
     // alternative route line casing will look like this: `0x0000600001ddee80.alternative.route_line_casing`.
-    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 1) : #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 0.6)))
+    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 1) : #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 0.4)))
     lineLayer.lineWidth = .expression(lineWidthExpression())
     lineLayer.lineJoin = .constant(.round)
     lineLayer.lineCap = .constant(.round)
@@ -263,7 +263,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
  
     // Based on information stored in `identifier` property (whether route line is main or not)
     // route line will be colored differently.
-    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 1) : #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 0.6)))
+    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 1) : #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 0.4)))
     lineLayer.lineWidth = .expression(lineWidthExpression(1.2))
     lineLayer.lineJoin = .constant(.round)
     lineLayer.lineCap = .constant(.round)
