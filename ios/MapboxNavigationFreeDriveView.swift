@@ -79,9 +79,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
             self.routeResponse = response
             
             if let routes = self.routes, let currentRoute = self.currentRoute {
-              self.navigationMapView.showcase(routes)
-              //self.navigationMapView.show(routes)
-              //self.navigationMapView.showWaypoints(on: currentRoute)
+              //self.navigationMapView.showcase(routes)
+              self.navigationMapView.show(routes)
+              self.navigationMapView.showWaypoints(on: currentRoute)
+              self.navigationMapView.showRouteDurations(along: routes)
             }
           }
         }
@@ -110,9 +111,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     routes.append(contentsOf: self.routes!.filter {
       $0 != currentRoute
     })
-    navigationMapView.showcase(routes)
-    //navigationMapView.show(routes)
-    //navigationMapView.showWaypoints(on: currentRoute)
+    //navigationMapView.showcase(routes)
+    navigationMapView.show(routes)
+    navigationMapView.showWaypoints(on: currentRoute)
+    navigationMapView.showRouteDurations(along: routes)
   }
   
   override init(frame: CGRect) {
@@ -154,6 +156,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     navigationMapView = NavigationMapView(frame: bounds)
     navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+    navigationMapView.showsCongestionForAlternativeRoutes = true
     navigationMapView.showsRestrictedAreasOnRoute = true
     navigationMapView.delegate = self
     navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
