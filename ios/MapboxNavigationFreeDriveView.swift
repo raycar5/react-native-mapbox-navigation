@@ -79,10 +79,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
             self.routeResponse = response
             
             if let routes = self.routes, let currentRoute = self.currentRoute {
-              self.navigationMapView.showcase(routes)
+              self.navigationMapView.showcase([currentRoute])
               //self.navigationMapView.show(routes)
               self.navigationMapView.showWaypoints(on: currentRoute)
-              self.navigationMapView.showRouteDurations(along: routes)
+              //self.navigationMapView.showRouteDurations(along: routes)
             }
           }
         }
@@ -91,6 +91,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
   @objc func clearRoute() {
     routeResponse = nil
+    
+    navigationMapView?.unhighlightBuildings()
+    navigationMapView?.removeRoutes()
+    navigationMapView?.removeRouteDurations()
+    navigationMapView?.removeWaypoints()
+    navigationMapView?.navigationCamera?.follow()
   }
   
   @objc func didUpdatePassiveLocation(_ notification: Notification) {
@@ -111,10 +117,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     routes.append(contentsOf: self.routes!.filter {
       $0 != currentRoute
     })
-    navigationMapView.showcase(routes)
+    navigationMapView.showcase([currentRoute])
     //navigationMapView.show(routes)
     navigationMapView.showWaypoints(on: currentRoute)
-    navigationMapView.showRouteDurations(along: routes)
+    //navigationMapView.showRouteDurations(along: routes)
   }
   
   override init(frame: CGRect) {
