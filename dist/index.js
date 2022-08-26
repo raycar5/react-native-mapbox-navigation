@@ -13,7 +13,7 @@ const MapboxNavigationFreeDrive = React.forwardRef((props, ref) => {
             UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.getViewManagerConfig('RNMapboxNavigationFreeDrive').Commands.showRouteViaManager, [origin, destination, waypoints]);
         }
         else if (Platform.OS === "ios") {
-            NativeModules.MapboxNavigationFreeDriveManager.showRouteViaManager(findNodeHandle(mapboxNavigationFreeDriveRef.current), origin, destination, waypoints);
+            NativeModules.MapboxNavigationFreeDrive.showRouteViaManager(findNodeHandle(mapboxNavigationFreeDriveRef.current), origin, destination, waypoints);
             //UIManager.dispatchViewManagerCommand(
             //findNodeHandle(mapboxNavigationFreeDriveRef.current),
             //UIManager.getViewManagerConfig('RNMapboxNavigationFreeDrive').Commands.showRouteViaManager,
