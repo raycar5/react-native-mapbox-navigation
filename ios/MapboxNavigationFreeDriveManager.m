@@ -8,10 +8,10 @@ RCT_EXPORT_VIEW_PROPERTY(followZoomLevel, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(userPuckImage, UIImage)
 RCT_EXPORT_VIEW_PROPERTY(userPuckScale, NSNumber)
 
-RCT_EXPORT_METHOD(
-  showRoute: (NSArray)origin 
-  withDestination: (NSArray)destination 
-  withWaypoints: (NSArray)waypoints
+RCT_EXTERN_METHOD(
+  showRoute: (NSArray *)origin 
+  withDestination: (NSArray *)destination 
+  withWaypoints: (NSArray *)waypoints
 )
 
 @end
