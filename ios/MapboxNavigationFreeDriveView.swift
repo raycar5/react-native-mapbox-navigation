@@ -40,6 +40,16 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var showSpeedLimit: Bool = true
   @objc var userPuckImage: UIImage? = nil
   @objc var userPuckScale: NSNumber = 1.0
+  
+  @objc func didUpdatePassiveLocation(_ notification: Notification) {
+    speedLimitView.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
+    speedLimitView.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
+
+    let location = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.locationKey] as? CLLocation
+    let roadName = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.roadNameKey] as? String
+
+    onLocationChange?(["longitude": location?.coordinate.longitude, "latitude": location?.coordinate.latitude, "roadName": roadName])
+  }
 
   @objc func showRoute(_ origin: [NSNumber], withDestination destination: [NSNumber], withWaypoints waypoints: [[NSNumber]]) {
     currentOrigin = origin
@@ -187,16 +197,6 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     embedding = false
     embedded = true
   }
-  
-  @objc func didUpdatePassiveLocation(_ notification: Notification) {
-    speedLimitView.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
-    speedLimitView.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
-
-    let location = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.locationKey] as? CLLocation
-    let roadName = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.roadNameKey] as? String
-
-    onLocationChange?(["longitude": location?.coordinate.longitude, "latitude": location?.coordinate.latitude, "roadName": roadName])
-  }
 
   func lineWidthExpression(_ multiplier: Double = 1.0) -> Expression {
     let lineWidthExpression = Exp(.interpolate) {
@@ -210,6 +210,20 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
  
     return lineWidthExpression
   }
+  
+  func navigationMapView(_ mapView: NavigationMapView, didSelect route: Route) {
+    currentRouteIndex = routes?.firstIndex(of: route) ?? 0
+  }
+
+  // It's possible to change route line shape in preview mode by adding own implementation to either
+  // `NavigationMapView.navigationMapView(_:shapeFor:)` or `NavigationMapView.navigationMapView(_:casingShapeFor:)`.
+  func navigationMapView(_ navigationMapView: NavigationMapView, shapeFor route: Route) -> LineString? {
+    return route.shape
+  }
+ 
+  func navigationMapView(_ navigationMapView: NavigationMapView, casingShapeFor route: Route) -> LineString? {
+    return route.shape
+  }
  
   func navigationMapView(_ navigationMapView: NavigationMapView, routeLineLayerWithIdentifier identifier: String, sourceIdentifier: String) -> LineLayer? {
     var lineLayer = LineLayer(id: identifier)
@@ -220,7 +234,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     // main or alternative, and whether route is casing or not. For example: identifier for
     // main route line will look like this: `0x0000600001168000.main.route_line`, and for
     // alternative route line casing will look like this: `0x0000600001ddee80.alternative.route_line_casing`.
-    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? #colorLiteral(red: 0.337254902, green: 0.6588235294, blue: 0.9843137255, alpha: 1) : #colorLiteral(red: 0.6, green: 0.6, blue: 0.6, alpha: 1)))
+    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 1) : #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 0.6)))
     lineLayer.lineWidth = .expression(lineWidthExpression())
     lineLayer.lineJoin = .constant(.round)
     lineLayer.lineCap = .constant(.round)
@@ -234,7 +248,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
  
     // Based on information stored in `identifier` property (whether route line is main or not)
     // route line will be colored differently.
-    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? #colorLiteral(red: 0.1843137255, green: 0.4784313725, blue: 0.7764705882, alpha: 1) : #colorLiteral(red: 0.4, green: 0.4, blue: 0.4, alpha: 1)))
+    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 1) : #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 0.6)))
     lineLayer.lineWidth = .expression(lineWidthExpression(1.2))
     lineLayer.lineJoin = .constant(.round)
     lineLayer.lineCap = .constant(.round)
