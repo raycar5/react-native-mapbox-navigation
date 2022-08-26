@@ -38,7 +38,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var followZoomLevel: NSNumber = 16.0
   @objc var onLocationChange: RCTDirectEventBlock?
   @objc var showSpeedLimit: Bool = true
-  @objc var userPuckImage: UIImage? = nil
+  @objc var userPuckImage: UIImage = nil
   @objc var userPuckScale: NSNumber = 1.0
 
   @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]]) {
