@@ -38,7 +38,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var followZoomLevel: NSNumber = 16.0
   @objc var onLocationChange: RCTDirectEventBlock?
   @objc var showSpeedLimit: Bool = true
-  @objc var userPuckImage: UIImage = nil
+  @objc var userPuckImage: UIImage?
   @objc var userPuckScale: NSNumber = 1.0
 
   @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]]) {
@@ -275,7 +275,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     var finalDestinationAnnotation = finalDestinationAnnotation
 
     if (userPuckImage != nil) {
-      finalDestinationAnnotation.image = .init(image: userPuckImage, name: "marker")
+      finalDestinationAnnotation.image = .init(image: userPuckImage!, name: "marker")
     } else {
       let image = UIImage(named: "default_marker", in: .mapboxNavigation, compatibleWith: nil)!
       finalDestinationAnnotation.image = .init(image: image, name: "marker")
