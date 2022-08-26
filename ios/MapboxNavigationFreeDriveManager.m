@@ -9,7 +9,7 @@ RCT_EXPORT_VIEW_PROPERTY(userPuckImage, UIImage)
 RCT_EXPORT_VIEW_PROPERTY(userPuckScale, NSNumber)
 
 RCT_EXTERN_METHOD(
-  showRouteViaManager: (NSNumber *)node
+  showRouteViaManager: (nonnull NSNumber *)node
   origin: (NSArray *)origin 
   destination: (NSArray *)destination 
   waypoints: (NSArray *)waypoints

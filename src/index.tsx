@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Platform, findNodeHandle, requireNativeComponent, NativeModules, UIManager, StyleSheet } from 'react-native';
+import { Platform, findNodeHandle, requireNativeComponent, UIManager, StyleSheet } from 'react-native';
 
 import { IMapboxNavigationProps, IMapboxNavigationFreeDriveProps } from './typings';
 
