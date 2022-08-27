@@ -37,7 +37,17 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   
   @objc var followZoomLevel: NSNumber = 16.0
   @objc var onLocationChange: RCTDirectEventBlock?
-  @objc var showSpeedLimit: Bool = true
+  @objc var showSpeedLimit: Bool = true {
+    didSet {
+      if (oldValue != showSpeedLimit) {
+        if (showSpeedLimit) {
+          addSpeedLimitView()
+        } else {
+          removeSpeedLimitView()
+        }
+      }
+    }
+  }
   @objc var userPuckImage: UIImage?
   @objc var userPuckScale: NSNumber = 1.0
   @objc var destinationImage: UIImage?
@@ -86,7 +96,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
                 left: padding.contains(1) ? CGFloat(padding[1].floatValue) : 0, 
                 bottom: padding.contains(2) ? CGFloat(padding[2].floatValue) : 0, 
                 right: padding.contains(3) ? CGFloat(padding[3].floatValue) : 0)
-              showCurrentRoute(newPadding)
+              self.showCurrentRoute(newPadding)
             }
           }
         }
