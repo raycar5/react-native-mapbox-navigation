@@ -3,7 +3,9 @@
 @interface RCT_EXTERN_MODULE(MapboxNavigationFreeDriveManager, RCTViewManager)
 
 RCT_EXPORT_VIEW_PROPERTY(onLocationChange, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onTrackingStateChange, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(showSpeedLimit, BOOL)
+RCT_EXPORT_VIEW_PROPERTY(showSpeedLimitAnchor, NSArray)
 RCT_EXPORT_VIEW_PROPERTY(followZoomLevel, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(userPuckImage, UIImage)
 RCT_EXPORT_VIEW_PROPERTY(userPuckScale, NSNumber)

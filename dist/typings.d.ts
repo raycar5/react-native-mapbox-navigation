@@ -9,6 +9,11 @@ declare type OnLocationChangeEvent = {
         longitude: number;
     };
 };
+declare type OnTrackingStateChangeEvent = {
+    nativeEvent?: {
+        state?: string;
+    };
+};
 declare type OnRouteProgressChangeEvent = {
     nativeEvent?: {
         distanceTraveled: number;
@@ -37,7 +42,9 @@ export interface IMapboxNavigationProps {
 }
 export interface IMapboxNavigationFreeDriveProps {
     onLocationChange?: (event: OnLocationChangeEvent) => void;
+    onTrackingStateChange?: (event: OnTrackingStateChangeEvent) => void;
     showSpeedLimit?: boolean;
+    showSpeedLimitAnchor?: Padding;
     followZoomLevel?: number;
     userPuckImage?: string;
     userPuckScale?: number;

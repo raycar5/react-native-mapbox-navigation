@@ -37,6 +37,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   
   @objc var followZoomLevel: NSNumber = 16.0
   @objc var onLocationChange: RCTDirectEventBlock?
+  @objc var onTrackingStateChange: RCTDirectEventBlock?
   @objc var showSpeedLimit: Bool = true {
     didSet {
       if (oldValue != showSpeedLimit) {
@@ -48,6 +49,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       }
     }
   }
+  @objc var speedLimitAnchor: [NSNumber] = [0, 0, 0, 0]
   @objc var userPuckImage: UIImage?
   @objc var userPuckScale: NSNumber = 1.0
   @objc var destinationImage: UIImage?
@@ -92,10 +94,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
             
             if let routes = self.routes, let currentRoute = self.currentRoute {
               let newPadding = UIEdgeInsets(
-                top: padding.contains(0) ? CGFloat(padding[0].floatValue) : 0, 
-                left: padding.contains(1) ? CGFloat(padding[1].floatValue) : 0, 
-                bottom: padding.contains(2) ? CGFloat(padding[2].floatValue) : 0, 
-                right: padding.contains(3) ? CGFloat(padding[3].floatValue) : 0)
+                top: padding.indices.contains(0) ? CGFloat(padding[0].floatValue) : 0, 
+                left: padding.indices.contains(1) ? CGFloat(padding[1].floatValue) : 0, 
+                bottom: padding.indices.contains(2) ? CGFloat(padding[2].floatValue) : 0, 
+                right: padding.indices.contains(3) ? CGFloat(padding[3].floatValue) : 0)
               self.showCurrentRoute(newPadding)
             }
           }
@@ -126,6 +128,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     speedLimitView?.currentSpeed = location?.speed
 
     onLocationChange?(["longitude": location?.coordinate.longitude, "latitude": location?.coordinate.latitude, "roadName": roadName])
+  }
+
+  @objc func navigationCameraStateDidChange(_ notification: Notification) {
+    let navigationCameraState = notification.userInfo?[NavigationCamera.NotificationUserInfoKey.state] as? NavigationCameraState
+    
+    onTrackingStateChange?(["state": navigationCameraState])
   }
  
   func showCurrentRoute(_ padding: UIEdgeInsets? = nil) {
@@ -238,6 +246,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       name: .passiveLocationManagerDidUpdate,
       object: nil)
 
+    NotificationCenter.default.addObserver(self,
+      selector: #selector(navigationCameraStateDidChange(_:)),
+      name: .navigationCameraStateDidChange,
+      object: navigationMapView?.navigationCamera)
+
     embedding = false
     embedded = true
   }
@@ -251,10 +264,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     
       addSubview(speedLimitView)
       
-      speedLimitView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: mapPadding.indices.contains(0) ? CGFloat(mapPadding[0].floatValue) : 10).isActive = true
-      speedLimitView.widthAnchor.constraint(equalToConstant: 50).isActive = true
-      speedLimitView.heightAnchor.constraint(equalToConstant: 50).isActive = true
-      speedLimitView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: mapPadding.indices.contains(1) ? CGFloat(mapPadding[1].floatValue) : 10).isActive = true
+      speedLimitView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
+      speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
+      speedLimitView.heightAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(3) ? CGFloat(speedLimitAnchor[3].floatValue) : 50).isActive = true
+      speedLimitView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: speedLimitAnchor.indices.contains(1) ? CGFloat(speedLimitAnchor[1].floatValue) : 10).isActive = true
     }
   }
 
