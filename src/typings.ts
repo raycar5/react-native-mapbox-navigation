@@ -2,6 +2,7 @@
  * Provide an array with longitude and latitude [$longitude, $latitude]
  */
 type Coordinate = [number, number];
+type Padding = [number, number, number, number];
 
 type OnLocationChangeEvent = {
   nativeEvent?: {
@@ -45,4 +46,6 @@ export interface IMapboxNavigationFreeDriveProps {
   followZoomLevel?: number;
   userPuckImage?: string;
   userPuckScale?: number;
+  destinationImage?: string;
+  mapPadding?: Padding;
 }

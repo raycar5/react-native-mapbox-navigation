@@ -40,6 +40,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var showSpeedLimit: Bool = true
   @objc var userPuckImage: UIImage?
   @objc var userPuckScale: NSNumber = 1.0
+  @objc var destinationImage: UIImage?
+  @objc var mapPadding: [NSNumber] = [0, 0, 0, 0]
 
   @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]]) {
     currentOrigin = origin
@@ -98,14 +100,18 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationMapView?.removeWaypoints()
     navigationMapView?.navigationCamera?.follow()
   }
+
+  @objc func follow() {
+    navigationMapView?.navigationCamera?.follow()
+  }
   
   @objc func didUpdatePassiveLocation(_ notification: Notification) {
     let location = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.locationKey] as? CLLocation
     let roadName = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.roadNameKey] as? String
     
-    speedLimitView.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
-    speedLimitView.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
-    speedLimitView.currentSpeed = location?.speed
+    speedLimitView?.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
+    speedLimitView?.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
+    speedLimitView?.currentSpeed = location?.speed
 
     onLocationChange?(["longitude": location?.coordinate.longitude, "latitude": location?.coordinate.latitude, "roadName": roadName])
   }
@@ -141,6 +147,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     } else {
       navigationMapView?.frame = bounds
     }
+
+    if (speedLimitView == nil && showSpeedLimit) {
+      addSpeedLimitView()
+    } else if (speedLimitView != nil && showSpeedLimit == false) {
+      removeSpeedLimitView()
+    }
   }
   
   override func removeFromSuperview() {
@@ -151,6 +163,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     passiveLocationProvider.stopUpdatingHeading()
     navigationMapView?.removeFromSuperview()
     navigationMapView = nil
+    removeSpeedLimitView()
   }
   
   private func embed() {
@@ -184,7 +197,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationViewportDataSource.options.followingCameraOptions.centerUpdatesAllowed = true
     navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = false
     navigationViewportDataSource.options.followingCameraOptions.bearingUpdatesAllowed = false
+    navigationViewportDataSource.options.followingCameraOptions.paddingUpdatesAllowed = false
     navigationViewportDataSource.followingMobileCamera.zoom = CGFloat(followZoomLevel.floatValue)
+    navigationViewportDataSource.followingMobileCamera.padding = UIEdgeInsets(top: mapPadding.contains(0) ? CGFloat(mapPadding[0].floatValue) : 0, left: mapPadding.contains(1) ? CGFloat(mapPadding[1].floatValue) : 0, bottom: mapPadding.contains(2) ? CGFloat(mapPadding[2].floatValue) : 0, right: mapPadding.contains(3) ? CGFloat(mapPadding[3].floatValue) : 0)
     navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
     navigationMapView.navigationCamera.follow()
 
@@ -196,6 +211,18 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     addSubview(navigationMapView)
 
+    addSpeedLimitView()
+
+    NotificationCenter.default.addObserver(self,
+      selector: #selector(didUpdatePassiveLocation),
+      name: .passiveLocationManagerDidUpdate,
+      object: nil)
+
+    embedding = false
+    embedded = true
+  }
+
+  func addSpeedLimitView() {
     if (showSpeedLimit) {
       speedLimitView = SpeedLimitView()
 
@@ -209,14 +236,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       speedLimitView.heightAnchor.constraint(equalToConstant: 50).isActive = true
       speedLimitView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 10).isActive = true
     }
+  }
 
-    NotificationCenter.default.addObserver(self,
-      selector: #selector(didUpdatePassiveLocation),
-      name: .passiveLocationManagerDidUpdate,
-      object: nil)
-
-    embedding = false
-    embedded = true
+  func removeSpeedLimitView() {
+    speedLimitView?.removeFromSuperview()
+    speedLimitView = nil
   }
 
   func lineWidthExpression(_ multiplier: Double = 1.0) -> Expression {
@@ -280,8 +304,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   func navigationMapView(_ navigationMapView: NavigationMapView, didAdd finalDestinationAnnotation: PointAnnotation, pointAnnotationManager: PointAnnotationManager) {
     var finalDestinationAnnotation = finalDestinationAnnotation
 
-    if (userPuckImage != nil) {
-      finalDestinationAnnotation.image = .init(image: userPuckImage!, name: "marker")
+    if (destinationImage != nil) {
+      finalDestinationAnnotation.image = .init(image: destinationImage!, name: "marker")
     } else {
       let image = UIImage(named: "default_marker", in: .mapboxNavigation, compatibleWith: nil)!
       finalDestinationAnnotation.image = .init(image: image, name: "marker")

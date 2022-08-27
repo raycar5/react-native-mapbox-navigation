@@ -23,4 +23,12 @@ class MapboxNavigationFreeDriveManager: RCTViewManager {
       mapboxNavigationFreeDriveView.clearRoute()
     }
   }
+
+  @objc func followViaManager(_ node: NSNumber) {
+    DispatchQueue.main.async {
+      let mapboxNavigationFreeDriveView = self.bridge.uiManager.view(forReactTag: node) as! MapboxNavigationFreeDriveView
+      
+      mapboxNavigationFreeDriveView.follow()
+    }
+  }
 }
