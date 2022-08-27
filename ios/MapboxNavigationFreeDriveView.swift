@@ -86,7 +86,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
                 left: padding.contains(1) ? CGFloat(padding[1].floatValue) : 0, 
                 bottom: padding.contains(2) ? CGFloat(padding[2].floatValue) : 0, 
                 right: padding.contains(3) ? CGFloat(padding[3].floatValue) : 0)
-              showCurrentRoute(padding)
+              showCurrentRoute(newPadding)
             }
           }
         }
@@ -130,8 +130,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       left: mapPadding.indices.contains(1) ? CGFloat(mapPadding[1].floatValue) : 0, 
       bottom: mapPadding.indices.contains(2) ? CGFloat(mapPadding[2].floatValue) : 0, 
       right: mapPadding.indices.contains(3) ? CGFloat(mapPadding[3].floatValue) : 0)
-    let cameraOptions = CameraOptions()
-    cameraOptions.padding = padding ?? defaultPadding
+    let cameraOptions = CameraOptions(padding: padding ?? defaultPadding)
     navigationMapView.showcase(routes, routesPresentationStyle: .single(cameraOptions: cameraOptions), animated: true)
     //navigationMapView.show(routes)
     navigationMapView.showWaypoints(on: currentRoute)
