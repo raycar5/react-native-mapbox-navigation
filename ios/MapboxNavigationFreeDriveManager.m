@@ -15,6 +15,7 @@ RCT_EXTERN_METHOD(
   origin: (NSArray *)origin 
   destination: (NSArray *)destination 
   waypoints: (NSArray *)waypoints
+  padding: (NSArray *)padding
 )
 
 RCT_EXTERN_METHOD(

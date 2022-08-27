@@ -8,11 +8,11 @@ class MapboxNavigationFreeDriveManager: RCTViewManager {
     return true
   }
 
-  @objc func showRouteViaManager(_ node: NSNumber, origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]]) {
+  @objc func showRouteViaManager(_ node: NSNumber, origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], padding: [NSNumber]) {
     DispatchQueue.main.async {
       let mapboxNavigationFreeDriveView = self.bridge.uiManager.view(forReactTag: node) as! MapboxNavigationFreeDriveView
       
-      mapboxNavigationFreeDriveView.showRoute(origin: origin, destination: destination, waypoints: waypoints)
+      mapboxNavigationFreeDriveView.showRoute(origin: origin, destination: destination, waypoints: waypoints, padding: padding)
     }
   }
 

@@ -43,7 +43,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var destinationImage: UIImage?
   @objc var mapPadding: [NSNumber] = [0, 0, 0, 0]
 
-  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]]) {
+  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], padding: [NSNumber]) {
     currentOrigin = origin
     currentDestination = destination
     currentWaypoints = waypoints
@@ -81,10 +81,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
             self.routeResponse = response
             
             if let routes = self.routes, let currentRoute = self.currentRoute {
-              self.navigationMapView.showcase([currentRoute])
-              //self.navigationMapView.show(routes)
-              self.navigationMapView.showWaypoints(on: currentRoute)
-              //self.navigationMapView.showRouteDurations(along: routes)
+              let newPadding = UIEdgeInsets(
+                top: padding.contains(0) ? CGFloat(padding[0].floatValue) : 0, 
+                left: padding.contains(1) ? CGFloat(padding[1].floatValue) : 0, 
+                bottom: padding.contains(2) ? CGFloat(padding[2].floatValue) : 0, 
+                right: padding.contains(3) ? CGFloat(padding[3].floatValue) : 0)
+              showCurrentRoute(padding)
             }
           }
         }
@@ -116,14 +118,21 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     onLocationChange?(["longitude": location?.coordinate.longitude, "latitude": location?.coordinate.latitude, "roadName": roadName])
   }
  
-  func showCurrentRoute() {
+  func showCurrentRoute(_ padding: UIEdgeInsets? = nil) {
     guard let currentRoute = currentRoute else { return }
  
     var routes = [currentRoute]
     routes.append(contentsOf: self.routes!.filter {
       $0 != currentRoute
     })
-    navigationMapView.showcase([currentRoute])
+    let defaultPadding = UIEdgeInsets(
+      top: mapPadding.indices.contains(0) ? CGFloat(mapPadding[0].floatValue) : 0, 
+      left: mapPadding.indices.contains(1) ? CGFloat(mapPadding[1].floatValue) : 0, 
+      bottom: mapPadding.indices.contains(2) ? CGFloat(mapPadding[2].floatValue) : 0, 
+      right: mapPadding.indices.contains(3) ? CGFloat(mapPadding[3].floatValue) : 0)
+    let cameraOptions = CameraOptions()
+    cameraOptions.padding = padding ?? defaultPadding
+    navigationMapView.showcase(routes, routesPresentationStyle: .single(cameraOptions: cameraOptions), animated: true)
     //navigationMapView.show(routes)
     navigationMapView.showWaypoints(on: currentRoute)
     //navigationMapView.showRouteDurations(along: routes)
@@ -199,7 +208,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationViewportDataSource.options.followingCameraOptions.bearingUpdatesAllowed = false
     navigationViewportDataSource.options.followingCameraOptions.paddingUpdatesAllowed = false
     navigationViewportDataSource.followingMobileCamera.zoom = CGFloat(followZoomLevel.floatValue)
-    navigationViewportDataSource.followingMobileCamera.padding = UIEdgeInsets(top: mapPadding.contains(0) ? CGFloat(mapPadding[0].floatValue) : 0, left: mapPadding.contains(1) ? CGFloat(mapPadding[1].floatValue) : 0, bottom: mapPadding.contains(2) ? CGFloat(mapPadding[2].floatValue) : 0, right: mapPadding.contains(3) ? CGFloat(mapPadding[3].floatValue) : 0)
+    navigationViewportDataSource.followingMobileCamera.padding = UIEdgeInsets(
+      top: mapPadding.indices.contains(0) ? CGFloat(mapPadding[0].floatValue) : 0, 
+      left: mapPadding.indices.contains(1) ? CGFloat(mapPadding[1].floatValue) : 0, 
+      bottom: mapPadding.indices.contains(2) ? CGFloat(mapPadding[2].floatValue) : 0, 
+      right: mapPadding.indices.contains(3) ? CGFloat(mapPadding[3].floatValue) : 0)
     navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
     navigationMapView.navigationCamera.follow()
 
@@ -210,8 +223,6 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     passiveLocationProvider.startUpdatingLocation()
 
     addSubview(navigationMapView)
-
-    addSpeedLimitView()
 
     NotificationCenter.default.addObserver(self,
       selector: #selector(didUpdatePassiveLocation),
@@ -231,10 +242,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     
       addSubview(speedLimitView)
       
-      speedLimitView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 50).isActive = true
+      speedLimitView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: mapPadding.indices.contains(0) ? CGFloat(mapPadding[0].floatValue) : 10).isActive = true
       speedLimitView.widthAnchor.constraint(equalToConstant: 50).isActive = true
       speedLimitView.heightAnchor.constraint(equalToConstant: 50).isActive = true
-      speedLimitView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 10).isActive = true
+      speedLimitView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: mapPadding.indices.contains(1) ? CGFloat(mapPadding[1].floatValue) : 10).isActive = true
     }
   }
 
