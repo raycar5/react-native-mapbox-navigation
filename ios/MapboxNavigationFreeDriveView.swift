@@ -226,9 +226,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationMapView.mapView.gestures.options.pinchZoomEnabled = true
     navigationMapView.mapView.gestures.options.pinchPanEnabled = false
     navigationMapView.mapView.gestures.options.pitchEnabled = false
-    //navigationMapView.mapView.ornaments.options.logo.visibility = logoVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
+    navigationMapView.mapView.ornaments.options.logo.visibility = logoVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
     navigationMapView.mapView.ornaments.options.logo.margins = CGPoint(x: logoPadding.indices.contains(0) ? logoPadding[0] : 8.0, y: logoPadding.indices.contains(1) ? logoPadding[1] : 8.0)
-    //navigationMapView.mapView.ornaments.options.attributionButton.visibility = attributionVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
+    navigationMapView.mapView.ornaments.options.attributionButton.visibility = attributionVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
     navigationMapView.mapView.ornaments.options.attributionButton.margins = CGPoint(x: attributionPadding.indices.contains(0) ? attributionPadding[0] : 8.0, y: attributionPadding.indices.contains(1) ? attributionPadding[1] : 8.0)
 
     var puck2DConfiguration = Puck2DConfiguration()
