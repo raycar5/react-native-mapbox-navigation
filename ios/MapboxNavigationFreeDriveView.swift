@@ -49,11 +49,25 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       }
     }
   }
-  @objc var speedLimitAnchor: [NSNumber] = [0, 0, 0, 0]
+  @objc var speedLimitAnchor: [NSNumber] = [] {
+    didSet {
+      if (oldValue.count != speedLimitAnchor.count || oldValue != speedLimitAnchor) {
+        if (showSpeedLimit) {
+          addSpeedLimitView()
+        } else {
+          removeSpeedLimitView()
+        }
+      }
+    }
+  }
   @objc var userPuckImage: UIImage?
   @objc var userPuckScale: NSNumber = 1.0
   @objc var destinationImage: UIImage?
-  @objc var mapPadding: [NSNumber] = [0, 0, 0, 0]
+  @objc var mapPadding: [NSNumber] = []
+  @objc var logoVisible: Bool = true
+  @objc var logoPadding: [NSNumber] = []
+  @objc var attributionVisible: Bool = true
+  @objc var attributionPadding: [NSNumber] = []
 
   @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], padding: [NSNumber]) {
     currentOrigin = origin
@@ -133,7 +147,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc func navigationCameraStateDidChange(_ notification: Notification) {
     let navigationCameraState = notification.userInfo?[NavigationCamera.NotificationUserInfoKey.state] as? NavigationCameraState
     
-    onTrackingStateChange?(["state": navigationCameraState])
+    onTrackingStateChange?(["state": navigationCameraState?.rawValue])
   }
  
   func showCurrentRoute(_ padding: UIEdgeInsets? = nil) {
@@ -211,6 +225,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationMapView.mapView.gestures.options.pinchZoomEnabled = true
     navigationMapView.mapView.gestures.options.pinchPanEnabled = false
     navigationMapView.mapView.gestures.options.pitchEnabled = false
+    navigationMapView.mapView.ornaments.options.logo.visibility = logoVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
+    navigationMapView.mapView.ornaments.options.logo.margins = CGFloat(x: logoPadding.indices.contains(0) ? logoPadding[0] : 8.0, y: logoPadding.indices.contains(1) ? logoPadding[1] : 8.0)
+    navigationMapView.mapView.ornaments.options.attributionButton.visibility = attributionVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
+    navigationMapView.mapView.ornaments.options.attributionButton.margins = CGFloat(x: attributionPadding.indices.contains(0) ? attributionPadding[0] : 8.0, y: attributionPadding.indices.contains(1) ? attributionPadding[1] : 8.0)
 
     var puck2DConfiguration = Puck2DConfiguration()
     if (userPuckImage != nil) {
@@ -256,6 +274,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   func addSpeedLimitView() {
+    removeSpeedLimitView()
+
     if (showSpeedLimit) {
       speedLimitView = SpeedLimitView()
 
