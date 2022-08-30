@@ -129,7 +129,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
             self.routeResponse = response
             
             if let routes = self.routes, let currentRoute = self.currentRoute {
-              let newPadding = getPadding(padding)
+              let newPadding = self.getPadding(padding)
               self.showCurrentRoute(newPadding, highlightFirstLeg: highlightFirstLeg)
             }
           }
@@ -200,7 +200,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     onTrackingStateChange?(["state": stateStr])
   }
 
-  func getPadding(_ padding: [NSNumber]) {
+  func getPadding(_ padding: [NSNumber]) -> UIEdgeInsets {
     let newPadding = UIEdgeInsets(
       top: padding.indices.contains(0) ? CGFloat(padding[0].floatValue) : (mapPadding.indices.contains(0) ? CGFloat(mapPadding[0].floatValue) : 0),
       left: padding.indices.contains(1) ? CGFloat(padding[1].floatValue) : (mapPadding.indices.contains(1) ? CGFloat(mapPadding[1].floatValue) : 0), 
@@ -464,10 +464,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       0.6
       1
     }
-    let color = Exp(.get) {
-      "color"
+    let color = Exp(.toColor) {
+      Exp(.get) {
+        "color"
+      }
     }
-    circleLayer.circleColor = .constant(.init(UIColor(hex: color.arguments[0])))
+    circleLayer.circleColor = .expression(color)
     circleLayer.circleOpacity = .expression(opacity)
     circleLayer.circleRadius = .constant(.init(CGFloat(waypointRadius.floatValue)))
     circleLayer.circleStrokeColor = .constant(.init(UIColor(hex: waypointBorderColor as String)))
@@ -498,10 +500,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     
     for (waypointIndex, waypoint) in waypoints.enumerated() {
       var feature = Feature(geometry: .point(Point(waypoint.coordinate)))
-      let color = waypointColors.indices.contains(waypointIndex) ? UIColor(hex: waypointColors[waypointIndex] as String) : UIColor(hex: waypointColor as String)
       feature.properties = [
         "waypointCompleted": .boolean(waypointIndex < legIndex),
-        "color": .string(color.RGBAString),
+        "color": .string(waypointColors.indices.contains(waypointIndex) ? waypointColors[waypointIndex] as String : waypointColor as String),
         "name": .number(Double(waypointIndex + 1))
       ]
       features.append(feature)
@@ -513,11 +514,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
 extension UIColor {
   convenience init(hex: String) {
-    let hex = hexString.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+    let hexString = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
     var int = UInt64()
-    Scanner(string: hex).scanHexInt64(&int)
+    Scanner(string: hexString).scanHexInt64(&int)
     let a, r, g, b: UInt64
-    switch hex.count {
+    switch hexString.count {
     case 3: // RGB (12-bit)
       (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
     case 6: // RGB (24-bit)
@@ -537,7 +538,7 @@ extension UIColor {
     var alpha: CGFloat = 0.0
 
     guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
-      return nil
+      return "rgba(0,0,0,1)"
     }
     
     return "rgba(\(Double(red * 255)),\(Double(green * 255)),\(Double(blue * 255)),\(Double(alpha)))"
