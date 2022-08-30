@@ -18,18 +18,18 @@ const MapboxNavigationFreeDrive = React.forwardRef((props: IMapboxNavigationFree
     fitCamera
   }))
 
-  const showRoute = (origin = [], destination = [], waypoints = [[]], padding = [], colors = [], highlightFirstLeg = false) => {
+  const showRoute = (origin = [], destination = [], waypoints = [[]], padding = [], styles = [], legIndex = null) => {
     if (Platform.OS === "android") {
       UIManager.dispatchViewManagerCommand(
         findNodeHandle(mapboxNavigationFreeDriveRef.current),
         UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager,
-        [origin, destination, waypoints, padding, colors, highlightFirstLeg]
+        [origin, destination, waypoints, padding, styles, legIndex]
       )
     } else if (Platform.OS === "ios") {
       UIManager.dispatchViewManagerCommand(
         findNodeHandle(mapboxNavigationFreeDriveRef.current),
         UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager,
-        [origin, destination, waypoints, padding, colors, highlightFirstLeg]
+        [origin, destination, waypoints, padding, styles, legIndex]
       )
     }
   }

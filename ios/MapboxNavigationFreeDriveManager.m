@@ -20,8 +20,10 @@ RCT_EXPORT_VIEW_PROPERTY(lineColor, NSString)
 RCT_EXPORT_VIEW_PROPERTY(altLineColor, NSString)
 RCT_EXPORT_VIEW_PROPERTY(waypointColor, NSString)
 RCT_EXPORT_VIEW_PROPERTY(waypointRadius, NSNumber)
-RCT_EXPORT_VIEW_PROPERTY(waypointBorderWidth, NSNumber)
-RCT_EXPORT_VIEW_PROPERTY(waypointBorderColor, NSString)
+RCT_EXPORT_VIEW_PROPERTY(waypointOpacity, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(waypointStrokeWidth, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(waypointStrokeOpacity, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(waypointStrokeColor, NSString)
 RCT_EXPORT_VIEW_PROPERTY(unknownLineColor, NSString)
 
 RCT_EXTERN_METHOD(
@@ -30,8 +32,8 @@ RCT_EXTERN_METHOD(
   destination: (NSArray *)destination 
   waypoints: (NSArray *)waypoints
   padding: (NSArray *)padding
-  colors: (NSArray *)colors
-  highlightFirstLeg: (BOOL *)highlightFirstLeg
+  styles: (NSDictionaryArray *)styles
+  legIndex: (NSNumber *)legIndex
 )
 
 RCT_EXTERN_METHOD(

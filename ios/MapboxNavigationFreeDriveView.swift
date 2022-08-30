@@ -35,7 +35,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       currentRouteIndex = 0
     }
   }
-  var waypointColors: [NSString] = []
+  var waypointStyles: [[String: Any]] = []
   
   @objc var followZoomLevel: NSNumber = 16.0
   @objc var onLocationChange: RCTDirectEventBlock?
@@ -72,8 +72,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var unknownLineColor: NSString = "#1989FFFF"
   @objc var waypointColor: NSString = "#000000FF"
   @objc var waypointRadius: NSNumber = 8
-  @objc var waypointBorderWidth: NSNumber = 2
-  @objc var waypointBorderColor: NSString = "#000000FF"
+  @objc var waypointOpacity: NSNumber = 1
+  @objc var waypointStrokeWidth: NSNumber = 2
+  @objc var waypointStrokeOpacity: NSNumber = 1
+  @objc var waypointStrokeColor: NSString = "#000000FF"
   @objc var logoVisible: Bool = true
   @objc var logoPadding: [NSNumber] = [] {
     didSet {
@@ -91,11 +93,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
   }
 
-  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], padding: [NSNumber], colors: [NSString], highlightFirstLeg: Bool) {
+  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], padding: [NSNumber], styles: [NSDictionary], legIndex: NSNumber) {
     currentOrigin = origin
     currentDestination = destination
     currentWaypoints = waypoints
-    waypointColors = colors
+    waypointStyles = styles as? [[String: Any]]
     var routeWaypoints = [Waypoint]()
 
     if (origin != nil && origin.isEmpty == false) {
@@ -132,7 +134,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
             if let routes = self.routes, let currentRoute = self.currentRoute {
               let newPadding = self.getPadding(padding)
 
-              self.showCurrentRoute(newPadding, highlightFirstLeg: highlightFirstLeg)
+              self.showCurrentRoute(newPadding, legIndex: legIndex != nil ? Int(legIndex) : nil)
 
               self.onRouteChange?(["distance": currentRoute.distance, "expectedTravelTime": currentRoute.expectedTravelTime, "typicalTravelTime": currentRoute.typicalTravelTime])
             }
@@ -143,7 +145,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
   @objc func clearRoute() {
     routeResponse = nil
-    waypointColors = []
+    waypointStyles = []
 
     navigationMapView?.unhighlightBuildings()
     navigationMapView?.removeRoutes()
@@ -214,7 +216,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     return newPadding
   }
  
-  func showCurrentRoute(_ padding: UIEdgeInsets? = nil, highlightFirstLeg: Bool? = false) {
+  func showCurrentRoute(_ padding: UIEdgeInsets? = nil, legIndex: Int? = nil) {
     guard let currentRoute = currentRoute else { return }
  
     var routes = [currentRoute]
@@ -226,12 +228,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     
     //navigationMapView.showcase(routes, routesPresentationStyle: .single(cameraOptions: cameraOptions), animated: true)
 
-    if (highlightFirstLeg ?? false) {
-      navigationMapView.show([currentRoute], legIndex: 0)
-    } else {
-      navigationMapView.show([currentRoute])
-    }
-
+    navigationMapView.show([currentRoute], legIndex: legIndex)
+    
     navigationMapView.showWaypoints(on: currentRoute)
     //navigationMapView.showRouteDurations(along: routes)
   }
@@ -289,12 +287,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationMapView.trafficUnknownColor = UIColor(hex: unknownLineColor as String)
     navigationMapView.delegate = self
     navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
-    navigationMapView.mapView.gestures.options.panEnabled = true
-    navigationMapView.mapView.gestures.options.pinchEnabled = true
-    navigationMapView.mapView.gestures.options.pinchRotateEnabled = false
-    navigationMapView.mapView.gestures.options.pinchZoomEnabled = true
-    navigationMapView.mapView.gestures.options.pinchPanEnabled = false
-    navigationMapView.mapView.gestures.options.pitchEnabled = false
+    //navigationMapView.mapView.gestures.options.panEnabled = true
+    //navigationMapView.mapView.gestures.options.pinchEnabled = true
+    //navigationMapView.mapView.gestures.options.pinchRotateEnabled = false
+    //navigationMapView.mapView.gestures.options.pinchZoomEnabled = true
+    //navigationMapView.mapView.gestures.options.pinchPanEnabled = false
+    //navigationMapView.mapView.gestures.options.pitchEnabled = false
 
     setLogoPadding()
     setAttributionPadding()
@@ -381,7 +379,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
   }
 
-  func lineWidthExpression(_ multiplier: Double = 1.0) -> Expression {
+  /*func lineWidthExpression(_ multiplier: Double = 1.0) -> Expression {
     let lineWidthExpression = Exp(.interpolate) {
       Exp(.linear)
       Exp(.zoom)
@@ -417,7 +415,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     // main or alternative, and whether route is casing or not. For example: identifier for
     // main route line will look like this: `0x0000600001168000.main.route_line`, and for
     // alternative route line casing will look like this: `0x0000600001ddee80.alternative.route_line_casing`.
-    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? UIColor(hex: lineColor as String) : UIColor(hex: altLineColor as String)))
+    lineLayer.lineColor = .constant(.init(identifier.contains("alternative") ? UIColor(hex: lineColor as String) : UIColor(hex: altLineColor as String)))
     lineLayer.lineWidth = .expression(lineWidthExpression())
     lineLayer.lineJoin = .constant(.round)
     lineLayer.lineCap = .constant(.round)
@@ -437,7 +435,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     lineLayer.lineCap = .constant(.round)
     
     return lineLayer
-  }
+  }*/
 
   func navigationMapView(_ navigationMapView: NavigationMapView, didAdd finalDestinationAnnotation: PointAnnotation, pointAnnotationManager: PointAnnotationManager) {
     var finalDestinationAnnotation = finalDestinationAnnotation
@@ -466,19 +464,51 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
         }
       }
       0.6
-      1
+      Exp(.toNumber) {
+        Exp(.get) {
+          "opacity"
+        }
+      }
     }
     let color = Exp(.toColor) {
       Exp(.get) {
         "color"
       }
     }
+    let radius = Exp(.toNumber) {
+      Exp(.get) {
+        "radius"
+      }
+    }
+    let strokeColor = Exp(.toColor) {
+      Exp(.get) {
+        "strokeColor"
+      }
+    }
+    let strokeOpacity = Exp(.switchCase) {
+      Exp(.any) {
+        Exp(.get) {
+          "waypointCompleted"
+        }
+      }
+      0.6
+      Exp(.toNumber) {
+        Exp(.get) {
+          "strokeOpacity"
+        }
+      }
+    }
+    let strokeWidth = Exp(.toNumber) {
+      Exp(.get) {
+        "strokeWidth"
+      }
+    }
     circleLayer.circleColor = .expression(color)
     circleLayer.circleOpacity = .expression(opacity)
-    circleLayer.circleRadius = .constant(.init(CGFloat(waypointRadius.floatValue)))
-    circleLayer.circleStrokeColor = .constant(.init(UIColor(hex: waypointBorderColor as String)))
-    circleLayer.circleStrokeWidth = .constant(.init(CGFloat(waypointBorderWidth.floatValue)))
-    circleLayer.circleStrokeOpacity = .expression(opacity)
+    circleLayer.circleRadius = .expression(radius)
+    circleLayer.circleStrokeColor = .expression(strokeColor)
+    circleLayer.circleStrokeOpacity = .expression(strokeOpacity)
+    circleLayer.circleStrokeWidth = .expression(strokeWidth)
 
     return circleLayer
   }
@@ -506,7 +536,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       var feature = Feature(geometry: .point(Point(waypoint.coordinate)))
       feature.properties = [
         "waypointCompleted": .boolean(waypointIndex < legIndex),
-        "color": .string(waypointColors.indices.contains(waypointIndex) ? waypointColors[waypointIndex] as String : waypointColor as String),
+        "color": .string((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["color"] != nil) ? waypointStyles[waypointIndex]["color"] as String : waypointColor as String),
+        "radius": .number((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["radius"] != nil) ? Double(exactly: waypointStyles[waypointIndex]["radius"]!)! : Double(exactly: waypointRadius)!),
+        "opacity": .number((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["opacity"] != nil) ? Double(exactly: waypointStyles[waypointIndex]["opacity"]!)! : Double(exactly: waypointOpacity)!),
+        "strokeColor": .string((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["strokeColor"] != nil) ? waypointStyles[waypointIndex]["strokeColor"]! as String : waypointStrokeColor as String),
+        "strokeWidth": .number((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["strokeWidth"] != nil) ? Double(exactly: waypointStyles[waypointIndex]["strokeWidth"]!)! : Double(exactly: waypointStrokeWidth)!),
+        "strokeOpacity": .number((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["strokeOpacity"] != nil) ? Double(exactly: waypointStyles[waypointIndex]["strokeOpacity"]!)! : Double(exactly: waypointStrokeOpacity)!),
         "name": .number(Double(waypointIndex + 1))
       ]
       features.append(feature)
