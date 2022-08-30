@@ -65,9 +65,21 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var destinationImage: UIImage?
   @objc var mapPadding: [NSNumber] = []
   @objc var logoVisible: Bool = true
-  @objc var logoPadding: [NSNumber] = []
+  @objc var logoPadding: [NSNumber] = [] {
+    didSet {
+      if (oldValue.count != logoPadding.count || oldValue != logoPadding) {
+        setLogoPadding()
+      }
+    }
+  }
   @objc var attributionVisible: Bool = true
-  @objc var attributionPadding: [NSNumber] = []
+  @objc var attributionPadding: [NSNumber] = [] {
+    didSet {
+      if (oldValue.count != attributionPadding.count || oldValue != attributionPadding) {
+        setAttributionPadding()
+      }
+    }
+  }
 
   @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], padding: [NSNumber]) {
     currentOrigin = origin
@@ -147,7 +159,21 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc func navigationCameraStateDidChange(_ notification: Notification) {
     let navigationCameraState = notification.userInfo?[NavigationCamera.NotificationUserInfoKey.state] as? NavigationCameraState
     
-    onTrackingStateChange?(["state": navigationCameraState])
+    var stateStr = "idle"
+
+    if (navigationCameraState != nil) {
+      if (navigationCameraState == NavigationCameraState.transitionToFollowing) {
+        stateStr = "transitionToFollowing"
+      } else if (navigationCameraState == NavigationCameraState.following) {
+        stateStr = "following"
+      } else if (navigationCameraState == NavigationCameraState.transitionToOverview) {
+        stateStr = "transitionToOverview"
+      } else if (navigationCameraState == NavigationCameraState.overview) {
+        stateStr = "overview"
+      }
+    }
+
+    onTrackingStateChange?(["state": stateStr])
   }
  
   func showCurrentRoute(_ padding: UIEdgeInsets? = nil) {
@@ -226,14 +252,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationMapView.mapView.gestures.options.pinchZoomEnabled = true
     navigationMapView.mapView.gestures.options.pinchPanEnabled = false
     navigationMapView.mapView.gestures.options.pitchEnabled = false
-    //navigationMapView.mapView.ornaments.options.logo.visibility = logoVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
-    navigationMapView.mapView.ornaments.options.logo.margins = CGPoint(
-      x: logoPadding.indices.contains(0) ? CGFloat(logoPadding[0].floatValue) : 8.0, 
-      y: logoPadding.indices.contains(1) ? CGFloat(logoPadding[1].floatValue) : 8.0)
-    //navigationMapView.mapView.ornaments.options.attributionButton.visibility = attributionVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
-    navigationMapView.mapView.ornaments.options.attributionButton.margins = CGPoint(
-      x: attributionPadding.indices.contains(0) ? CGFloat(attributionPadding[0].floatValue) : 8.0, 
-      y: attributionPadding.indices.contains(1) ? CGFloat(attributionPadding[1].floatValue) : 8.0)
+
+    setLogoPadding()
+    setAttributionPadding()
 
     var puck2DConfiguration = Puck2DConfiguration()
     if (userPuckImage != nil) {
@@ -299,6 +320,20 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   func removeSpeedLimitView() {
     speedLimitView?.removeFromSuperview()
     speedLimitView = nil
+  }
+
+  func setLogoPadding() {
+    //navigationMapView.mapView.ornaments.options.logo.visibility = logoVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
+    navigationMapView.mapView.ornaments.options.logo.margins = CGPoint(
+      x: logoPadding.indices.contains(0) ? CGFloat(logoPadding[0].floatValue) : 8.0, 
+      y: logoPadding.indices.contains(1) ? CGFloat(logoPadding[1].floatValue) : 8.0)
+  }
+
+  func setAttributionPadding() {
+    //navigationMapView.mapView.ornaments.options.attributionButton.visibility = attributionVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
+    navigationMapView.mapView.ornaments.options.attributionButton.margins = CGPoint(
+      x: attributionPadding.indices.contains(0) ? CGFloat(attributionPadding[0].floatValue) : 8.0, 
+      y: attributionPadding.indices.contains(1) ? CGFloat(attributionPadding[1].floatValue) : 8.0)
   }
 
   func lineWidthExpression(_ multiplier: Double = 1.0) -> Expression {

@@ -8,12 +8,13 @@ type OnLocationChangeEvent = {
   nativeEvent?: {
     latitude: number;
     longitude: number;
+    roadName: string;
   };
 };
 
 type OnTrackingStateChangeEvent = {
   nativeEvent?: {
-    state?: string
+    state: string
   }
 }
 

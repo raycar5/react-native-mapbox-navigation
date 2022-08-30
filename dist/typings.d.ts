@@ -7,11 +7,12 @@ declare type OnLocationChangeEvent = {
     nativeEvent?: {
         latitude: number;
         longitude: number;
+        roadName: string;
     };
 };
 declare type OnTrackingStateChangeEvent = {
     nativeEvent?: {
-        state?: string;
+        state: string;
     };
 };
 declare type OnRouteProgressChangeEvent = {
