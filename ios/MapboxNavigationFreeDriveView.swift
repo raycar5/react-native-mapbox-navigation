@@ -129,12 +129,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
             self.routeResponse = response
             
             if let routes = self.routes, let currentRoute = self.currentRoute {
-              let newPadding = UIEdgeInsets(
-                top: padding.indices.contains(0) ? CGFloat(padding[0].floatValue) : 0, 
-                left: padding.indices.contains(1) ? CGFloat(padding[1].floatValue) : 0, 
-                bottom: padding.indices.contains(2) ? CGFloat(padding[2].floatValue) : 0, 
-                right: padding.indices.contains(3) ? CGFloat(padding[3].floatValue) : 0)
-              self.showCurrentRoute(newPadding, highlightFirstLeg)
+              let newPadding = getPadding(padding)
+              self.showCurrentRoute(newPadding, highlightFirstLeg: highlightFirstLeg)
             }
           }
         }
@@ -167,14 +163,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     routes.append(contentsOf: self.routes!.filter {
       $0 != currentRoute
     })
-    let defaultPadding = UIEdgeInsets(
-      top: mapPadding.indices.contains(0) ? CGFloat(mapPadding[0].floatValue) : 0, 
-      left: mapPadding.indices.contains(1) ? CGFloat(mapPadding[1].floatValue) : 0, 
-      bottom: mapPadding.indices.contains(2) ? CGFloat(mapPadding[2].floatValue) : 0, 
-      right: mapPadding.indices.contains(3) ? CGFloat(mapPadding[3].floatValue) : 0)
-    let cameraOptions = CameraOptions(padding: padding ?? defaultPadding)
+    let newPadding = getPadding(padding)
+    let cameraOptions = CameraOptions(padding: newPadding)
     
-    navigationMapView.fitCamera(routes, routesPresentationStyle: .single(cameraOptions: cameraOptions), animated: true)
+    navigationMapView?.showcase(routes, routesPresentationStyle: .single(cameraOptions: cameraOptions), animated: true)
   }
   
   @objc func didUpdatePassiveLocation(_ notification: Notification) {
@@ -207,6 +199,16 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     onTrackingStateChange?(["state": stateStr])
   }
+
+  func getPadding(_ padding: [NSNumber]) {
+    let newPadding = UIEdgeInsets(
+      top: padding.indices.contains(0) ? CGFloat(padding[0].floatValue) : (mapPadding.indices.contains(0) ? CGFloat(mapPadding[0].floatValue) : 0),
+      left: padding.indices.contains(1) ? CGFloat(padding[1].floatValue) : (mapPadding.indices.contains(1) ? CGFloat(mapPadding[1].floatValue) : 0), 
+      bottom: padding.indices.contains(2) ? CGFloat(padding[2].floatValue) : (mapPadding.indices.contains(2) ? CGFloat(mapPadding[2].floatValue) : 0), 
+      right: padding.indices.contains(3) ? CGFloat(padding[3].floatValue) : (mapPadding.indices.contains(3) ? CGFloat(mapPadding[3].floatValue) : 0))
+
+    return newPadding
+  }
  
   func showCurrentRoute(_ padding: UIEdgeInsets? = nil, highlightFirstLeg: Bool? = false) {
     guard let currentRoute = currentRoute else { return }
@@ -215,11 +217,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     routes.append(contentsOf: self.routes!.filter {
       $0 != currentRoute
     })
-    let defaultPadding = UIEdgeInsets(
-      top: mapPadding.indices.contains(0) ? CGFloat(mapPadding[0].floatValue) : 0, 
-      left: mapPadding.indices.contains(1) ? CGFloat(mapPadding[1].floatValue) : 0, 
-      bottom: mapPadding.indices.contains(2) ? CGFloat(mapPadding[2].floatValue) : 0, 
-      right: mapPadding.indices.contains(3) ? CGFloat(mapPadding[3].floatValue) : 0)
+    let defaultPadding = getPadding([])
     let cameraOptions = CameraOptions(padding: padding ?? defaultPadding)
     
     //navigationMapView.showcase(routes, routesPresentationStyle: .single(cameraOptions: cameraOptions), animated: true)
@@ -310,11 +308,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationViewportDataSource.options.followingCameraOptions.bearingUpdatesAllowed = true
     navigationViewportDataSource.options.followingCameraOptions.paddingUpdatesAllowed = false
     navigationViewportDataSource.followingMobileCamera.zoom = CGFloat(followZoomLevel.floatValue)
-    navigationViewportDataSource.followingMobileCamera.padding = UIEdgeInsets(
-      top: mapPadding.indices.contains(0) ? CGFloat(mapPadding[0].floatValue) : 0, 
-      left: mapPadding.indices.contains(1) ? CGFloat(mapPadding[1].floatValue) : 0, 
-      bottom: mapPadding.indices.contains(2) ? CGFloat(mapPadding[2].floatValue) : 0, 
-      right: mapPadding.indices.contains(3) ? CGFloat(mapPadding[3].floatValue) : 0)
+    navigationViewportDataSource.followingMobileCamera.padding = getPadding([])
     navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
     navigationMapView.navigationCamera.follow()
 
@@ -504,9 +498,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     
     for (waypointIndex, waypoint) in waypoints.enumerated() {
       var feature = Feature(geometry: .point(Point(waypoint.coordinate)))
+      let color = waypointColors.indices.contains(waypointIndex) ? UIColor(hex: waypointColors[waypointIndex] as String) : UIColor(hex: waypointColor as String)
       feature.properties = [
         "waypointCompleted": .boolean(waypointIndex < legIndex),
-        "color": .string(waypointColors.indices.contains(waypointIndex) ? waypointColors[waypointIndex] as String : waypointColor as String),
+        "color": .string(color.RGBAString),
         "name": .number(Double(waypointIndex + 1))
       ]
       features.append(feature)
@@ -517,34 +512,34 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 }
 
 extension UIColor {
-  public convenience init(hex: String) {
-    var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
-    hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+  convenience init(hex: String) {
+    let hex = hexString.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+    var int = UInt64()
+    Scanner(string: hex).scanHexInt64(&int)
+    let a, r, g, b: UInt64
+    switch hex.count {
+    case 3: // RGB (12-bit)
+      (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+    case 6: // RGB (24-bit)
+      (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+    case 8: // ARGB (32-bit)
+      (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+    default:
+      (a, r, g, b) = (255, 0, 0, 0)
+    }
+    self.init(red: CGFloat(r) / 255, green: CGFloat(g) / 255, blue: CGFloat(b) / 255, alpha: CGFloat(a) / 255)
+  }
 
-    var rgb: UInt32 = 0
+  var RGBAString: String {
+    var red: CGFloat = 0.0
+    var green: CGFloat = 0.0
+    var blue: CGFloat = 0.0
+    var alpha: CGFloat = 0.0
 
-    var r: CGFloat = 0.0
-    var g: CGFloat = 0.0
-    var b: CGFloat = 0.0
-    var a: CGFloat = 1.0
-
-    let length = hexSanitized.characters.count
-
-    guard Scanner(string: hexSanitized).scanHexInt32(&rgb) else { return nil }
-
-    if length == 6 {
-      r = CGFloat((rgb & 0xFF0000) >> 16) / 255.0
-      g = CGFloat((rgb & 0x00FF00) >> 8) / 255.0
-      b = CGFloat(rgb & 0x0000FF) / 255.0
-    } else if length == 8 {
-      r = CGFloat((rgb & 0xFF000000) >> 24) / 255.0
-      g = CGFloat((rgb & 0x00FF0000) >> 16) / 255.0
-      b = CGFloat((rgb & 0x0000FF00) >> 8) / 255.0
-      a = CGFloat(rgb & 0x000000FF) / 255.0
-    } else {
+    guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
       return nil
     }
-
-    self.init(red: r, green: g, blue: b, alpha: a)
+    
+    return "rgba(\(Double(red * 255)),\(Double(green * 255)),\(Double(blue * 255)),\(Double(alpha)))"
   }
 }
