@@ -61,4 +61,6 @@ export interface IMapboxNavigationFreeDriveProps {
   logoPadding?: Coordinate;
   attributionVisible?: boolean;
   attributionPadding?: Coordinate;
+  lineColor?: string;
+  altLineColor?: string
 }

@@ -15,6 +15,8 @@ RCT_EXPORT_VIEW_PROPERTY(logoVisible, NSArray)
 RCT_EXPORT_VIEW_PROPERTY(logoPadding, NSArray)
 RCT_EXPORT_VIEW_PROPERTY(attributionVisible, NSArray)
 RCT_EXPORT_VIEW_PROPERTY(attributionPadding, NSArray)
+RCT_EXPORT_VIEW_PROPERTY(lineColor, NSString)
+RCT_EXPORT_VIEW_PROPERTY(altLineColor, NSString)
 
 RCT_EXTERN_METHOD(
   showRouteViaManager: (nonnull NSNumber *)node
@@ -22,6 +24,7 @@ RCT_EXTERN_METHOD(
   destination: (NSArray *)destination 
   waypoints: (NSArray *)waypoints
   padding: (NSArray *)padding
+  colors: (NSArray *)colors
 )
 
 RCT_EXTERN_METHOD(
@@ -30,6 +33,10 @@ RCT_EXTERN_METHOD(
 
 RCT_EXTERN_METHOD(
   followViaManager: (nonnull NSNumber *)node
+)
+
+RCT_EXTERN_METHOD(
+  moveToOverviewViaManager: (nonnull NSNumber *)node
 )
 
 @end

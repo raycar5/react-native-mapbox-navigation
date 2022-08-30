@@ -2,6 +2,7 @@ import MapboxCoreNavigation
 import MapboxNavigation
 import MapboxDirections
 import MapboxMaps
+import Turf
 
 class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, NavigationViewControllerDelegate {
   var navigationMapView: NavigationMapView!
@@ -34,6 +35,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       currentRouteIndex = 0
     }
   }
+  var waypointColors: [String] = []
   
   @objc var followZoomLevel: NSNumber = 16.0
   @objc var onLocationChange: RCTDirectEventBlock?
@@ -64,6 +66,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var userPuckScale: NSNumber = 1.0
   @objc var destinationImage: UIImage?
   @objc var mapPadding: [NSNumber] = []
+  @objc var lineColor: NSString = "#1989FFFF"
+  @objc var altLineColor: NSString = "#1989FF80"
   @objc var logoVisible: Bool = true
   @objc var logoPadding: [NSNumber] = [] {
     didSet {
@@ -81,10 +85,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
   }
 
-  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], padding: [NSNumber]) {
+  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], padding: [NSNumber], colors: [NSString]) {
     currentOrigin = origin
     currentDestination = destination
     currentWaypoints = waypoints
+    waypointColors = colors
     var routeWaypoints = [Waypoint]()
 
     if (origin != nil && origin.isEmpty == false) {
@@ -143,6 +148,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
   @objc func follow() {
     navigationMapView?.navigationCamera?.follow()
+  }
+
+  @objc func moveToOverview() {
+    navigationMapView?.navigationCamera?.moveToOverview()
   }
   
   @objc func didUpdatePassiveLocation(_ notification: Notification) {
@@ -378,7 +387,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     // main or alternative, and whether route is casing or not. For example: identifier for
     // main route line will look like this: `0x0000600001168000.main.route_line`, and for
     // alternative route line casing will look like this: `0x0000600001ddee80.alternative.route_line_casing`.
-    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 1) : #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 0.2)))
+    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? UIColor(hex: lineColor) : UIColor(hex: altLineColor)))
     lineLayer.lineWidth = .expression(lineWidthExpression())
     lineLayer.lineJoin = .constant(.round)
     lineLayer.lineCap = .constant(.round)
@@ -392,8 +401,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
  
     // Based on information stored in `identifier` property (whether route line is main or not)
     // route line will be colored differently.
-    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 1) : #colorLiteral(red: 1, green: 0.83, blue: 0.00, alpha: 0.2)))
-    lineLayer.lineWidth = .expression(lineWidthExpression(1.2))
+    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? UIColor(hex: lineColor) : UIColor(hex: altLineColor)))
+    lineLayer.lineWidth = .expression(lineWidthExpression())
     lineLayer.lineJoin = .constant(.round)
     lineLayer.lineCap = .constant(.round)
     
@@ -415,5 +424,85 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     // `PointAnnotation` changes must be applied to `PointAnnotationManager.annotations`
     // array. To remove all annotations for specific `PointAnnotationManager`, set an empty array.
     pointAnnotationManager.annotations = [finalDestinationAnnotation]
+  }
+
+  func navigationMapView(_ navigationMapView: NavigationMapView, waypointCircleLayerWithIdentifier identifier: String, sourceIdentifier: String) -> CircleLayer? {
+    return customCircleLayer(with: identifier, sourceIdentifier: sourceIdentifier)
+
+    var circleLayer = CircleLayer(id: identifier)
+    circleLayer.source = sourceIdentifier
+    let opacity = Exp(.switchCase) {
+      Exp(.any) {
+        Exp(.get) {
+          "waypointCompleted"
+        }
+      }
+      0.5
+      1
+    }
+    let color = Exp(.get) {
+      "color"
+    }
+    circleLayer.circleColor = .constant(.init(UIColor(hex: .expression(color))))
+    circleLayer.circleOpacity = .expression(opacity)
+    circleLayer.circleRadius = .constant(.init(8))
+    circleLayer.circleStrokeColor = .constant(.init(UIColor(red: 0.19, green: 0.19, blue: 0.2, alpha: 1.0)))
+    circleLayer.circleStrokeWidth = .constant(.init(2))
+    circleLayer.circleStrokeOpacity = .expression(opacity)
+
+    return circleLayer
+  }
+ 
+  func navigationMapView(_ navigationMapView: NavigationMapView, waypointSymbolLayerWithIdentifier identifier: String, sourceIdentifier: String) -> SymbolLayer? {
+    var symbolLayer = SymbolLayer(id: identifier)
+    symbolLayer.source = sourceIdentifier
+    symbolLayer.textOpacity = 0
+    
+    return symbolLayer
+  }
+
+  func navigationMapView(_ navigationMapView: NavigationMapView, shapeFor waypoints: [Waypoint], legIndex: Int) -> FeatureCollection? {
+    var features = [Turf.Feature]()
+    
+    for (waypointIndex, waypoint) in waypoints.enumerated() {
+      var feature = Feature(geometry: .point(Point(waypoint.coordinate)))
+      feature.properties = [
+        "waypointCompleted": .boolean(waypointIndex < legIndex),
+        "color": waypointColors.indices.contains(waypointIndex) ? waypointColors[waypointIndex] : "#000000ff"
+        "name": .number(Double(waypointIndex + 1))
+      ]
+      features.append(feature)
+    }
+
+    return FeatureCollection(features: features)
+  }
+}
+
+extension UIColor {
+  public convenience init?(hex: String) {
+    let r, g, b, a: CGFloat
+
+    if hex.hasPrefix("#") {
+      let start = hex.index(hex.startIndex, offsetBy: 1)
+      let hexColor = String(hex[start...])
+
+      if hexColor.count == 8 {
+        let scanner = Scanner(string: hexColor)
+        var hexNumber: UInt64 = 0
+
+        if scanner.scanHexInt64(&hexNumber) {
+          r = CGFloat((hexNumber & 0xff000000) >> 24) / 255
+          g = CGFloat((hexNumber & 0x00ff0000) >> 16) / 255
+          b = CGFloat((hexNumber & 0x0000ff00) >> 8) / 255
+          a = CGFloat(hexNumber & 0x000000ff) / 255
+
+          self.init(red: r, green: g, blue: b, alpha: a)
+          
+          return
+        }
+      }
+    }
+
+    return nil
   }
 }

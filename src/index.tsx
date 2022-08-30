@@ -13,21 +13,22 @@ const MapboxNavigationFreeDrive = React.forwardRef((props: IMapboxNavigationFree
   React.useImperativeHandle(ref, () => ({
     showRoute,
     clearRoute,
-    follow
+    follow,
+    moveToOverview
   }))
 
-  const showRoute = (origin = [], destination = [], waypoints = [], padding = []) => {
+  const showRoute = (origin = [], destination = [], waypoints = [[]], padding = [], colors = []) => {
     if (Platform.OS === "android") {
       UIManager.dispatchViewManagerCommand(
         findNodeHandle(mapboxNavigationFreeDriveRef.current),
         UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager,
-        [origin, destination, waypoints, padding]
+        [origin, destination, waypoints, padding, colors]
       )
     } else if (Platform.OS === "ios") {
       UIManager.dispatchViewManagerCommand(
         findNodeHandle(mapboxNavigationFreeDriveRef.current),
         UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager,
-        [origin, destination, waypoints, padding]
+        [origin, destination, waypoints, padding, colors]
       )
     }
   }
@@ -59,6 +60,22 @@ const MapboxNavigationFreeDrive = React.forwardRef((props: IMapboxNavigationFree
       UIManager.dispatchViewManagerCommand(
         findNodeHandle(mapboxNavigationFreeDriveRef.current),
         UIManager.MapboxNavigationFreeDrive.Commands.followViaManager,
+        []
+      )
+    }
+  }
+
+  const moveToOverview = () => {
+    if (Platform.OS === "android") {
+      UIManager.dispatchViewManagerCommand(
+        findNodeHandle(mapboxNavigationFreeDriveRef.current),
+        UIManager.MapboxNavigationFreeDrive.Commands.moveToOverviewViaManager,
+        []
+      )
+    } else if (Platform.OS === "ios") {
+      UIManager.dispatchViewManagerCommand(
+        findNodeHandle(mapboxNavigationFreeDriveRef.current),
+        UIManager.MapboxNavigationFreeDrive.Commands.moveToOverviewViaManager,
         []
       )
     }
