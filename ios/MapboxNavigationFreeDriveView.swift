@@ -446,10 +446,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       0.6
       1
     }
-    let color = Exp(.get) {
-      "color"
+    let color = Exp(.match) {
+      Exp(.get) {
+        "color"
+      }
     }
-    circleLayer.circleColor = .expression(color)
+    circleLayer.circleColor = .constant(.init(UIColor(hex: color.arguments[0])))
     circleLayer.circleOpacity = .expression(opacity)
     circleLayer.circleRadius = .constant(.init(CGFloat(waypointRadius.floatValue)))
     circleLayer.circleStrokeColor = .constant(.init(UIColor(hex: waypointBorderColor as String)))
@@ -462,7 +464,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   func navigationMapView(_ navigationMapView: NavigationMapView, waypointSymbolLayerWithIdentifier identifier: String, sourceIdentifier: String) -> SymbolLayer? {
     var symbolLayer = SymbolLayer(id: identifier)
     symbolLayer.source = sourceIdentifier
-    symbolLayer.textOpacity = 0
+    symbolLayer.textOpacity = 0.0
     
     return symbolLayer
   }
@@ -474,7 +476,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       var feature = Feature(geometry: .point(Point(waypoint.coordinate)))
       feature.properties = [
         "waypointCompleted": .boolean(waypointIndex < legIndex),
-        "color": waypointColors.indices.contains(waypointIndex) ? UIColor(hex: waypointColors[waypointIndex] as String) : UIColor(hex: waypointColor as String),
+        "color": waypointColors.indices.contains(waypointIndex) ? waypointColors[waypointIndex] as String : waypointColor as String,
         "name": .number(Double(waypointIndex + 1))
       ]
       features.append(feature)
