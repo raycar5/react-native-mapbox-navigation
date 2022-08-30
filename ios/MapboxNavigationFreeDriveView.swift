@@ -511,6 +511,6 @@ extension UIColor {
       }
     }
 
-    return UIColor.Black
+    return UIColor.black
   }
 }
