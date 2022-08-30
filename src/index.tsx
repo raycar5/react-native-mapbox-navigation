@@ -86,13 +86,13 @@ const MapboxNavigationFreeDrive = React.forwardRef((props: IMapboxNavigationFree
     if (Platform.OS === "android") {
       UIManager.dispatchViewManagerCommand(
         findNodeHandle(mapboxNavigationFreeDriveRef.current),
-        UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager,
+        UIManager.MapboxNavigationFreeDrive.Commands.fitCameraViaManager,
         [padding]
       )
     } else if (Platform.OS === "ios") {
       UIManager.dispatchViewManagerCommand(
         findNodeHandle(mapboxNavigationFreeDriveRef.current),
-        UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager,
+        UIManager.MapboxNavigationFreeDrive.Commands.fitCameraViaManager,
         [padding]
       )
     }
