@@ -300,20 +300,22 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   func addSpeedLimitView() {
-    removeSpeedLimitView()
+    if (navigationMapView != nil) {
+      removeSpeedLimitView()
 
-    if (showSpeedLimit) {
-      speedLimitView = SpeedLimitView()
+      if (showSpeedLimit) {
+        speedLimitView = SpeedLimitView()
 
-      speedLimitView.shouldShowUnknownSpeedLimit = true
-      speedLimitView.translatesAutoresizingMaskIntoConstraints = false
-    
-      addSubview(speedLimitView)
+        speedLimitView.shouldShowUnknownSpeedLimit = true
+        speedLimitView.translatesAutoresizingMaskIntoConstraints = false
       
-      speedLimitView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
-      speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
-      speedLimitView.heightAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(3) ? CGFloat(speedLimitAnchor[3].floatValue) : 50).isActive = true
-      speedLimitView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: speedLimitAnchor.indices.contains(1) ? CGFloat(speedLimitAnchor[1].floatValue) : 10).isActive = true
+        addSubview(speedLimitView)
+        
+        speedLimitView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
+        speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
+        speedLimitView.heightAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(3) ? CGFloat(speedLimitAnchor[3].floatValue) : 50).isActive = true
+        speedLimitView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: speedLimitAnchor.indices.contains(1) ? CGFloat(speedLimitAnchor[1].floatValue) : 10).isActive = true
+      }
     }
   }
 
@@ -323,17 +325,21 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   func setLogoPadding() {
-    //navigationMapView.mapView.ornaments.options.logo.visibility = logoVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
-    navigationMapView.mapView.ornaments.options.logo.margins = CGPoint(
-      x: logoPadding.indices.contains(0) ? CGFloat(logoPadding[0].floatValue) : 8.0, 
-      y: logoPadding.indices.contains(1) ? CGFloat(logoPadding[1].floatValue) : 8.0)
+    if (navigationMapView != nil) {
+      //navigationMapView.mapView.ornaments.options.logo.visibility = logoVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
+      navigationMapView.mapView.ornaments.options.logo.margins = CGPoint(
+        x: logoPadding.indices.contains(0) ? CGFloat(logoPadding[0].floatValue) : 8.0, 
+        y: logoPadding.indices.contains(1) ? CGFloat(logoPadding[1].floatValue) : 8.0)
+    }
   }
 
   func setAttributionPadding() {
-    //navigationMapView.mapView.ornaments.options.attributionButton.visibility = attributionVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
-    navigationMapView.mapView.ornaments.options.attributionButton.margins = CGPoint(
-      x: attributionPadding.indices.contains(0) ? CGFloat(attributionPadding[0].floatValue) : 8.0, 
-      y: attributionPadding.indices.contains(1) ? CGFloat(attributionPadding[1].floatValue) : 8.0)
+    if (navigationMapView != nil) {
+      //navigationMapView.mapView.ornaments.options.attributionButton.visibility = attributionVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
+      navigationMapView.mapView.ornaments.options.attributionButton.margins = CGPoint(
+        x: attributionPadding.indices.contains(0) ? CGFloat(attributionPadding[0].floatValue) : 8.0, 
+        y: attributionPadding.indices.contains(1) ? CGFloat(attributionPadding[1].floatValue) : 8.0)
+    }
   }
 
   func lineWidthExpression(_ multiplier: Double = 1.0) -> Expression {
