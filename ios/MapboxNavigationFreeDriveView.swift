@@ -35,7 +35,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       currentRouteIndex = 0
     }
   }
-  var waypointColors: [String] = []
+  var waypointColors: [NSString] = []
   
   @objc var followZoomLevel: NSNumber = 16.0
   @objc var onLocationChange: RCTDirectEventBlock?
@@ -68,6 +68,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var mapPadding: [NSNumber] = []
   @objc var lineColor: NSString = "#1989FFFF"
   @objc var altLineColor: NSString = "#1989FF80"
+  @objc var unknownLineColor: NSString = "#1989FFFF"
+  @objc var waypointColor: NSString = "#000000FF"
+  @objc var waypointRadius: NSNumber = 8
+  @objc var waypointBorderWidth: NSNumber = 2
+  @objc var waypointBorderColor: NSString = "#000000FF"
   @objc var logoVisible: Bool = true
   @objc var logoPadding: [NSNumber] = [] {
     didSet {
@@ -138,7 +143,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
   @objc func clearRoute() {
     routeResponse = nil
-    
+    waypointColors = []
+
     navigationMapView?.unhighlightBuildings()
     navigationMapView?.removeRoutes()
     navigationMapView?.removeRouteDurations()
@@ -253,6 +259,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     navigationMapView.showsCongestionForAlternativeRoutes = true
     navigationMapView.showsRestrictedAreasOnRoute = true
+    navigationMapView.routeCasingColor = UIColor(hex: lineColor as String)
+    navigationMapView.trafficUnknownColor = UIColor(hex: unknownLineColor as String)
     navigationMapView.delegate = self
     navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
     navigationMapView.mapView.gestures.options.panEnabled = true
@@ -387,7 +395,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     // main or alternative, and whether route is casing or not. For example: identifier for
     // main route line will look like this: `0x0000600001168000.main.route_line`, and for
     // alternative route line casing will look like this: `0x0000600001ddee80.alternative.route_line_casing`.
-    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? UIColor(hex: lineColor) : UIColor(hex: altLineColor)))
+    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? UIColor(hex: lineColor as String) : UIColor(hex: altLineColor as String)))
     lineLayer.lineWidth = .expression(lineWidthExpression())
     lineLayer.lineJoin = .constant(.round)
     lineLayer.lineCap = .constant(.round)
@@ -401,7 +409,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
  
     // Based on information stored in `identifier` property (whether route line is main or not)
     // route line will be colored differently.
-    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? UIColor(hex: lineColor) : UIColor(hex: altLineColor)))
+    lineLayer.lineColor = .constant(.init(identifier.contains("main") ? UIColor(hex: lineColor as String) : UIColor(hex: altLineColor as String)))
     lineLayer.lineWidth = .expression(lineWidthExpression())
     lineLayer.lineJoin = .constant(.round)
     lineLayer.lineCap = .constant(.round)
@@ -427,8 +435,6 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   func navigationMapView(_ navigationMapView: NavigationMapView, waypointCircleLayerWithIdentifier identifier: String, sourceIdentifier: String) -> CircleLayer? {
-    return customCircleLayer(with: identifier, sourceIdentifier: sourceIdentifier)
-
     var circleLayer = CircleLayer(id: identifier)
     circleLayer.source = sourceIdentifier
     let opacity = Exp(.switchCase) {
@@ -437,17 +443,17 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
           "waypointCompleted"
         }
       }
-      0.5
+      0.6
       1
     }
     let color = Exp(.get) {
       "color"
     }
-    circleLayer.circleColor = .constant(.init(UIColor(hex: .expression(color))))
+    circleLayer.circleColor = .expression(color)
     circleLayer.circleOpacity = .expression(opacity)
-    circleLayer.circleRadius = .constant(.init(8))
-    circleLayer.circleStrokeColor = .constant(.init(UIColor(red: 0.19, green: 0.19, blue: 0.2, alpha: 1.0)))
-    circleLayer.circleStrokeWidth = .constant(.init(2))
+    circleLayer.circleRadius = .constant(.init(CGFloat(waypointRadius.floatValue)))
+    circleLayer.circleStrokeColor = .constant(.init(UIColor(hex: waypointBorderColor as String)))
+    circleLayer.circleStrokeWidth = .constant(.init(CGFloat(waypointBorderWidth.floatValue)))
     circleLayer.circleStrokeOpacity = .expression(opacity)
 
     return circleLayer
@@ -468,7 +474,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       var feature = Feature(geometry: .point(Point(waypoint.coordinate)))
       feature.properties = [
         "waypointCompleted": .boolean(waypointIndex < legIndex),
-        "color": waypointColors.indices.contains(waypointIndex) ? waypointColors[waypointIndex] : "#000000ff"
+        "color": waypointColors.indices.contains(waypointIndex) ? UIColor(hex: waypointColors[waypointIndex] as String) : UIColor(hex: waypointColor as String),
         "name": .number(Double(waypointIndex + 1))
       ]
       features.append(feature)
@@ -479,7 +485,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 }
 
 extension UIColor {
-  public convenience init?(hex: String) {
+  public convenience init(hex: String) {
     let r, g, b, a: CGFloat
 
     if hex.hasPrefix("#") {
@@ -503,6 +509,6 @@ extension UIColor {
       }
     }
 
-    return nil
+    return UIColor.Black
   }
 }

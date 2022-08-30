@@ -17,6 +17,11 @@ RCT_EXPORT_VIEW_PROPERTY(attributionVisible, NSArray)
 RCT_EXPORT_VIEW_PROPERTY(attributionPadding, NSArray)
 RCT_EXPORT_VIEW_PROPERTY(lineColor, NSString)
 RCT_EXPORT_VIEW_PROPERTY(altLineColor, NSString)
+RCT_EXPORT_VIEW_PROPERTY(waypointColor, NSString)
+RCT_EXPORT_VIEW_PROPERTY(waypointRadius, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(waypointBorderWidth, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(waypointBorderColor, NSString)
+RCT_EXPORT_VIEW_PROPERTY(unknownLineColor, NSString)
 
 RCT_EXTERN_METHOD(
   showRouteViaManager: (nonnull NSNumber *)node

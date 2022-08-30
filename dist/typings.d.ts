@@ -57,5 +57,10 @@ export interface IMapboxNavigationFreeDriveProps {
     attributionPadding?: Coordinate;
     lineColor?: string;
     altLineColor?: string;
+    unknownLineColor?: string;
+    waypointColor?: string;
+    waypointRadius?: number;
+    waypointBorderWidth?: number;
+    waypointBorderColor?: string;
 }
 export {};
