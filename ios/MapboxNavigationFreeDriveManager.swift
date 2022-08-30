@@ -8,11 +8,11 @@ class MapboxNavigationFreeDriveManager: RCTViewManager {
     return true
   }
 
-  @objc func showRouteViaManager(_ node: NSNumber, origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], padding: [NSNumber], colors: [NSString]) {
+  @objc func showRouteViaManager(_ node: NSNumber, origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], padding: [NSNumber], colors: [NSString], highlightFirstLeg: Bool) {
     DispatchQueue.main.async {
       let mapboxNavigationFreeDriveView = self.bridge.uiManager.view(forReactTag: node) as! MapboxNavigationFreeDriveView
       
-      mapboxNavigationFreeDriveView.showRoute(origin: origin, destination: destination, waypoints: waypoints, padding: padding, colors: colors)
+      mapboxNavigationFreeDriveView.showRoute(origin: origin, destination: destination, waypoints: waypoints, padding: padding, colors: colors, highlightFirstLeg: highlightFirstLeg)
     }
   }
 
@@ -37,6 +37,14 @@ class MapboxNavigationFreeDriveManager: RCTViewManager {
       let mapboxNavigationFreeDriveView = self.bridge.uiManager.view(forReactTag: node) as! MapboxNavigationFreeDriveView
       
       mapboxNavigationFreeDriveView.moveToOverview()
+    }
+  }
+
+  @objc func fitCameraViaManager(_ node: NSNumber, padding: [NSNumber]) {
+    DispatchQueue.main.async {
+      let mapboxNavigationFreeDriveView = self.bridge.uiManager.view(forReactTag: node) as! MapboxNavigationFreeDriveView
+      
+      mapboxNavigationFreeDriveView.fitCamera(padding: padding)
     }
   }
 }

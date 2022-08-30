@@ -90,7 +90,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
   }
 
-  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], padding: [NSNumber], colors: [NSString]) {
+  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], padding: [NSNumber], colors: [NSString], highlightFirstLeg: Bool) {
     currentOrigin = origin
     currentDestination = destination
     currentWaypoints = waypoints
@@ -134,7 +134,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
                 left: padding.indices.contains(1) ? CGFloat(padding[1].floatValue) : 0, 
                 bottom: padding.indices.contains(2) ? CGFloat(padding[2].floatValue) : 0, 
                 right: padding.indices.contains(3) ? CGFloat(padding[3].floatValue) : 0)
-              self.showCurrentRoute(newPadding)
+              self.showCurrentRoute(newPadding, highlightFirstLeg)
             }
           }
         }
@@ -158,6 +158,23 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
   @objc func moveToOverview() {
     navigationMapView?.navigationCamera?.moveToOverview()
+  }
+
+  @objc func fitCamera(padding: [NSNumber]) {
+    guard let currentRoute = currentRoute else { return }
+ 
+    var routes = [currentRoute]
+    routes.append(contentsOf: self.routes!.filter {
+      $0 != currentRoute
+    })
+    let defaultPadding = UIEdgeInsets(
+      top: mapPadding.indices.contains(0) ? CGFloat(mapPadding[0].floatValue) : 0, 
+      left: mapPadding.indices.contains(1) ? CGFloat(mapPadding[1].floatValue) : 0, 
+      bottom: mapPadding.indices.contains(2) ? CGFloat(mapPadding[2].floatValue) : 0, 
+      right: mapPadding.indices.contains(3) ? CGFloat(mapPadding[3].floatValue) : 0)
+    let cameraOptions = CameraOptions(padding: padding ?? defaultPadding)
+    
+    navigationMapView.fitCamera(routes, routesPresentationStyle: .single(cameraOptions: cameraOptions), animated: true)
   }
   
   @objc func didUpdatePassiveLocation(_ notification: Notification) {
@@ -191,7 +208,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     onTrackingStateChange?(["state": stateStr])
   }
  
-  func showCurrentRoute(_ padding: UIEdgeInsets? = nil) {
+  func showCurrentRoute(_ padding: UIEdgeInsets? = nil, highlightFirstLeg: Bool? = false) {
     guard let currentRoute = currentRoute else { return }
  
     var routes = [currentRoute]
@@ -204,8 +221,15 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       bottom: mapPadding.indices.contains(2) ? CGFloat(mapPadding[2].floatValue) : 0, 
       right: mapPadding.indices.contains(3) ? CGFloat(mapPadding[3].floatValue) : 0)
     let cameraOptions = CameraOptions(padding: padding ?? defaultPadding)
-    navigationMapView.showcase(routes, routesPresentationStyle: .single(cameraOptions: cameraOptions), animated: true)
-    //navigationMapView.show(routes)
+    
+    //navigationMapView.showcase(routes, routesPresentationStyle: .single(cameraOptions: cameraOptions), animated: true)
+
+    if (highlightFirstLeg ?? false) {
+      navigationMapView.show([currentRoute], legIndex: 0)
+    } else {
+      navigationMapView.show([currentRoute])
+    }
+
     navigationMapView.showWaypoints(on: currentRoute)
     //navigationMapView.showRouteDurations(along: routes)
   }
@@ -283,7 +307,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .raw)
     navigationViewportDataSource.options.followingCameraOptions.centerUpdatesAllowed = true
     navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = false
-    navigationViewportDataSource.options.followingCameraOptions.bearingUpdatesAllowed = false
+    navigationViewportDataSource.options.followingCameraOptions.bearingUpdatesAllowed = true
     navigationViewportDataSource.options.followingCameraOptions.paddingUpdatesAllowed = false
     navigationViewportDataSource.followingMobileCamera.zoom = CGFloat(followZoomLevel.floatValue)
     navigationViewportDataSource.followingMobileCamera.padding = UIEdgeInsets(

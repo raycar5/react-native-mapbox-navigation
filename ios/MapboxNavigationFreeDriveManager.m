@@ -30,6 +30,7 @@ RCT_EXTERN_METHOD(
   waypoints: (NSArray *)waypoints
   padding: (NSArray *)padding
   colors: (NSArray *)colors
+  highlightFirstLeg: (BOOL *)highlightFirstLeg
 )
 
 RCT_EXTERN_METHOD(
@@ -42,6 +43,11 @@ RCT_EXTERN_METHOD(
 
 RCT_EXTERN_METHOD(
   moveToOverviewViaManager: (nonnull NSNumber *)node
+)
+
+RCT_EXTERN_METHOD(
+  fitCameraViaManager: (nonnull NSNumber *)node
+  padding: (NSArray *)padding
 )
 
 @end
