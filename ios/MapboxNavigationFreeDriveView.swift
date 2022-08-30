@@ -446,10 +446,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       0.6
       1
     }
-    let color = Exp(.match) {
-      Exp(.get) {
-        "color"
-      }
+    let color = Exp(.get) {
+      "color"
     }
     circleLayer.circleColor = .constant(.init(UIColor(hex: color.arguments[0])))
     circleLayer.circleOpacity = .expression(opacity)
@@ -464,7 +462,15 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   func navigationMapView(_ navigationMapView: NavigationMapView, waypointSymbolLayerWithIdentifier identifier: String, sourceIdentifier: String) -> SymbolLayer? {
     var symbolLayer = SymbolLayer(id: identifier)
     symbolLayer.source = sourceIdentifier
-    symbolLayer.textOpacity = 0.0
+    symbolLayer.textOpacity = .expression(Exp(.switchCase) {
+      Exp(.any) {
+        Exp(.get) {
+          "waypointCompleted"
+        }
+      }
+      0
+      0
+    })
     
     return symbolLayer
   }
@@ -476,7 +482,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       var feature = Feature(geometry: .point(Point(waypoint.coordinate)))
       feature.properties = [
         "waypointCompleted": .boolean(waypointIndex < legIndex),
-        "color": waypointColors.indices.contains(waypointIndex) ? waypointColors[waypointIndex] as String : waypointColor as String,
+        "color": .string(waypointColors.indices.contains(waypointIndex) ? waypointColors[waypointIndex] as String : waypointColor as String),
         "name": .number(Double(waypointIndex + 1))
       ]
       features.append(feature)
@@ -488,29 +494,33 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
 extension UIColor {
   public convenience init(hex: String) {
-    let r, g, b, a: CGFloat
+    var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+    hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
 
-    if hex.hasPrefix("#") {
-      let start = hex.index(hex.startIndex, offsetBy: 1)
-      let hexColor = String(hex[start...])
+    var rgb: UInt32 = 0
 
-      if hexColor.count == 8 {
-        let scanner = Scanner(string: hexColor)
-        var hexNumber: UInt64 = 0
+    var r: CGFloat = 0.0
+    var g: CGFloat = 0.0
+    var b: CGFloat = 0.0
+    var a: CGFloat = 1.0
 
-        if scanner.scanHexInt64(&hexNumber) {
-          r = CGFloat((hexNumber & 0xff000000) >> 24) / 255
-          g = CGFloat((hexNumber & 0x00ff0000) >> 16) / 255
-          b = CGFloat((hexNumber & 0x0000ff00) >> 8) / 255
-          a = CGFloat(hexNumber & 0x000000ff) / 255
+    let length = hexSanitized.characters.count
 
-          self.init(red: r, green: g, blue: b, alpha: a)
-          
-          return
-        }
-      }
+    guard Scanner(string: hexSanitized).scanHexInt32(&rgb) else { return nil }
+
+    if length == 6 {
+      r = CGFloat((rgb & 0xFF0000) >> 16) / 255.0
+      g = CGFloat((rgb & 0x00FF00) >> 8) / 255.0
+      b = CGFloat(rgb & 0x0000FF) / 255.0
+    } else if length == 8 {
+      r = CGFloat((rgb & 0xFF000000) >> 24) / 255.0
+      g = CGFloat((rgb & 0x00FF0000) >> 16) / 255.0
+      b = CGFloat((rgb & 0x0000FF00) >> 8) / 255.0
+      a = CGFloat(rgb & 0x000000FF) / 255.0
+    } else {
+      return nil
     }
 
-    return UIColor.black
+    self.init(red: r, green: g, blue: b, alpha: a)
   }
 }
