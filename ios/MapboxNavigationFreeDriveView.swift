@@ -40,6 +40,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var followZoomLevel: NSNumber = 16.0
   @objc var onLocationChange: RCTDirectEventBlock?
   @objc var onTrackingStateChange: RCTDirectEventBlock?
+  @objc var onRouteChange: RCTDirectEventBlock?
   @objc var showSpeedLimit: Bool = true {
     didSet {
       if (oldValue != showSpeedLimit) {
@@ -130,7 +131,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
             
             if let routes = self.routes, let currentRoute = self.currentRoute {
               let newPadding = self.getPadding(padding)
+
               self.showCurrentRoute(newPadding, highlightFirstLeg: highlightFirstLeg)
+
+              onRouteChange?(["distance": currentRoute.distance, "expectedTravelTime": currentRoute.expectedTravelTime, "typicalTravelTime": currentRoute.typicalTravelTime])
             }
           }
         }
