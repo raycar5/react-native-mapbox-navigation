@@ -33,7 +33,7 @@ RCT_EXTERN_METHOD(
   waypoints: (NSArray *)waypoints
   padding: (NSArray *)padding
   styles: (NSDictionaryArray *)styles
-  legIndex: (NSNumber *)legIndex
+  legIndex: (nonnull NSNumber *)legIndex
 )
 
 RCT_EXTERN_METHOD(
