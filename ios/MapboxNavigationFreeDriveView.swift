@@ -543,11 +543,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
         "radius": .number(
           Double(exactly: (waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["radius"] != nil) 
             ? ((waypointStyles[waypointIndex]["radius"]! as? NSNumber) ?? waypointRadius)
-            : waypointRadius)),
+            : waypointRadius)!),
         "opacity": .number(
           Double(exactly: (waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["opacity"] != nil) 
             ? ((waypointStyles[waypointIndex]["opacity"]! as? NSNumber) ?? waypointOpacity) 
-            : waypointOpacity)),
+            : waypointOpacity)!),
         "strokeColor": .string(
           ((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["strokeColor"] != nil) 
             ? ((waypointStyles[waypointIndex]["strokeColor"]! as? NSString) ?? waypointStrokeColor)
@@ -555,11 +555,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
         "strokeWidth": .number(
           Double(exactly: (waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["strokeWidth"] != nil) 
             ? ((waypointStyles[waypointIndex]["strokeWidth"]! as? NSNumber) ?? waypointStrokeWidth) 
-            : waypointStrokeWidth)),
+            : waypointStrokeWidth)!),
         "strokeOpacity": .number(
           Double(exactly: (waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["strokeOpacity"] != nil) 
             ? ((waypointStyles[waypointIndex]["strokeOpacity"]! as? NSNumber) ?? waypointStrokeOpacity)
-            : waypointStrokeOpacity)),
+            : waypointStrokeOpacity)!),
         "name": .number(Double(waypointIndex + 1))
       ]
       features.append(feature)
