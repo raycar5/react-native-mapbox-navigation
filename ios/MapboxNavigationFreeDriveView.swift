@@ -15,6 +15,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   var currentOrigin: [NSNumber] = []
   var currentDestination: [NSNumber] = []
   var currentWaypoints: [[NSNumber]] = []
+  var currentLegIndex: NSNumber = -1
   var currentRouteIndex = 0 {
     didSet {
       showCurrentRoute()
@@ -67,15 +68,47 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var userPuckScale: NSNumber = 1.0
   @objc var destinationImage: UIImage?
   @objc var mapPadding: [NSNumber] = []
-  @objc var lineColor: NSString = "#1989FFFF"
-  @objc var altLineColor: NSString = "#1989FF80"
-  @objc var unknownLineColor: NSString = "#1989FFFF"
-  @objc var waypointColor: NSString = "#000000FF"
+  @objc var routeCasingColor: NSString = "#2F7AC6" {
+    didSet {
+      navigationMapView.routeCasingColor = UIColor(hex: routeCasingColor as String)
+    }
+  }
+  @objc var traversedRouteColor: NSString = "#FFFFFF" {
+    didSet {
+      navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor as String)
+    }
+  }
+  @objc var trafficUnknownColor: NSString = "#56A8FB" {
+    didSet {
+      navigationMapView.trafficUnknownColor = UIColor(hex: trafficUnknownColor as String)
+    }
+  }
+  @objc var trafficLowColor: NSString = "#56A8FB" {
+    didSet {
+      navigationMapView.trafficLowColor = UIColor(hex: trafficLowColor as String)
+    }
+  }
+  @objc var trafficModerateColor: NSString = "#FF9500" {
+    didSet {
+      navigationMapView.trafficModerateColor = UIColor(hex: trafficModerateColor as String)
+    }
+  }
+  @objc var trafficHeavyColor: NSString = "#FF4D4D" {
+    didSet {
+      navigationMapView.trafficHeavyColor = UIColor(hex: trafficHeavyColor as String)
+    }
+  }
+  @objc var trafficSevereColor: NSString = "#8F2447" {
+    didSet {
+      navigationMapView.trafficSevereColor = UIColor(hex: trafficSevereColor as String)
+    }
+  }
+  @objc var waypointColor: NSString = "#2F7AC6"
   @objc var waypointRadius: NSNumber = 8
   @objc var waypointOpacity: NSNumber = 1
   @objc var waypointStrokeWidth: NSNumber = 2
   @objc var waypointStrokeOpacity: NSNumber = 1
-  @objc var waypointStrokeColor: NSString = "#000000FF"
+  @objc var waypointStrokeColor: NSString = "#FFFFFF"
   @objc var logoVisible: Bool = true
   @objc var logoPadding: [NSNumber] = [] {
     didSet {
@@ -93,10 +126,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
   }
 
-  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], padding: [NSNumber], styles: [NSDictionary], legIndex: NSNumber) {
+  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber) {
     currentOrigin = origin
     currentDestination = destination
     currentWaypoints = waypoints
+    currentLegIndex = legIndex
     waypointStyles = (styles as? [[String: Any]]) ?? []
     var routeWaypoints = [Waypoint]()
 
@@ -132,9 +166,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
             self.routeResponse = response
             
             if let routes = self.routes, let currentRoute = self.currentRoute {
-              let newPadding = self.getPadding(padding)
-
-              self.showCurrentRoute(newPadding, legIndex: legIndex != nil ? Int(legIndex) : nil)
+              self.showCurrentRoute()
 
               self.onRouteChange?(["distance": currentRoute.distance, "expectedTravelTime": currentRoute.expectedTravelTime, "typicalTravelTime": currentRoute.typicalTravelTime])
             }
@@ -155,11 +187,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   @objc func follow() {
+    showCurrentRoute()
     navigationMapView?.navigationCamera?.follow()
   }
 
-  @objc func moveToOverview() {
-    navigationMapView?.navigationCamera?.moveToOverview()
+  @objc func moveToOverview(padding: [NSNumber]) {
+    fitCamera(padding: padding)
   }
 
   @objc func fitCamera(padding: [NSNumber]) {
@@ -173,6 +206,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     let cameraOptions = CameraOptions(padding: newPadding)
     
     navigationMapView?.showcase(routes, routesPresentationStyle: .single(cameraOptions: cameraOptions), animated: true)
+    showCurrentRoute()
   }
   
   @objc func didUpdatePassiveLocation(_ notification: Notification) {
@@ -216,19 +250,19 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     return newPadding
   }
  
-  func showCurrentRoute(_ padding: UIEdgeInsets? = nil, legIndex: Int? = nil) {
+  func showCurrentRoute() {
     guard let currentRoute = currentRoute else { return }
  
     var routes = [currentRoute]
     routes.append(contentsOf: self.routes!.filter {
       $0 != currentRoute
     })
-    let defaultPadding = getPadding([])
-    let cameraOptions = CameraOptions(padding: padding ?? defaultPadding)
+    //let defaultPadding = getPadding([])
+    //let cameraOptions = CameraOptions(padding: padding ?? defaultPadding)
     
     //navigationMapView.showcase(routes, routesPresentationStyle: .single(cameraOptions: cameraOptions), animated: true)
 
-    navigationMapView.show([currentRoute], legIndex: legIndex)
+    navigationMapView.show([currentRoute], legIndex: Int(self.currentLegIndex))
     
     navigationMapView.showWaypoints(on: currentRoute)
     //navigationMapView.showRouteDurations(along: routes)
@@ -283,16 +317,21 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     navigationMapView.showsCongestionForAlternativeRoutes = true
     navigationMapView.showsRestrictedAreasOnRoute = true
-    navigationMapView.routeCasingColor = UIColor(hex: lineColor as String)
-    navigationMapView.trafficUnknownColor = UIColor(hex: unknownLineColor as String)
+    navigationMapView.routeCasingColor = UIColor(hex: routeCasingColor as String)
+    navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor as String)
+    navigationMapView.trafficUnknownColor = UIColor(hex: trafficUnknownColor as String)
+    navigationMapView.trafficLowColor = UIColor(hex: trafficLowColor as String)
+    navigationMapView.trafficModerateColor = UIColor(hex: trafficModerateColor as String)
+    navigationMapView.trafficHeavyColor = UIColor(hex: trafficHeavyColor as String)
+    navigationMapView.trafficSevereColor = UIColor(hex: trafficSevereColor as String)
     navigationMapView.delegate = self
     navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
-    //navigationMapView.mapView.gestures.options.panEnabled = true
-    //navigationMapView.mapView.gestures.options.pinchEnabled = true
-    //navigationMapView.mapView.gestures.options.pinchRotateEnabled = false
-    //navigationMapView.mapView.gestures.options.pinchZoomEnabled = true
-    //navigationMapView.mapView.gestures.options.pinchPanEnabled = false
-    //navigationMapView.mapView.gestures.options.pitchEnabled = false
+    navigationMapView.mapView.gestures.options.panEnabled = true
+    navigationMapView.mapView.gestures.options.pinchEnabled = true
+    navigationMapView.mapView.gestures.options.pinchRotateEnabled = false
+    navigationMapView.mapView.gestures.options.pinchZoomEnabled = true
+    navigationMapView.mapView.gestures.options.pinchPanEnabled = false
+    navigationMapView.mapView.gestures.options.pitchEnabled = false
 
     setLogoPadding()
     setAttributionPadding()

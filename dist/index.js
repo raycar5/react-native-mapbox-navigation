@@ -12,12 +12,12 @@ const MapboxNavigationFreeDrive = React.forwardRef((props, ref) => {
         moveToOverview,
         fitCamera
     }));
-    const showRoute = (origin = [], destination = [], waypoints = [[]], padding = [], styles = [], legIndex = null) => {
+    const showRoute = (origin = [], destination = [], waypoints = [[]], styles = [], legIndex = null) => {
         if (Platform.OS === "android") {
-            UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager, [origin, destination, waypoints, padding, styles, legIndex]);
+            UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager, [origin, destination, waypoints, styles, legIndex]);
         }
         else if (Platform.OS === "ios") {
-            UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager, [origin, destination, waypoints, padding, styles, legIndex]);
+            UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager, [origin, destination, waypoints, styles, legIndex]);
         }
     };
     const clearRoute = () => {
@@ -36,12 +36,12 @@ const MapboxNavigationFreeDrive = React.forwardRef((props, ref) => {
             UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.followViaManager, []);
         }
     };
-    const moveToOverview = () => {
+    const moveToOverview = (padding) => {
         if (Platform.OS === "android") {
-            UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.moveToOverviewViaManager, []);
+            UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.moveToOverviewViaManager, [padding]);
         }
         else if (Platform.OS === "ios") {
-            UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.moveToOverviewViaManager, []);
+            UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.moveToOverviewViaManager, [padding]);
         }
     };
     const fitCamera = (padding = []) => {

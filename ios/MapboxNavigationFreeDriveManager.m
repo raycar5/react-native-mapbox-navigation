@@ -16,8 +16,13 @@ RCT_EXPORT_VIEW_PROPERTY(logoVisible, NSArray)
 RCT_EXPORT_VIEW_PROPERTY(logoPadding, NSArray)
 RCT_EXPORT_VIEW_PROPERTY(attributionVisible, NSArray)
 RCT_EXPORT_VIEW_PROPERTY(attributionPadding, NSArray)
-RCT_EXPORT_VIEW_PROPERTY(lineColor, NSString)
-RCT_EXPORT_VIEW_PROPERTY(altLineColor, NSString)
+RCT_EXPORT_VIEW_PROPERTY(routeCasingColor, NSString)
+RCT_EXPORT_VIEW_PROPERTY(traversedRouteColor, NSString)
+RCT_EXPORT_VIEW_PROPERTY(trafficUnknownColor, NSString)
+RCT_EXPORT_VIEW_PROPERTY(trafficLowColor, NSString)
+RCT_EXPORT_VIEW_PROPERTY(trafficModerateColor, NSString)
+RCT_EXPORT_VIEW_PROPERTY(trafficHeavyColor, NSString)
+RCT_EXPORT_VIEW_PROPERTY(trafficSevereColor, NSString)
 RCT_EXPORT_VIEW_PROPERTY(waypointColor, NSString)
 RCT_EXPORT_VIEW_PROPERTY(waypointRadius, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(waypointOpacity, NSNumber)
@@ -31,7 +36,6 @@ RCT_EXTERN_METHOD(
   origin: (NSArray *)origin 
   destination: (NSArray *)destination 
   waypoints: (NSArray *)waypoints
-  padding: (NSArray *)padding
   styles: (NSDictionaryArray *)styles
   legIndex: (nonnull NSNumber *)legIndex
 )
@@ -46,6 +50,7 @@ RCT_EXTERN_METHOD(
 
 RCT_EXTERN_METHOD(
   moveToOverviewViaManager: (nonnull NSNumber *)node
+  padding: (NSArray *)padding
 )
 
 RCT_EXTERN_METHOD(
