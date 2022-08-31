@@ -35,7 +35,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       currentRouteIndex = 0
     }
   }
-  var waypointStyles: [[String: Any]] = []
+  var waypointStyles: [[String: Any]] = [String: Any?]()
   
   @objc var followZoomLevel: NSNumber = 16.0
   @objc var onLocationChange: RCTDirectEventBlock?
@@ -97,7 +97,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     currentOrigin = origin
     currentDestination = destination
     currentWaypoints = waypoints
-    waypointStyles = styles as [[String: Any]]
+    waypointStyles = (styles as? [[String: Any]]) ?? [String: Any?]()
     var routeWaypoints = [Waypoint]()
 
     if (origin != nil && origin.isEmpty == false) {
@@ -145,7 +145,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
   @objc func clearRoute() {
     routeResponse = nil
-    waypointStyles = []
+    waypointStyles = [String: Any?]()
 
     navigationMapView?.unhighlightBuildings()
     navigationMapView?.removeRoutes()
@@ -536,12 +536,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       var feature = Feature(geometry: .point(Point(waypoint.coordinate)))
       feature.properties = [
         "waypointCompleted": .boolean(waypointIndex < legIndex),
-        "color": .string((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["color"] != nil) ? waypointStyles[waypointIndex]["color"]! as? String : waypointColor as String),
-        "radius": .number((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["radius"] != nil) ? Double(waypointStyles[waypointIndex]["radius"]!) : Double(waypointRadius)),
-        "opacity": .number((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["opacity"] != nil) ? Double(waypointStyles[waypointIndex]["opacity"]!) : Double(waypointOpacity)),
-        "strokeColor": .string((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["strokeColor"] != nil) ? waypointStyles[waypointIndex]["strokeColor"]! as? String : waypointStrokeColor as String),
-        "strokeWidth": .number((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["strokeWidth"] != nil) ? Double(waypointStyles[waypointIndex]["strokeWidth"]!) : Double(waypointStrokeWidth)),
-        "strokeOpacity": .number((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["strokeOpacity"] != nil) ? Double(waypointStyles[waypointIndex]["strokeOpacity"]!) : Double(waypointStrokeOpacity)),
+        "color": .string(((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["color"] != nil) ? waypointStyles[waypointIndex]["color"] as? String : nil) ?? (waypointColor as String)),
+        "radius": .number(((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["radius"] != nil) ? Double(exactly: waypointStyles[waypointIndex]["radius"] as? NSNumber) : nil) ?? Double(exactly: waypointRadius)!),
+        "opacity": .number(((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["opacity"] != nil) ? Double(exactly: waypointStyles[waypointIndex]["opacity"] as? NSNumber) : nil) ?? Double(exactly: waypointOpacity)!),
+        "strokeColor": .string(((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["strokeColor"] != nil) ? waypointStyles[waypointIndex]["strokeColor"] as? String : nil) ?? (waypointStrokeColor as String)),
+        "strokeWidth": .number(((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["strokeWidth"] != nil) ? Double(exactly: waypointStyles[waypointIndex]["strokeWidth"]! as NSNumber) : nil) ?? Double(exactly: waypointStrokeWidth)!),
+        "strokeOpacity": .number(((waypointStyles.indices.contains(waypointIndex) && waypointStyles[waypointIndex]["strokeOpacity"] != nil) ? Double(exactly: waypointStyles[waypointIndex]["strokeOpacity"]! as NSNumber) : nil) ?? Double(exactly: waypointStrokeOpacity)!),
         "name": .number(Double(waypointIndex + 1))
       ]
       features.append(feature)
