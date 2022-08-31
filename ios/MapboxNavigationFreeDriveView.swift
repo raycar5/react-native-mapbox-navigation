@@ -172,7 +172,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       Directions.shared.calculate(options) { [weak self] (_, result) in
         switch result {
           case .failure(let error):
-            onFailure?([])
+            onFailure?([NSNull](), ["error": nil])
             print(error.localizedDescription)
           case .success(let response):
             guard let self = self else { return }
@@ -183,7 +183,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
             if let routes = self.routes, let currentRoute = self.currentRoute {
               self.showCurrentRoute()
               self.onRouteChange?(["distance": currentRoute.distance, "expectedTravelTime": currentRoute.expectedTravelTime, "typicalTravelTime": currentRoute.typicalTravelTime])
-              onSuccess?([])
+              onSuccess?([NSNull](), ["distance": currentRoute.distance, "expectedTravelTime": currentRoute.expectedTravelTime, "typicalTravelTime": currentRoute.typicalTravelTime])
             }
           }
         }
