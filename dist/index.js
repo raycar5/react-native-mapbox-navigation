@@ -12,7 +12,7 @@ const MapboxNavigationFreeDrive = React.forwardRef((props, ref) => {
         moveToOverview,
         fitCamera
     }));
-    const showRoute = (origin = [], destination = [], waypoints = [[]], styles = [], legIndex = null) => {
+    const showRoute = (origin = [], destination = [], waypoints = [[]], styles = [], legIndex = -1) => {
         if (Platform.OS === "android") {
             UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager, [origin, destination, waypoints, styles, legIndex]);
         }
@@ -36,7 +36,7 @@ const MapboxNavigationFreeDrive = React.forwardRef((props, ref) => {
             UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.followViaManager, []);
         }
     };
-    const moveToOverview = (padding) => {
+    const moveToOverview = (padding = []) => {
         if (Platform.OS === "android") {
             UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.moveToOverviewViaManager, [padding]);
         }
