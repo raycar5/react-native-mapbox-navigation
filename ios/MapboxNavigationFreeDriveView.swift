@@ -276,8 +276,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     //let cameraOptions = CameraOptions(padding: padding ?? defaultPadding)
     
     //navigationMapView.showcase(routes, routesPresentationStyle: .single(cameraOptions: cameraOptions), animated: true)
+    let legIdx = Int(self.currentLegIndex)
 
-    navigationMapView.show([currentRoute], legIndex: self.currentLegIndex > 0 ? Int(self.currentLegIndex!) : nil)
+    navigationMapView.show([currentRoute], legIndex: legIdx > 0 ? legIdx : nil)
     
     navigationMapView.showWaypoints(on: currentRoute)
     //navigationMapView.showRouteDurations(along: routes)
