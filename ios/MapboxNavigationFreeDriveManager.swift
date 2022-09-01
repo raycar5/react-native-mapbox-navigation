@@ -8,7 +8,7 @@ class MapboxNavigationFreeDriveManager: RCTViewManager {
     return true
   }
 
-  @objc func showRouteViaManager(_ node: NSNumber, origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, onSuccess: RCTResponseSenderBlock?, onFailure: RCTResponseSenderBlock?) {
+  @objc func showRouteViaManager(_ node: NSNumber, origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, onSuccess: RCTResponseSenderBlock? = nil, onFailure: RCTResponseSenderBlock? = nil) {
     DispatchQueue.main.async {
       let mapboxNavigationFreeDriveView = self.bridge.uiManager.view(forReactTag: node) as! MapboxNavigationFreeDriveView
       

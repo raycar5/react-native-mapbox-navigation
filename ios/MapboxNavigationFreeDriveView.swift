@@ -140,7 +140,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
   }
 
-  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, onSuccess: RCTResponseSenderBlock?, onFailure: RCTResponseSenderBlock?) {
+  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, onSuccess: RCTResponseSenderBlock? = nil, onFailure: RCTResponseSenderBlock? = nil) {
     currentOrigin = origin
     currentDestination = destination
     currentWaypoints = waypoints
@@ -276,7 +276,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     //let cameraOptions = CameraOptions(padding: padding ?? defaultPadding)
     
     //navigationMapView.showcase(routes, routesPresentationStyle: .single(cameraOptions: cameraOptions), animated: true)
-    let legIdx = Int(self.currentLegIndex)
+    let legIdx = Int(currentLegIndex)
 
     navigationMapView.show([currentRoute], legIndex: legIdx > 0 ? legIdx : nil)
     
