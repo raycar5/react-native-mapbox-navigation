@@ -19,22 +19,20 @@ const MapboxNavigationFreeDrive = React.forwardRef((props: IMapboxNavigationFree
   }))
 
   const showRoute = (origin = [], destination = [], waypoints = [], styles = [], legIndex = -1) => {
-    return new Promise((resolve, reject) => {
-      if (Platform.OS === "android") {
-        UIManager.dispatchViewManagerCommand(
-          findNodeHandle(mapboxNavigationFreeDriveRef.current),
-          UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager,
-          [origin, destination, waypoints, styles, legIndex]
-        )
-      } else if (Platform.OS === "ios") {
-        //UIManager.dispatchViewManagerCommand(
-          //findNodeHandle(mapboxNavigationFreeDriveRef.current),
-          //UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager,
-          //[origin, destination, waypoints, styles, legIndex]
-        //)
-        NativeModules.MapboxNavigationFreeDrive.showRouteViaManager(origin, destination, waypoints, styles, legIndex, resolve, reject)
-      }
-    })
+    if (Platform.OS === "android") {
+      UIManager.dispatchViewManagerCommand(
+        findNodeHandle(mapboxNavigationFreeDriveRef.current),
+        UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager,
+        [origin, destination, waypoints, styles, legIndex]
+      )
+    } else if (Platform.OS === "ios") {
+      //UIManager.dispatchViewManagerCommand(
+        //findNodeHandle(mapboxNavigationFreeDriveRef.current),
+        //UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager,
+        //[origin, destination, waypoints, styles, legIndex]
+      //)
+      return NativeModules.MapboxNavigationFreeDrive.showRouteViaManager(findNodeHandle(mapboxNavigationFreeDriveRef.current), origin, destination, waypoints, styles, legIndex)
+    }
   }
 
   const clearRoute = () => {
