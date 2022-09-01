@@ -70,49 +70,49 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var mapPadding: [NSNumber] = []
   @objc var routeCasingColor: NSString = "#2F7AC6" {
     didSet {
-      if (navigationMapView != nil) {
+      if (embedded == true && navigationMapView != nil) {
         navigationMapView.routeCasingColor = UIColor(hex: routeCasingColor as String)
       }
     }
   }
   @objc var traversedRouteColor: NSString = "#FFFFFF" {
     didSet {
-      if (navigationMapView != nil) {
+      if (embedded == true && navigationMapView != nil) {
         navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor as String)
       }
     }
   }
   @objc var trafficUnknownColor: NSString = "#56A8FB" {
     didSet {
-      if (navigationMapView != nil) {
+      if (embedded == true && navigationMapView != nil) {
         navigationMapView.trafficUnknownColor = UIColor(hex: trafficUnknownColor as String)
       }
     }
   }
   @objc var trafficLowColor: NSString = "#56A8FB" {
     didSet {
-      if (navigationMapView != nil) {
+      if (embedded == true && navigationMapView != nil) {
         navigationMapView.trafficLowColor = UIColor(hex: trafficLowColor as String)
       }
     }
   }
   @objc var trafficModerateColor: NSString = "#FF9500" {
     didSet {
-      if (navigationMapView != nil) {
+      if (embedded == true && navigationMapView != nil) {
         navigationMapView.trafficModerateColor = UIColor(hex: trafficModerateColor as String)
       }
     }
   }
   @objc var trafficHeavyColor: NSString = "#FF4D4D" {
     didSet {
-      if (navigationMapView != nil) {
+      if (embedded == true && navigationMapView != nil) {
         navigationMapView.trafficHeavyColor = UIColor(hex: trafficHeavyColor as String)
       }
     }
   }
   @objc var trafficSevereColor: NSString = "#8F2447" {
     didSet {
-      if (navigationMapView != nil) {
+      if (embedded == true && navigationMapView != nil) {
         navigationMapView.trafficSevereColor = UIColor(hex: trafficSevereColor as String)
       }
     }
@@ -140,7 +140,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
   }
 
-  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, onSuccess: RCTResponseSenderBlock?, onFailure: RCTResponseSenderBlock?) {
+  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, onSuccess: @escaping RCTResponseSenderBlock?, onFailure: @escaping RCTResponseSenderBlock?) {
     currentOrigin = origin
     currentDestination = destination
     currentWaypoints = waypoints
@@ -172,8 +172,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       Directions.shared.calculate(options) { [weak self] (_, result) in
         switch result {
           case .failure(let error):
-            onFailure?([NSNull(), ["error": nil]])
-            print(error.localizedDescription)
+            onFailure?([["error": true]])
+            //print(error.localizedDescription)
           case .success(let response):
             guard let self = self else { return }
 
@@ -183,7 +183,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
             if let routes = self.routes, let currentRoute = self.currentRoute {
               self.showCurrentRoute()
               self.onRouteChange?(["distance": currentRoute.distance, "expectedTravelTime": currentRoute.expectedTravelTime, "typicalTravelTime": currentRoute.typicalTravelTime])
-              onSuccess?([NSNull(), ["distance": currentRoute.distance, "expectedTravelTime": currentRoute.expectedTravelTime, "typicalTravelTime": currentRoute.typicalTravelTime]])
+              onSuccess?([["distance": currentRoute.distance, "expectedTravelTime": currentRoute.expectedTravelTime, "typicalTravelTime": currentRoute.typicalTravelTime]])
             }
           }
         }
@@ -392,9 +392,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   func addSpeedLimitView() {
-    if (navigationMapView != nil) {
-      removeSpeedLimitView()
+    removeSpeedLimitView()
 
+    if (navigationMapView != nil) {
       if (showSpeedLimit) {
         speedLimitView = SpeedLimitView()
 
@@ -417,7 +417,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   func setLogoPadding() {
-    if (navigationMapView != nil) {
+    if (embedded == true && navigationMapView != nil && navigationMapView.mapView != nil) {
       //navigationMapView.mapView.ornaments.options.logo.visibility = logoVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
       navigationMapView.mapView.ornaments.options.logo.margins = CGPoint(
         x: logoPadding.indices.contains(0) ? CGFloat(logoPadding[0].floatValue) : 8.0, 
@@ -426,7 +426,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   func setAttributionPadding() {
-    if (navigationMapView != nil) {
+    if (embedded == true && navigationMapView != nil && navigationMapView.mapView != nil) {
       //navigationMapView.mapView.ornaments.options.attributionButton.visibility = attributionVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
       navigationMapView.mapView.ornaments.options.attributionButton.margins = CGPoint(
         x: attributionPadding.indices.contains(0) ? CGFloat(attributionPadding[0].floatValue) : 8.0, 
