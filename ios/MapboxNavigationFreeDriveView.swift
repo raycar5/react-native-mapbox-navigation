@@ -140,7 +140,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
   }
 
-  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, onSuccess: @escaping RCTResponseSenderBlock?, onFailure: @escaping RCTResponseSenderBlock?) {
+  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, onSuccess: RCTResponseSenderBlock?, onFailure: RCTResponseSenderBlock?) {
     currentOrigin = origin
     currentDestination = destination
     currentWaypoints = waypoints
