@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Platform, findNodeHandle, requireNativeComponent, UIManager, StyleSheet } from 'react-native';
+import { Platform, findNodeHandle, requireNativeComponent, UIManager, StyleSheet, NativeModules } from 'react-native';
 const MapboxNavigation = (props) => {
     return <RNMapboxNavigation style={styles.container} {...props}/>;
 };
@@ -12,13 +12,20 @@ const MapboxNavigationFreeDrive = React.forwardRef((props, ref) => {
         moveToOverview,
         fitCamera
     }));
-    const showRoute = (origin = [], destination = [], waypoints = [], styles = [], legIndex = -1, onSuccess = null, onFailure = null) => {
-        if (Platform.OS === "android") {
-            UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager, [origin, destination, waypoints, styles, legIndex, onSuccess, onFailure]);
-        }
-        else if (Platform.OS === "ios") {
-            UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager, [origin, destination, waypoints, styles, legIndex, onSuccess, onFailure]);
-        }
+    const showRoute = (origin = [], destination = [], waypoints = [], styles = [], legIndex = -1) => {
+        return new Promise((resolve, reject) => {
+            if (Platform.OS === "android") {
+                UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager, [origin, destination, waypoints, styles, legIndex]);
+            }
+            else if (Platform.OS === "ios") {
+                //UIManager.dispatchViewManagerCommand(
+                //findNodeHandle(mapboxNavigationFreeDriveRef.current),
+                //UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager,
+                //[origin, destination, waypoints, styles, legIndex]
+                //)
+                NativeModules.MapboxNavigationFreeDrive.showRouteViaManager(origin, destination, waypoints, styles, legIndex, resolve, reject);
+            }
+        });
     };
     const clearRoute = () => {
         if (Platform.OS === "android") {

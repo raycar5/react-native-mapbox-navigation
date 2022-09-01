@@ -140,7 +140,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
   }
 
-  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, onSuccess: RCTResponseSenderBlock? = nil, onFailure: RCTResponseSenderBlock? = nil) {
+  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
     currentOrigin = origin
     currentDestination = destination
     currentWaypoints = waypoints
@@ -172,7 +172,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       Directions.shared.calculate(options) { [weak self] (_, result) in
         switch result {
           case .failure(let error):
-            onFailure?([["error": true]])
+            reject(["error": true])
             //print(error.localizedDescription)
           case .success(let response):
             guard let self = self else { return }
@@ -183,7 +183,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
             if let routes = self.routes, let currentRoute = self.currentRoute {
               self.showCurrentRoute()
               self.onRouteChange?(["distance": currentRoute.distance, "expectedTravelTime": currentRoute.expectedTravelTime, "typicalTravelTime": currentRoute.typicalTravelTime])
-              onSuccess?([["distance": currentRoute.distance, "expectedTravelTime": currentRoute.expectedTravelTime, "typicalTravelTime": currentRoute.typicalTravelTime]])
+              resolve(["distance": currentRoute.distance, "expectedTravelTime": currentRoute.expectedTravelTime, "typicalTravelTime": currentRoute.typicalTravelTime])
             }
           }
         }
