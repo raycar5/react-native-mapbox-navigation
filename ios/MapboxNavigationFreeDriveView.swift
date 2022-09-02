@@ -140,7 +140,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
   }
 
-  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber) {
+  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, cameraType: NSString) {
     currentOrigin = origin
     currentDestination = destination
     currentWaypoints = waypoints
@@ -182,6 +182,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
             if let routes = self.routes, let currentRoute = self.currentRoute {
               self.showCurrentRoute()
               self.onRouteChange?(["distance": currentRoute.distance, "expectedTravelTime": currentRoute.expectedTravelTime, "typicalTravelTime": currentRoute.typicalTravelTime])
+
+              if (cameraType == "follow") {
+                self.follow()
+              } else if (cameraType == "overview") {
+                self.moveToOverview()
+              }
             }
           }
         }
@@ -200,7 +206,6 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   @objc func follow() {
-    showCurrentRoute()
     navigationMapView?.navigationCamera?.follow()
   }
 
@@ -276,7 +281,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     //navigationMapView.showcase(routes, routesPresentationStyle: .single(cameraOptions: cameraOptions), animated: true)
     let legIdx = Int(currentLegIndex)
 
-    navigationMapView.show([currentRoute], legIndex: legIdx > 0 ? legIdx : nil)
+    navigationMapView.show([currentRoute], legIndex: legIdx > -1 ? legIdx : nil)
     
     navigationMapView.showWaypoints(on: currentRoute)
     //navigationMapView.showRouteDurations(along: routes)

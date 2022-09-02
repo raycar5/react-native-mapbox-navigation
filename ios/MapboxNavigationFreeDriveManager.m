@@ -32,12 +32,13 @@ RCT_EXPORT_VIEW_PROPERTY(waypointStrokeColor, NSString)
 RCT_EXPORT_VIEW_PROPERTY(unknownLineColor, NSString)
 
 RCT_EXTERN_METHOD(
-  showRouteViaManager: (nonnull NSNumber *)node
+  showRouteViaManager: (nonnull NSNumber *)node 
   origin: (NSArray *)origin 
   destination: (NSArray *)destination 
-  waypoints: (NSArray *)waypoints
-  styles: (NSDictionaryArray *)styles
-  legIndex: (nonnull NSNumber *)legIndex
+  waypoints: (NSArray *)waypoints 
+  styles: (NSDictionaryArray *)styles 
+  legIndex: (nonnull NSNumber *)legIndex 
+  cameraType: (NSString *)cameraType
 )
 
 RCT_EXTERN_METHOD(
