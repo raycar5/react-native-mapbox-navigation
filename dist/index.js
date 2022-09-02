@@ -22,7 +22,7 @@ const MapboxNavigationFreeDrive = React.forwardRef((props, ref) => {
             //UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager,
             //[origin, destination, waypoints, styles, legIndex]
             //)
-            return NativeModules.MapboxNavigationFreeDrive.showRouteViaManager(findNodeHandle(mapboxNavigationFreeDriveRef.current), origin, destination, waypoints, styles, legIndex);
+            NativeModules.MapboxNavigationFreeDrive.showRouteViaManager(findNodeHandle(mapboxNavigationFreeDriveRef.current), origin, destination, waypoints, styles, legIndex);
         }
     };
     const clearRoute = () => {

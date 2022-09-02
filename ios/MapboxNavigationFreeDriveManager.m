@@ -38,8 +38,6 @@ RCT_EXTERN_METHOD(
   waypoints: (NSArray *)waypoints
   styles: (NSDictionaryArray *)styles
   legIndex: (nonnull NSNumber *)legIndex
-  resolver: (RCTPromiseResolveBlock)resolve
-  rejecter:(RCTPromiseRejectBlock)reject
 )
 
 RCT_EXTERN_METHOD(
