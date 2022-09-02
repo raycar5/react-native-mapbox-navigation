@@ -172,7 +172,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       Directions.shared.calculate(options) { [weak self] (_, result) in
         switch result {
           case .failure(let error):
-            //print(error.localizedDescription)
+            print(error.localizedDescription)
           case .success(let response):
             guard let self = self else { return }
 
