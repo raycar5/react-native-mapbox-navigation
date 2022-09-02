@@ -186,7 +186,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
               if (cameraType == "follow") {
                 self.follow()
               } else if (cameraType == "overview") {
-                self.moveToOverview(padding)
+                self.moveToOverview(padding: padding)
               }
             }
           }
