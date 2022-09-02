@@ -38,7 +38,8 @@ RCT_EXTERN_METHOD(
   waypoints: (NSArray *)waypoints 
   styles: (NSDictionaryArray *)styles 
   legIndex: (nonnull NSNumber *)legIndex 
-  cameraType: (NSString *)cameraType
+  cameraType: (NSString *)cameraType 
+  padding: (NSArray *)padding
 )
 
 RCT_EXTERN_METHOD(

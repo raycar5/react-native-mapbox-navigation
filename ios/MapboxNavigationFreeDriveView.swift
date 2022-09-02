@@ -140,7 +140,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
   }
 
-  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, cameraType: NSString) {
+  @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, cameraType: NSString, padding: [NSNumber])  {
     currentOrigin = origin
     currentDestination = destination
     currentWaypoints = waypoints
@@ -186,7 +186,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
               if (cameraType == "follow") {
                 self.follow()
               } else if (cameraType == "overview") {
-                self.moveToOverview()
+                self.moveToOverview(padding)
               }
             }
           }
