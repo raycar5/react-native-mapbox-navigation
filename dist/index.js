@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Platform, findNodeHandle, requireNativeComponent, UIManager, StyleSheet, NativeModules } from 'react-native';
+import { Platform, findNodeHandle, requireNativeComponent, UIManager, StyleSheet } from 'react-native';
 const MapboxNavigation = (props) => {
     return <RNMapboxNavigation style={styles.container} {...props}/>;
 };
@@ -17,12 +17,8 @@ const MapboxNavigationFreeDrive = React.forwardRef((props, ref) => {
             UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager, [origin, destination, waypoints, styles, legIndex]);
         }
         else if (Platform.OS === "ios") {
-            //UIManager.dispatchViewManagerCommand(
-            //findNodeHandle(mapboxNavigationFreeDriveRef.current),
-            //UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager,
-            //[origin, destination, waypoints, styles, legIndex]
-            //)
-            NativeModules.MapboxNavigationFreeDrive.showRouteViaManager(findNodeHandle(mapboxNavigationFreeDriveRef.current), origin, destination, waypoints, styles, legIndex);
+            UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.showRouteViaManager, [origin, destination, waypoints, styles, legIndex]);
+            //NativeModules.MapboxNavigationFreeDrive.showRouteViaManager(findNodeHandle(mapboxNavigationFreeDriveRef.current), origin, destination, waypoints, styles, legIndex)
         }
     };
     const clearRoute = () => {
