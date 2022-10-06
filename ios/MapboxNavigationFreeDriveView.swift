@@ -364,7 +364,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .raw)
     navigationViewportDataSource.options.followingCameraOptions.centerUpdatesAllowed = true
-    navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = false
+    navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = true
     navigationViewportDataSource.options.followingCameraOptions.bearingUpdatesAllowed = true
     navigationViewportDataSource.options.followingCameraOptions.paddingUpdatesAllowed = false
     navigationViewportDataSource.followingMobileCamera.zoom = CGFloat(followZoomLevel.floatValue)
