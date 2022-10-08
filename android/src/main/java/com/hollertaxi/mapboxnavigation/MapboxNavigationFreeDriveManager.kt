@@ -57,11 +57,11 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
 
     override fun receiveCommand(view: MapboxNavigationFreeDriveView, commandId: String, args: ReadableArray?) {
         when (commandId) {
-            "showRouteViaManager" -> view.showRoute(args?.getOrNull(0), args?.getOrNull(1), args?.getOrNull(2), args?.getOrNull(3), args?.getOrNull(4), args?.getOrNull(5), args?.getOrNull(6))
+            "showRouteViaManager" -> view.showRoute(args.getArray(0), args.getArray(1), args.getArray(2), args.getArray(3), args.getInt(4), args.getString(5), args.getArray(6))
             "clearRouteViaManager" -> view.clearRoute()
             "followViaManager" -> view.follow()
-            "moveToOverviewViaManager" -> view.moveToOverview(args?.getOrNull(0))
-            "fitCameraViaManager" -> view.fitCamera(args?.getOrNull(0))
+            "moveToOverviewViaManager" -> view.moveToOverview(args.getArray(0))
+            "fitCameraViaManager" -> view.fitCamera(args.getArray(0))
         }
     }
 
