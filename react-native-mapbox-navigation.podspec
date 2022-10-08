@@ -5,7 +5,7 @@ package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 # TargetsToChangeToDynamic = ['MapboxMobileEvents']
 TargetsToChangeToDynamic = []
 
-rnMapboxNavigationDefaultVersion = '~> 2.7.1'
+rnMapboxNavigationDefaultVersion = '~> 2.7.2'
 
 $RNMBNAVVersion = rnMapboxNavigationDefaultVersion unless $RNMBNAVVersion
 
