@@ -89,9 +89,9 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var followZoomLevel: Double = 16.0
     private var showSpeedLimit: Boolean = true
     private var speedLimitAnchor: ReadableArray? = null
-    private var userPuckImage = null
+    private var userPuckImage: String? = null
     private var userPuckScale: Double = 1.0
-    private var destinationImage = null
+    private var destinationImage: String? = null
     private var mapPadding: ReadableArray? = null
     private var routeCasingColor: String = "#2F7AC6"
     private var traversedRouteColor: String = "#FFFFFF"
@@ -446,7 +446,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.followZoomLevel = followZoomLevel
     }
     
-    fun serUserPuckImage(userPuckImage: String) {
+    fun serUserPuckImage(userPuckImage: String?) {
         this.userPuckImage = userPuckImage
     }
     
@@ -454,7 +454,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.userPuckScale = userPuckScale
     }
     
-    fun setDestinationImage(destinationImage: String) {
+    fun setDestinationImage(destinationImage: String?) {
         this.destinationImage = destinationImage
     }
     
