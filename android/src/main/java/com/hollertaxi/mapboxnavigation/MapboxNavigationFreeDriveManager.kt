@@ -57,11 +57,11 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
 
     override fun receiveCommand(view: MapboxNavigationFreeDriveView, commandId: String, args: ReadableArray?) {
         when (commandId) {
-            "showRouteViaManager" -> view.showRoute(args.getArray(0), args.getArray(1), args.getArray(2), args.getArray(3), args.getInt(4), args.getString(5), args.getArray(6))
+            "showRouteViaManager" -> view.showRoute(args?.getArray(0), args?.getArray(1), args?.getArray(2), args?.getArray(3), args?.getInt(4), args?.getString(5), args?.getArray(6))
             "clearRouteViaManager" -> view.clearRoute()
             "followViaManager" -> view.follow()
-            "moveToOverviewViaManager" -> view.moveToOverview(args.getArray(0))
-            "fitCameraViaManager" -> view.fitCamera(args.getArray(0))
+            "moveToOverviewViaManager" -> view.moveToOverview(args?.getArray(0))
+            "fitCameraViaManager" -> view.fitCamera(args?.getArray(0))
         }
     }
 
@@ -161,22 +161,22 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
     }
     
     @ReactProp(name = "waypointRadius")
-    fun setWaypointRadius(view: MapboxNavigationFreeDriveView, waypointRadius: Double) {
+    fun setWaypointRadius(view: MapboxNavigationFreeDriveView, waypointRadius: Int) {
         view.setWaypointRadius(waypointRadius)
     }
     
     @ReactProp(name = "waypointOpacity")
-    fun setWaypointOpacity(view: MapboxNavigationFreeDriveView, waypointOpacity: Double) {
+    fun setWaypointOpacity(view: MapboxNavigationFreeDriveView, waypointOpacity: Int) {
         view.setWaypointOpacity(waypointOpacity)
     }
     
     @ReactProp(name = "waypointStrokeWidth")
-    fun setWaypointStrokeWidth(view: MapboxNavigationFreeDriveView, waypointStrokeWidth: Double) {
+    fun setWaypointStrokeWidth(view: MapboxNavigationFreeDriveView, waypointStrokeWidth: Int) {
         view.setWaypointStrokeWidth(waypointStrokeWidth)
     }
     
     @ReactProp(name = "waypointStrokeOpacity")
-    fun setWaypointStrokeOpacity(view: MapboxNavigationFreeDriveView, waypointStrokeOpacity: Double) {
+    fun setWaypointStrokeOpacity(view: MapboxNavigationFreeDriveView, waypointStrokeOpacity: Int) {
         view.setWaypointStrokeOpacity(waypointStrokeOpacity)
     }
     

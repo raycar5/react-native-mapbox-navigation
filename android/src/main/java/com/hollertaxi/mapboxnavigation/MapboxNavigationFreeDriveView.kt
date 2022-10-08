@@ -86,30 +86,30 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         private const val BUTTON_ANIMATION_DURATION = 1500L
     }
 
-    private val followZoomLevel: Double = 16.0
-    private val showSpeedLimit: Boolean = true
-    private val speedLimitAnchor: ReadableArray? = null
-    private val userPuckImage = null
-    private val userPuckScale: Double = 1.0
-    private val destinationImage = null
-    private val mapPadding: ReadableArray? = null
-    private val routeCasingColor: String = "#2F7AC6"
-    private val traversedRouteColor: String = "#FFFFFF"
-    private val trafficUnknownColor: String = "#56A8FB"
-    private val trafficLowColor: String = "#56A8FB"
-    private val trafficModerateColor: String = "#FF9500"
-    private val trafficHeavyColor: String = "#FF4D4D"
-    private val trafficSevereColor: String = "#8F2447"
-    private val waypointColor: String = "#2F7AC6"
-    private val waypointRadius: Int = 8
-    private val waypointOpacity: Int = 1
-    private val waypointStrokeWidth: Int = 2
-    private val waypointStrokeOpacity: Int = 1
-    private val waypointStrokeColor: String = "#FFFFFF"
-    private val logoVisible: Boolean = true
-    private val logoPadding: ReadableArray? = null
-    private val attributionVisible: Boolean = true
-    private val attributionPadding: ReadableArray? = null
+    private var followZoomLevel: Double = 16.0
+    private var showSpeedLimit: Boolean = true
+    private var speedLimitAnchor: ReadableArray? = null
+    private var userPuckImage = null
+    private var userPuckScale: Double = 1.0
+    private var destinationImage = null
+    private var mapPadding: ReadableArray? = null
+    private var routeCasingColor: String = "#2F7AC6"
+    private var traversedRouteColor: String = "#FFFFFF"
+    private var trafficUnknownColor: String = "#56A8FB"
+    private var trafficLowColor: String = "#56A8FB"
+    private var trafficModerateColor: String = "#FF9500"
+    private var trafficHeavyColor: String = "#FF4D4D"
+    private var trafficSevereColor: String = "#8F2447"
+    private var waypointColor: String = "#2F7AC6"
+    private var waypointRadius: Int = 8
+    private var waypointOpacity: Int = 1
+    private var waypointStrokeWidth: Int = 2
+    private var waypointStrokeOpacity: Int = 1
+    private var waypointStrokeColor: String = "#FFFFFF"
+    private var logoVisible: Boolean = true
+    private var logoPadding: ReadableArray? = null
+    private var attributionVisible: Boolean = true
+    private var attributionPadding: ReadableArray? = null
 
     /**
      * Bindings to the example layout.
@@ -410,7 +410,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxNavigation.setRoutes(listOf())
     }
 
-    fun showRoute(origin: Array<Double>?, destination: Array<Double>?, waypoints: Array<Array<Double>>?, styles: Array<ReadableMap>?, legIndex: Int?, cameraType: String?, padding: Array<Double?)  {
+    fun showRoute(origin: ReadableArray?, destination: ReadableArray?, waypoints: ReadableArray?, styles: ReadableArray?, legIndex: Int?, cameraType: String?, padding: ReadableArray?)  {
         //
     }
 
@@ -422,11 +422,11 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         //
     }
     
-    fun moveToOverview(padding: Array<Double>?) {
+    fun moveToOverview(padding: ReadableArray?) {
         //
     }
     
-    fun fitCamera(padding: Array<Double>?) {
+    fun fitCamera(padding: ReadableArray?) {
         //
     }
 
@@ -438,7 +438,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.showSpeedLimit = showSpeedLimit
     }
 
-    fun setSpeedLimitAnchor(speedLimitAnchor: Array<Double>?) {
+    fun setSpeedLimitAnchor(speedLimitAnchor: ReadableArray?) {
         this.speedLimitAnchor = speedLimitAnchor
     }
     
@@ -458,7 +458,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.destinationImage = destinationImage
     }
     
-    fun setMapPadding(mapPadding: Array<Double>?) {
+    fun setMapPadding(mapPadding: ReadableArray?) {
         this.mapPadding = mapPadding
     }
     
@@ -466,7 +466,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.logoVisible = logoVisible
     }
     
-    fun setLogoPadding(logoPadding: Array<Double>?) {
+    fun setLogoPadding(logoPadding: ReadableArray?) {
         this.logoPadding = logoPadding
     }
     
@@ -474,7 +474,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.attributionVisible = attributionVisible
     }
     
-    fun setAttributionPadding(attributionPadding: Array<Double>?) {
+    fun setAttributionPadding(attributionPadding: ReadableArray?) {
         this.attributionPadding = attributionPadding
     }
     
