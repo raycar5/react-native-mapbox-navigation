@@ -3,6 +3,7 @@ package com.hollertaxi.mapboxnavigation
 import android.content.pm.PackageManager
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.common.MapBuilder
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
@@ -58,9 +59,9 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
         when (commandId) {
             "showRouteViaManager" -> view.showRoute(args?.getOrNull(0), args?.getOrNull(1), args?.getOrNull(2), args?.getOrNull(3), args?.getOrNull(4), args?.getOrNull(5), args?.getOrNull(6))
             "clearRouteViaManager" -> view.clearRoute()
-            "followViaManager" -> view.followViaManager()
-            "moveToOverviewViaManager" -> view.moveToOverviewViaManager(args?.getOrNull(0))
-            "fitCameraViaManager" -> view.fitCameraViaManager(args?.getOrNull(0))
+            "followViaManager" -> view.follow()
+            "moveToOverviewViaManager" -> view.moveToOverview(args?.getOrNull(0))
+            "fitCameraViaManager" -> view.fitCamera(args?.getOrNull(0))
         }
     }
 

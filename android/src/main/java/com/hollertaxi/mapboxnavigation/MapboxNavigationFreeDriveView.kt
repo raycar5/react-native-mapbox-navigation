@@ -101,15 +101,15 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private val trafficHeavyColor: String = "#FF4D4D"
     private val trafficSevereColor: String = "#8F2447"
     private val waypointColor: String = "#2F7AC6"
-    private val waypointRadius: Double = 8
-    private val waypointOpacity: Double = 1
-    private val waypointStrokeWidth: Double = 2
-    private val waypointStrokeOpacity: Double = 1
+    private val waypointRadius: Int = 8
+    private val waypointOpacity: Int = 1
+    private val waypointStrokeWidth: Int = 2
+    private val waypointStrokeOpacity: Int = 1
     private val waypointStrokeColor: String = "#FFFFFF"
     private val logoVisible: Boolean = true
     private val logoPadding: ReadableArray? = null
     private val attributionVisible: Boolean = true
-    private val attributionPadding: ReadableArray? = []
+    private val attributionPadding: ReadableArray? = null
 
     /**
      * Bindings to the example layout.
@@ -243,19 +243,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         layout(left, top, right, bottom)
     }
 
-    private fun setCameraPositionToOrigin() {
-        val startingLocation = Location(LocationManager.GPS_PROVIDER)
-        startingLocation.latitude = origin!!.latitude()
-        startingLocation.longitude = origin!!.longitude()
-        viewportDataSource.onLocationChanged(startingLocation)
-
-        navigationCamera.requestNavigationCameraToFollowing(
-            stateTransitionOptions = NavigationCameraTransitionOptions.Builder()
-                .maxDuration(0) // instant transition
-                .build()
-        )
-    }
-
     @SuppressLint("MissingPermission")
     fun onCreate() {
         if (accessToken == null) {
@@ -335,41 +322,24 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         // load map style
         mapboxMap.loadStyleUri(
-            Style.MAPBOX_LIGHT
+            Style.LIGHT
         ) {
-            // only once the style is loaded expose an ability to add and draw a route
-            binding.routeButton.setOnClickListener {
-                if (mapboxNavigation.getNavigationRoutes().isEmpty()) {
-                    // disable navigation camera
-                    navigationCamera.requestNavigationCameraToIdle()
-                    // set a route to receive route progress updates and provide a route reference
-                    // to the viewport data source (via RoutesObserver)
-                    mapboxNavigation.setNavigationRoutes(listOf(route))
-                    // enable the camera back
-                    navigationCamera.requestNavigationCameraToOverview()
-
-                    binding.routeButton.text = "clear route"
-                } else {
-                    // clear the routes
-                    mapboxNavigation.setNavigationRoutes(listOf())
-                    binding.routeButton.text = "set route"
-                }
-            }
+            
         }
     }
 
     private fun startRoute() {
         // register event listeners
-        mapboxNavigation.registerRoutesObserver(routesObserver)
+        //mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerLocationObserver(locationObserver)
-        mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
+        //mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        mapboxNavigation.unregisterRoutesObserver(routesObserver)
+        //mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
-        mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
+        //mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
     }
 
     private fun onDestroy() {
@@ -431,16 +401,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         // will be used for active guidance
         mapboxNavigation.setRoutes(routes)
 
-        // start location simulation along the primary route
-        if (shouldSimulateRoute) {
-            startSimulation(routes.first())
-        }
-
-        // show UI elements
-        binding.soundButton.visibility = View.VISIBLE
-        binding.routeOverview.visibility = View.VISIBLE
-        binding.tripProgressCard.visibility = View.VISIBLE
-
         // move the camera to overview when new route is available
         navigationCamera.requestNavigationCameraToFollowing()
     }
@@ -448,29 +408,9 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private fun clearRouteAndStopNavigation() {
         // clear
         mapboxNavigation.setRoutes(listOf())
-
-        // stop simulation
-        mapboxReplayer.stop()
-
-        // hide UI elements
-        binding.soundButton.visibility = View.INVISIBLE
-        binding.maneuverView.visibility = View.INVISIBLE
-        binding.routeOverview.visibility = View.INVISIBLE
-        binding.tripProgressCard.visibility = View.INVISIBLE
     }
 
-    private fun startSimulation(route: DirectionsRoute) {
-        mapboxReplayer.run {
-            stop()
-            clearEvents()
-            val replayEvents = ReplayRouteMapper().mapDirectionsRouteGeometry(route)
-            pushEvents(replayEvents)
-            seekTo(replayEvents.first())
-            play()
-        }
-    }
-
-    fun showRoute(origin: ReadableArray?, destination: ReadableArray?, waypoints: ReadableArray?, styles: ReadableMap?, legIndex: Double?, cameraType: String?, padding: ReadableArray?)  {
+    fun showRoute(origin: Array<Double>?, destination: Array<Double>?, waypoints: Array<Array<Double>>?, styles: Array<ReadableMap>?, legIndex: Int?, cameraType: String?, padding: Array<Double?)  {
         //
     }
 
@@ -482,11 +422,11 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         //
     }
     
-    fun moveToOverview(padding: ReadableArray?) {
+    fun moveToOverview(padding: Array<Double>?) {
         //
     }
     
-    fun fitCamera(padding: ReadableArray?) {
+    fun fitCamera(padding: Array<Double>?) {
         //
     }
 
@@ -498,7 +438,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.showSpeedLimit = showSpeedLimit
     }
 
-    fun setSpeedLimitAnchor(speedLimitAnchor: ReadableArray?) {
+    fun setSpeedLimitAnchor(speedLimitAnchor: Array<Double>?) {
         this.speedLimitAnchor = speedLimitAnchor
     }
     
@@ -518,7 +458,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.destinationImage = destinationImage
     }
     
-    fun setMapPadding(mapPadding: ReadableArray?) {
+    fun setMapPadding(mapPadding: Array<Double>?) {
         this.mapPadding = mapPadding
     }
     
@@ -526,7 +466,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.logoVisible = logoVisible
     }
     
-    fun setLogoPadding(logoPadding: ReadableArray?) {
+    fun setLogoPadding(logoPadding: Array<Double>?) {
         this.logoPadding = logoPadding
     }
     
@@ -534,7 +474,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.attributionVisible = attributionVisible
     }
     
-    fun setAttributionPadding(attributionPadding: ReadableArray?) {
+    fun setAttributionPadding(attributionPadding: Array<Double>?) {
         this.attributionPadding = attributionPadding
     }
     
@@ -560,5 +500,33 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     
     fun setTrafficHeavyColor(trafficHeavyColor: String) {
         this.trafficHeavyColor = trafficHeavyColor
+    }
+    
+    fun setTrafficSevereColor(trafficSevereColor: String) {
+        this.trafficSevereColor = trafficSevereColor
+    }
+    
+    fun setWaypointColor(waypointColor: String) {
+        this.waypointColor = waypointColor
+    }
+    
+    fun setWaypointRadius(waypointRadius: Int) {
+        this.waypointRadius = waypointRadius
+    }
+    
+    fun setWaypointOpacity(waypointOpacity: Int) {
+        this.waypointOpacity = waypointOpacity
+    }
+    
+    fun setWaypointStrokeWidth(waypointStrokeWidth: Int) {
+        this.waypointStrokeWidth = waypointStrokeWidth
+    }
+    
+    fun setWaypointStrokeOpacity(waypointStrokeOpacity: Int) {
+        this.waypointStrokeOpacity = waypointStrokeOpacity
+    }
+    
+    fun setWaypointStrokeColor(waypointStrokeColor: String) {
+        this.waypointStrokeColor = waypointStrokeColor
     }
 }
