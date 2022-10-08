@@ -5,6 +5,7 @@ def safeExtGet(prop, fallback) {
 buildscript {
   repositories {
     google()
+    jcenter()
     mavenCentral()
   }
 
@@ -18,19 +19,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'maven-publish'
 
 android {
-    sourceSets {
-        main {
-            java.srcDirs = ['src/main/java-v10']
-        }
-    }
-
-    packagingOptions {
-        pickFirst 'lib/x86/libc++_shared.so'
-        pickFirst 'lib/x86_64/libc++_shared.so'
-        pickFirst 'lib/arm64-v8a/libc++_shared.so'
-        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
-    }
-
     compileSdkVersion safeExtGet("compileSdkVersion", 28)
     buildToolsVersion safeExtGet("buildToolsVersion", '28.0.3')
 
@@ -48,14 +36,8 @@ android {
 
     buildTypes {
         viewBinding true
-
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
     }
 }
-
 
 repositories {
     // ref: https://www.baeldung.com/maven-local-repository
