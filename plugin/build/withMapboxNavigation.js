@@ -24,7 +24,7 @@ catch (_a) {
  * @param config
  * @returns
  */
-const withCocoaPodsInstallerBlocks = (c, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion }) => {
+const withCocoaPodsInstallerBlocks = (c, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion }) => {
     return (0, config_plugins_1.withDangerousMod)(c, [
         'ios',
         async (config) => {
@@ -33,6 +33,7 @@ const withCocoaPodsInstallerBlocks = (c, { RNMBNAVVersion, RNMBNAVDownloadToken,
             await fs_1.promises.writeFile(file, applyCocoaPodsModifications(contents, {
                 RNMBNAVVersion,
                 RNMBNAVDownloadToken,
+                RNMBNAVPublicToken,
                 RNMapboxMapsVersion
             }), 'utf-8');
             return config;
@@ -41,9 +42,9 @@ const withCocoaPodsInstallerBlocks = (c, { RNMBNAVVersion, RNMBNAVDownloadToken,
 };
 // Only the preinstaller block is required, the post installer block is
 // used for spm (swift package manager) which Expo doesn't currently support.
-function applyCocoaPodsModifications(contents, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion }) {
+function applyCocoaPodsModifications(contents, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion }) {
     // Ensure installer blocks exist
-    let src = addConstantBlock(contents, RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion);
+    let src = addConstantBlock(contents, RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion);
     src = addDisableOutputPathsBlock(src);
     src = addInstallerBlock(src, 'pre');
     src = addInstallerBlock(src, 'post');
@@ -52,7 +53,7 @@ function applyCocoaPodsModifications(contents, { RNMBNAVVersion, RNMBNAVDownload
     return src;
 }
 exports.applyCocoaPodsModifications = applyCocoaPodsModifications;
-function addConstantBlock(src, RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion) {
+function addConstantBlock(src, RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion) {
     const tag = `@hollertaxi/react-native-mapbox-navigation-rbmbnaversion`;
     return (0, generateCode_1.mergeContents)({
         tag,
@@ -60,6 +61,7 @@ function addConstantBlock(src, RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMap
         newSrc: [
             RNMBNAVVersion && RNMBNAVVersion.length > 0 ? `$RNMBNAVVersion = '${RNMBNAVVersion}'` : '',
             RNMBNAVDownloadToken && RNMBNAVDownloadToken.length > 0 ? `$RNMBNAVDownloadToken = '${RNMBNAVDownloadToken}'` : '',
+            RNMBNAVPublicToken && RNMBNAVPublicToken.length > 0 ? `$RNMBNAVPublicToken = '${RNMBNAVPublicToken}'` : '',
             RNMapboxMapsVersion && RNMapboxMapsVersion.length > 0 ? `$RNMapboxMapsVersion = '${RNMapboxMapsVersion}'` : ''
         ].join('\n'),
         anchor: /target .+ do/,
@@ -169,9 +171,9 @@ const withAndroidPropertiesDownloadToken = (config, { RNMBNAVDownloadToken }) =>
         return config;
     }
 };
-const withAndroidPropertiesImpl2 = (config, { RNMBNAVVersion }) => {
-    const key = 'expoRNMBNAVVersion';
-    if (RNMBNAVVersion) {
+const withAndroidPropertiesPublicToken = (config, { RNMBNAVPublicToken }) => {
+    const key = 'MAPBOX_ACCESS_TOKEN';
+    if (RNMBNAVPublicToken) {
         return (0, config_plugins_1.withGradleProperties)(config, (config) => {
             config.modResults = config.modResults.filter((item) => {
                 if (item.type === 'property' && item.key === key) {
@@ -183,7 +185,7 @@ const withAndroidPropertiesImpl2 = (config, { RNMBNAVVersion }) => {
             config.modResults.push({
                 type: 'property',
                 key: key,
-                value: RNMBNAVVersion,
+                value: RNMBNAVPublicToken,
             });
             return config;
         });
@@ -192,11 +194,13 @@ const withAndroidPropertiesImpl2 = (config, { RNMBNAVVersion }) => {
         return config;
     }
 };
-const withAndroidProperties = (config, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion }) => {
+const withAndroidProperties = (config, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion }) => {
     config = withAndroidPropertiesDownloadToken(config, {
         RNMBNAVDownloadToken,
     });
-    config = withAndroidPropertiesImpl2(config, { RNMBNAVVersion });
+    config = withAndroidPropertiesPublicToken(config, {
+        RNMBNAVPublicToken
+    });
     return config;
 };
 const addLibCppFilter = (appBuildGradle) => {
@@ -269,24 +273,27 @@ const withAndroidProjectGradle = (config) => {
         return { modResults, ...config };
     });
 };
-const withMapboxNavigationAndroid = (config, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion }) => {
+const withMapboxNavigationAndroid = (config, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion }) => {
     config = withAndroidProperties(config, {
         RNMBNAVVersion,
         RNMBNAVDownloadToken,
+        RNMBNAVPublicToken
     });
     config = withAndroidProjectGradle(config, { RNMBNAVVersion });
     config = withAndroidAppGradle(config, { RNMBNAVVersion });
     return config;
 };
-const withMapboxNavigation = (config, { RNMBNAVVersion, RNMBNAVDownloadToken }) => {
+const withMapboxNavigation = (config, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken }) => {
     config = withExcludedSimulatorArchitectures(config);
     config = withMapboxNavigationAndroid(config, {
         RNMBNAVVersion,
         RNMBNAVDownloadToken,
+        RNMBNAVPublicToken
     });
     return withCocoaPodsInstallerBlocks(config, {
         RNMBNAVVersion,
         RNMBNAVDownloadToken,
+        RNMBNAVPublicToken
     });
 };
 exports.default = (0, config_plugins_1.createRunOncePlugin)(withMapboxNavigation, pkg.name, pkg.version);

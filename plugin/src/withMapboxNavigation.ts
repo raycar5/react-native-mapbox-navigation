@@ -31,6 +31,7 @@ type InstallerBlockName = 'pre' | 'post';
 export type MapboxNavigationPlugProps = {
   RNMBNAVVersion?: string;
   RNMBNAVDownloadToken?: string;
+  RNMBNAVPublicToken?: string;
   RNMapboxMapsVersion?: string;
 };
 
@@ -43,7 +44,7 @@ export type MapboxNavigationPlugProps = {
  */
 const withCocoaPodsInstallerBlocks: ConfigPlugin<MapboxNavigationPlugProps> = (
   c,
-  { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion },
+  { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion },
 ) => {
   return withDangerousMod(c, [
     'ios',
@@ -57,6 +58,7 @@ const withCocoaPodsInstallerBlocks: ConfigPlugin<MapboxNavigationPlugProps> = (
         applyCocoaPodsModifications(contents, {
           RNMBNAVVersion,
           RNMBNAVDownloadToken,
+          RNMBNAVPublicToken,
           RNMapboxMapsVersion
         }),
         'utf-8',
@@ -70,13 +72,14 @@ const withCocoaPodsInstallerBlocks: ConfigPlugin<MapboxNavigationPlugProps> = (
 // used for spm (swift package manager) which Expo doesn't currently support.
 export function applyCocoaPodsModifications(
   contents: string,
-  { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion }: MapboxNavigationPlugProps,
+  { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion }: MapboxNavigationPlugProps,
 ): string {
   // Ensure installer blocks exist
   let src = addConstantBlock(
     contents,
     RNMBNAVVersion,
     RNMBNAVDownloadToken,
+    RNMBNAVPublicToken,
     RNMapboxMapsVersion
   );
   src = addDisableOutputPathsBlock(src);
@@ -91,6 +94,7 @@ export function addConstantBlock(
   src: string,
   RNMBNAVVersion?: string,
   RNMBNAVDownloadToken?: string,
+  RNMBNAVPublicToken?: string,
   RNMapboxMapsVersion?: string
 ): string {
   const tag = `@hollertaxi/react-native-mapbox-navigation-rbmbnaversion`;
@@ -101,6 +105,7 @@ export function addConstantBlock(
     newSrc: [
       RNMBNAVVersion && RNMBNAVVersion.length > 0 ? `$RNMBNAVVersion = '${RNMBNAVVersion}'` : '',
       RNMBNAVDownloadToken && RNMBNAVDownloadToken.length > 0 ? `$RNMBNAVDownloadToken = '${RNMBNAVDownloadToken}'` : '',
+      RNMBNAVPublicToken && RNMBNAVPublicToken.length > 0 ? `$RNMBNAVPublicToken = '${RNMBNAVPublicToken}'` : '',
       RNMapboxMapsVersion && RNMapboxMapsVersion.length > 0 ? `$RNMapboxMapsVersion = '${RNMapboxMapsVersion}'` : ''
     ].join('\n'),
     anchor: /target .+ do/,
@@ -226,12 +231,12 @@ const withAndroidPropertiesDownloadToken: ConfigPlugin<MapboxNavigationPlugProps
   }
 };
 
-const withAndroidPropertiesImpl2: ConfigPlugin<MapboxNavigationPlugProps> = (
+const withAndroidPropertiesPublicToken: ConfigPlugin<MapboxNavigationPlugProps> = (
   config,
-  { RNMBNAVVersion },
+  { RNMBNAVPublicToken },
 ) => {
-  const key = 'expoRNMBNAVVersion';
-  if (RNMBNAVVersion) {
+  const key = 'MAPBOX_ACCESS_TOKEN';
+  if (RNMBNAVPublicToken) {
     return withGradleProperties(config, (config) => {
       config.modResults = config.modResults.filter((item) => {
         if (item.type === 'property' && item.key === key) {
@@ -243,7 +248,7 @@ const withAndroidPropertiesImpl2: ConfigPlugin<MapboxNavigationPlugProps> = (
       config.modResults.push({
         type: 'property',
         key: key,
-        value: RNMBNAVVersion,
+        value: RNMBNAVPublicToken,
       });
 
       return config;
@@ -255,12 +260,14 @@ const withAndroidPropertiesImpl2: ConfigPlugin<MapboxNavigationPlugProps> = (
 
 const withAndroidProperties: ConfigPlugin<MapboxNavigationPlugProps> = (
   config,
-  { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion },
+  { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion },
 ) => {
   config = withAndroidPropertiesDownloadToken(config, {
     RNMBNAVDownloadToken,
   });
-  config = withAndroidPropertiesImpl2(config, { RNMBNAVVersion });
+  config = withAndroidPropertiesPublicToken(config, { 
+    RNMBNAVPublicToken 
+  });
   return config;
 };
 
@@ -350,11 +357,12 @@ const withAndroidProjectGradle: ConfigPlugin<MapboxNavigationPlugProps> = (confi
 
 const withMapboxNavigationAndroid: ConfigPlugin<MapboxNavigationPlugProps> = (
   config,
-  { RNMBNAVVersion, RNMBNAVDownloadToken, RNMapboxMapsVersion },
+  { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion },
 ) => {
   config = withAndroidProperties(config, {
     RNMBNAVVersion,
     RNMBNAVDownloadToken,
+    RNMBNAVPublicToken
   });
   config = withAndroidProjectGradle(config, { RNMBNAVVersion });
   config = withAndroidAppGradle(config, { RNMBNAVVersion });
@@ -363,16 +371,18 @@ const withMapboxNavigationAndroid: ConfigPlugin<MapboxNavigationPlugProps> = (
 
 const withMapboxNavigation: ConfigPlugin<MapboxNavigationPlugProps> = (
   config,
-  { RNMBNAVVersion, RNMBNAVDownloadToken },
+  { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken },
 ) => {
   config = withExcludedSimulatorArchitectures(config);
   config = withMapboxNavigationAndroid(config, {
     RNMBNAVVersion,
     RNMBNAVDownloadToken,
+    RNMBNAVPublicToken
   });
   return withCocoaPodsInstallerBlocks(config, {
     RNMBNAVVersion,
     RNMBNAVDownloadToken,
+    RNMBNAVPublicToken
   });
 };
 
