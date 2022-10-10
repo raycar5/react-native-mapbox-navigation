@@ -17,6 +17,7 @@ try {
 catch (_a) {
     // empty catch block
 }
+const { addMetaDataItemToMainApplication, getMainApplicationOrThrow } = config_plugins_1.AndroidConfig.Manifest;
 /**
  * Dangerously adds the custom installer hooks to the Podfile.
  * In the future this should be removed in favor of some custom hooks provided by Expo autolinking.
@@ -171,22 +172,22 @@ const withAndroidPropertiesDownloadToken = (config, { RNMBNAVDownloadToken }) =>
         return config;
     }
 };
+const setMetaDataConfigAsync = async (config, androidManifest, key, value) => {
+    // Get the <application /> tag and assert if it doesn't exist.
+    const mainApplication = getMainApplicationOrThrow(androidManifest);
+    addMetaDataItemToMainApplication(mainApplication, 
+    // value for `android:name`
+    key, 
+    // value for `android:value`
+    value);
+    return androidManifest;
+};
 const withAndroidPropertiesPublicToken = (config, { RNMBNAVPublicToken }) => {
     const key = 'MAPBOX_ACCESS_TOKEN';
     if (RNMBNAVPublicToken) {
-        return (0, config_plugins_1.withGradleProperties)(config, (config) => {
-            config.modResults = config.modResults.filter((item) => {
-                if (item.type === 'property' && item.key === key) {
-                    return false;
-                }
-                return true;
-            });
-            // eslint-disable-next-line fp/no-mutating-methods
-            config.modResults.push({
-                type: 'property',
-                key: key,
-                value: RNMBNAVPublicToken,
-            });
+        return (0, config_plugins_1.withAndroidManifest)(config, async (config) => {
+            // Modifiers can be async, but try to keep them fast.
+            config.modResults = await setMetaDataConfigAsync(config, config.modResults, key, RNMBNAVPublicToken);
             return config;
         });
     }

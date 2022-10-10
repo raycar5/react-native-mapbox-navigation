@@ -2,6 +2,7 @@ import { promises } from 'fs';
 import path from 'path';
 
 import {
+  AndroidConfig,
   ConfigPlugin,
   createRunOncePlugin,
   withDangerousMod,
@@ -11,11 +12,15 @@ import {
   WarningAggregator,
   withProjectBuildGradle,
   withAppBuildGradle,
+  withAndroidManifest
 } from '@expo/config-plugins';
 import {
   mergeContents,
   removeGeneratedContents,
 } from '@expo/config-plugins/build/utils/generateCode';
+import { 
+  ExpoConfig 
+} from '@expo/config-types'
 
 let pkg: { name: string; version?: string } = {
   name: '@hollertaxi/react-native-mapbox-navigation',
@@ -34,6 +39,8 @@ export type MapboxNavigationPlugProps = {
   RNMBNAVPublicToken?: string;
   RNMapboxMapsVersion?: string;
 };
+
+const { addMetaDataItemToMainApplication, getMainApplicationOrThrow } = AndroidConfig.Manifest
 
 /**
  * Dangerously adds the custom installer hooks to the Podfile.
@@ -231,28 +238,39 @@ const withAndroidPropertiesDownloadToken: ConfigPlugin<MapboxNavigationPlugProps
   }
 };
 
+const setMetaDataConfigAsync = async (
+  config: Pick<ExpoConfig, 'android'>,
+  androidManifest: AndroidConfig.Manifest.AndroidManifest,
+  key: string,
+  value: string
+): Promise<AndroidConfig.Manifest.AndroidManifest> => {
+  // Get the <application /> tag and assert if it doesn't exist.
+  const mainApplication = getMainApplicationOrThrow(androidManifest);
+
+  addMetaDataItemToMainApplication(
+    mainApplication,
+    // value for `android:name`
+    key,
+    // value for `android:value`
+    value
+  );
+
+  return androidManifest;
+}
+
 const withAndroidPropertiesPublicToken: ConfigPlugin<MapboxNavigationPlugProps> = (
   config,
   { RNMBNAVPublicToken },
 ) => {
   const key = 'MAPBOX_ACCESS_TOKEN';
-  if (RNMBNAVPublicToken) {
-    return withGradleProperties(config, (config) => {
-      config.modResults = config.modResults.filter((item) => {
-        if (item.type === 'property' && item.key === key) {
-          return false;
-        }
-        return true;
-      });
-      // eslint-disable-next-line fp/no-mutating-methods
-      config.modResults.push({
-        type: 'property',
-        key: key,
-        value: RNMBNAVPublicToken,
-      });
 
+  if (RNMBNAVPublicToken) {
+    return withAndroidManifest(config, async config => {
+      // Modifiers can be async, but try to keep them fast.
+      config.modResults = await setMetaDataConfigAsync(config, config.modResults, key, RNMBNAVPublicToken);
+      
       return config;
-    });
+    })
   } else {
     return config;
   }
