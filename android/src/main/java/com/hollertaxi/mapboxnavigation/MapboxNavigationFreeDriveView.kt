@@ -254,13 +254,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         // initialize the location puck
         binding.mapView.location.apply {
+            setLocationProvider(navigationLocationProvider)
             this.locationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(
                     context,
                     R.drawable.mapbox_navigation_puck_icon
                 )
             )
-            setLocationProvider(navigationLocationProvider)
             enabled = true
         }
 
@@ -319,19 +319,20 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         // start the trip session to being receiving location updates in free drive
         // and later when a route is set also receiving route progress updates
         mapboxNavigation.startTripSession()
+        mapboxNavigation.registerLocationObserver(locationObserver)
 
         // load map style
         mapboxMap.loadStyleUri(
             Style.LIGHT
         ) {
-            
+            binding.mapView.gestures.scrollEnabled = false
         }
     }
 
     private fun startRoute() {
         // register event listeners
         //mapboxNavigation.registerRoutesObserver(routesObserver)
-        mapboxNavigation.registerLocationObserver(locationObserver)
+        //mapboxNavigation.registerLocationObserver(locationObserver)
         //mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
     }
 
