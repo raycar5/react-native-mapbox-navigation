@@ -91,8 +91,8 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
     }
     
     @ReactProp(name = "destinationImage")
-    fun setDestinationImage(view: MapboxNavigationFreeDriveView, destinationImage: Double?) {
-        view.setDestinationImage(destinationImage)
+    fun setDestinationWaypointImage(view: MapboxNavigationFreeDriveView, destinationWaypointImage: Double?) {
+        view.setDestinationWaypointImage(destinationWaypointImage)
     }
     
     @ReactProp(name = "mapPadding")

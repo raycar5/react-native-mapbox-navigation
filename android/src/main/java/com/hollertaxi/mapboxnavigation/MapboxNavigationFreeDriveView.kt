@@ -455,8 +455,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.userPuckScale = userPuckScale
     }
     
-    fun setDestinationImage(destinationImage: Double?) {
-        this.destinationImage = destinationImage
+    fun setDestinationWaypointImage(destinationWaypointImage: Double?) {
+        this.destinationImage = destinationWaypointImage
     }
     
     fun setMapPadding(mapPadding: ReadableArray?) {
