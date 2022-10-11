@@ -325,7 +325,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxMap.loadStyleUri(
             Style.LIGHT
         ) {
-            binding.mapView.gestures.scrollEnabled = false
+            //
         }
     }
 
