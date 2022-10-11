@@ -81,8 +81,8 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
     }
     
     @ReactProp(name = "userPuckImage")
-    fun serUserPuckImage(view: MapboxNavigationFreeDriveView, userPuckImage: Double?) {
-        view.serUserPuckImage(userPuckImage)
+    fun setUserPuckImage(view: MapboxNavigationFreeDriveView, userPuckImage: String?) {
+        view.setUserPuckImage(userPuckImage)
     }
     
     @ReactProp(name = "userPuckScale")
@@ -91,7 +91,7 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
     }
     
     @ReactProp(name = "destinationImage")
-    fun setDestinationImage(view: MapboxNavigationFreeDriveView, destinationImage: Double?) {
+    fun setDestinationImage(view: MapboxNavigationFreeDriveView, destinationImage: String?) {
         view.setDestinationImage(destinationImage)
     }
     
