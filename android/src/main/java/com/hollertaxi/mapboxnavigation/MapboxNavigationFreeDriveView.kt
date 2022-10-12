@@ -504,16 +504,18 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             }
 
             if (waypoints != null) {
-                currentWaypoints = arrayOf<Point>()
+                var newCurrentWaypoints = arrayOf<Point>()
 
-                for (int ii = 0; ii < waypoints.size(); ii++) {
+                for (ii in 0 until waypoints.size()) {
                     val waypoint = waypoints.getArray(ii)
 
                     if (waypoint != null) {
-                        currentWaypoints.plus(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
+                        newCurrentWaypoints.plus(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
                         routeWaypoints.plus(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
                     }
                 }
+
+                currentWaypoints = newCurrentWaypoints
             }
 
             if (destination != null) {
