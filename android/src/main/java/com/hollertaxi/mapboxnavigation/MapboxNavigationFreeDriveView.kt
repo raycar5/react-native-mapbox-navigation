@@ -89,7 +89,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var followZoomLevel: Double = 16.0
     private var showSpeedLimit: Boolean = true
     private var speedLimitAnchor: ReadableArray? = null
-    private var userPuckImage: ReadableMap? = null
+    private var userPuckImage: Int = -1
     private var userPuckScale: Double = 1.0
     private var destinationImage: ReadableMap? = null
     private var mapPadding: ReadableArray? = null
@@ -258,13 +258,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
             val puckImage = userPuckImage
 
-            if (puckImage != null && puckImage.hasKey("uri")) {
-                val resourceId = context.getResources().getIdentifier(puckImage.getString("uri"), "drawable", context.getPackageName())
+            if (puckImage > -1) {
+                //val resourceId = context.getResources().getIdentifier(puckImage.getString("uri").toLowerCase().replace("-", "_"), "drawable", context.getPackageName())
 
                 this.locationPuck = LocationPuck2D(
                     bearingImage = ContextCompat.getDrawable(
                         context,
-                        resourceId
+                        puckImage
                     )
                 )
             } else {
@@ -275,7 +275,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                     )
                 )
             }
-            
+
             enabled = true
         }
 
@@ -305,13 +305,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         )
         navigationCamera.registerNavigationCameraStateChangeObserver { navigationCameraState ->
             // shows/hide the recenter button depending on the camera state
-            when (navigationCameraState) {
-                NavigationCameraState.TRANSITION_TO_FOLLOWING,
-                NavigationCameraState.FOLLOWING -> binding.recenter.visibility = View.INVISIBLE
-                NavigationCameraState.TRANSITION_TO_OVERVIEW,
-                NavigationCameraState.OVERVIEW,
-                NavigationCameraState.IDLE -> binding.recenter.visibility = View.VISIBLE
-            }
+            //when (navigationCameraState) {
+                //NavigationCameraState.TRANSITION_TO_FOLLOWING,
+                //NavigationCameraState.FOLLOWING -> binding.recenter.visibility = View.INVISIBLE
+                //NavigationCameraState.TRANSITION_TO_OVERVIEW,
+                //NavigationCameraState.OVERVIEW,
+                //NavigationCameraState.IDLE -> binding.recenter.visibility = View.VISIBLE
+            //}
         }
         
         viewportDataSource.overviewPadding = overviewPadding
@@ -353,9 +353,12 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        //mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        mapboxNavigation.unregisterLocationObserver(locationObserver)
-        //mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
+
+        if (mapboxNavigation.isInitialized) {
+            //mapboxNavigation.unregisterRoutesObserver(routesObserver)
+            mapboxNavigation.unregisterLocationObserver(locationObserver)
+            //mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
+        }
     }
 
     private fun onDestroy() {
@@ -462,7 +465,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.followZoomLevel = followZoomLevel
     }
     
-    fun setUserPuckImage(userPuckImage: ReadableMap?) {
+    fun setUserPuckImage(userPuckImage: Int) {
         this.userPuckImage = userPuckImage
     }
     

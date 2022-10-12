@@ -55,7 +55,7 @@ export interface IMapboxNavigationFreeDriveProps {
     showSpeedLimit?: boolean;
     speedLimitAnchor?: Padding;
     followZoomLevel?: number;
-    userPuckImage?: Object;
+    userPuckImage?: number;
     userPuckScale?: number;
     destinationImage?: Object;
     mapPadding?: Padding;
