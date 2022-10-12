@@ -256,8 +256,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         binding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
 
-            if (this.userPuckImage != null) {
-                val resourceId = context.getResources().getIdentifier(this.userPuckImage.uri, "drawable", context.getPackageName())
+            if (userPuckImage != null) {
+                val resourceId = context.getResources().getIdentifier(userPuckImage.uri, "drawable", context.getPackageName())
 
                 this.locationPuck = LocationPuck2D(
                     bearingImage = ContextCompat.getDrawable(
