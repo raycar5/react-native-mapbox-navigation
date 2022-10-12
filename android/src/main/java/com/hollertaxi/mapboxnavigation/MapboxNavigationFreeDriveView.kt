@@ -432,7 +432,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxNavigation.startTripSession()
         mapboxNavigation.registerLocationObserver(locationObserver)
 
-        setCameraPositionToOrigin()
+        //setCameraPositionToOrigin()
 
         // load map style
         mapboxMap.loadStyleUri(
@@ -500,13 +500,15 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
             if (origin != null) {
                 currentOrigin = Point.fromLngLat(origin.getDouble(0), origin.getDouble(1))
-                routeWaypoints.plus(currentOrigin)
+                routeWaypoints.plus(Point.fromLngLat(origin.getDouble(0), origin.getDouble(1)))
             }
 
             if (waypoints != null) {
                 currentWaypoints = arrayOf<Point>()
 
-                for (waypoint in waypoints) {
+                for (int ii = 0; ii < waypoints.size(); ii++) {
+                    val waypoint = waypoints.getArray(ii)
+
                     if (waypoint != null) {
                         currentWaypoints.plus(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
                         routeWaypoints.plus(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
@@ -516,10 +518,10 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
             if (destination != null) {
                 currentDestination = Point.fromLngLat(destination.getDouble(0), destination.getDouble(1))
-                routeWaypoints.plus(currentDestination)
+                routeWaypoints.plus(Point.fromLngLat(destination.getDouble(0), destination.getDouble(1)))
             }
 
-            currentLegIndex = legIndex
+            currentLegIndex = if (legIndex != null) legIndex!! else -1
 
             mapboxNavigation.requestRoutes(
                 RouteOptions.builder()

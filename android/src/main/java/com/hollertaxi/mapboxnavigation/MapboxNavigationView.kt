@@ -509,13 +509,13 @@ class MapboxNavigationView(private val context: ThemedReactContext, private val 
         )
         navigationCamera.registerNavigationCameraStateChangeObserver { navigationCameraState ->
             // shows/hide the recenter button depending on the camera state
-            when (navigationCameraState) {
-                NavigationCameraState.TRANSITION_TO_FOLLOWING,
+            //when (navigationCameraState) {
+                //NavigationCameraState.TRANSITION_TO_FOLLOWING,
                 //NavigationCameraState.FOLLOWING -> binding.recenter.visibility = View.INVISIBLE
-                NavigationCameraState.TRANSITION_TO_OVERVIEW,
-                NavigationCameraState.OVERVIEW,
+                //NavigationCameraState.TRANSITION_TO_OVERVIEW,
+                //NavigationCameraState.OVERVIEW
                 //NavigationCameraState.IDLE -> binding.recenter.visibility = View.VISIBLE
-            }
+            //}
         }
         // set the padding values depending on screen orientation and visible view layout
         if (this.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
