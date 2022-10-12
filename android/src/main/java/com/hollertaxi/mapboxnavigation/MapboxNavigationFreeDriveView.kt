@@ -231,6 +231,48 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         }
     }
 
+    /**
+     * Gets notified whenever the tracked routes change.
+     *
+     * A change can mean:
+     * - routes get changed with [MapboxNavigation.setRoutes]
+     * - routes annotations get refreshed (for example, congestion annotation that indicate the live traffic along the route)
+     * - driver got off route and a reroute was executed
+     */
+    private val routesObserver = RoutesObserver { routeUpdateResult ->
+        if (routeUpdateResult.routes.isNotEmpty()) {
+            // generate route geometries asynchronously and render them
+            val routeLines = routeUpdateResult.routes.map { RouteLine(it, null) }
+
+            routeLineApi.setRoutes(
+                routeLines
+            ) { value ->
+                mapboxMap.getStyle()?.apply {
+                    routeLineView.renderRouteDrawData(this, value)
+                }
+            }
+
+            // update the camera position to account for the new route
+            viewportDataSource.onRouteChanged(routeUpdateResult.routes.first())
+            viewportDataSource.evaluate()
+        } else {
+            // remove the route line and route arrow from the map
+            val style = mapboxMap.getStyle()
+            if (style != null) {
+                routeLineApi.clearRouteLine { value ->
+                    routeLineView.renderClearRouteLineValue(
+                        style,
+                        value
+                    )
+                }
+                routeArrowView.render(style, routeArrowApi.clearArrows())
+            }
+
+            // remove the route reference from camera position evaluations
+            viewportDataSource.clearRouteData()
+            viewportDataSource.evaluate()
+        }
+    }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -246,6 +288,19 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
             MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY))
         layout(left, top, right, bottom)
+    }
+    
+    private fun setCameraPositionToOrigin() {
+        val startingLocation = Location(LocationManager.GPS_PROVIDER)
+        startingLocation.latitude = currentOrigin!!.latitude()
+        startingLocation.longitude = currentOrigin!!.longitude()
+        viewportDataSource.onLocationChanged(startingLocation)
+
+        navigationCamera.requestNavigationCameraToFollowing(
+            stateTransitionOptions = NavigationCameraTransitionOptions.Builder()
+                .maxDuration(0) // instant transition
+                .build()
+        )
     }
 
     @SuppressLint("MissingPermission")
@@ -359,8 +414,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             //}
         }
 
-        navigationCamera.requestNavigationCameraToFollowing()
-
         // make sure to use the same DistanceFormatterOptions across different features
         val distanceFormatterOptions = mapboxNavigation.navigationOptions.distanceFormatterOptions
 
@@ -379,12 +432,16 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxNavigation.startTripSession()
         mapboxNavigation.registerLocationObserver(locationObserver)
 
+        setCameraPositionToOrigin()
+
         // load map style
         mapboxMap.loadStyleUri(
             Style.LIGHT
         ) {
             //
         }
+
+        mapboxNavigation.registerRoutesObserver(routesObserver)
     }
 
     private fun startRoute() {
@@ -398,7 +455,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         super.onDetachedFromWindow()
 
         if (::mapboxNavigation.isInitialized) {
-            //mapboxNavigation.unregisterRoutesObserver(routesObserver)
+            mapboxNavigation.unregisterRoutesObserver(routesObserver)
             mapboxNavigation.unregisterLocationObserver(locationObserver)
             //mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         }
@@ -408,10 +465,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         MapboxNavigationProvider.destroy()
         routeLineApi.cancel()
         routeLineView.cancel()
-    }
-
-    private fun findRoute(origin: Point, destination: Point, waypoints: Array<Point>?) {
-        
     }
 
     private fun sendErrorToReact(error: String?) {
@@ -442,7 +495,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
     fun showRoute(origin: ReadableArray?, destination: ReadableArray?, waypoints: ReadableArray?, styles: ReadableArray?, legIndex: Int?, cameraType: String?, padding: ReadableArray?)  {
         try {
-            var routeWaypoints = listOf<Point>()
+            var routeWaypoints = arrayOf<Point>()
+            var routeWaypointNames = arrayOf<String>()
 
             if (origin != null) {
                 currentOrigin = Point.fromLngLat(origin.getDouble(0), origin.getDouble(1))
@@ -450,7 +504,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             }
 
             if (waypoints != null) {
-                currentWaypoints = listOf<Point>()
+                currentWaypoints = arrayOf<Point>()
 
                 for (waypoint in waypoints) {
                     if (waypoint != null) {
@@ -471,7 +525,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 RouteOptions.builder()
                     .applyDefaultNavigationOptions()
                     //.applyLanguageAndVoiceUnitOptions(context)
-                    .coordinatesList(routeWaypoints)
+                    .coordinatesList(routeWaypoints.toList())
                     .profile(DirectionsCriteria.PROFILE_DRIVING)
                     .steps(true)
                     .build(),
