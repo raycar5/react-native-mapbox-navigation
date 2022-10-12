@@ -292,6 +292,27 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         // initialize Navigation Camera
         viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
+        
+        val padding = mapPadding
+
+        if (padding != null) {
+            viewportDataSource.followingPadding = EdgeInsets(
+                if (padding.size() > 0) padding.getDouble(0) * pixelDensity else 0,
+                if (padding.size() > 1) padding.getDouble(1) * pixelDensity else 0,
+                if (padding.size() > 2) padding.getDouble(2) * pixelDensity else 0,
+                if (padding.size() > 3) padding.getDouble(3) * pixelDensity else 0
+            )
+        } else {
+            viewportDataSource.followingPadding = EdgeInsets(0, 0, 0, 0)
+        }
+        
+        viewportDataSource.overviewPadding = overviewPadding
+        viewportDataSource.options.followingFrameOptions.centerUpdatesAllowed = true
+        viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = true
+        viewportDataSource.options.followingFrameOptions.bearingUpdatesAllowed = true
+        viewportDataSource.options.followingFrameOptions.paddingUpdatesAllowed = false
+        viewportDataSource.options.followingFrameOptions.minZoom = followZoomLevel
+        viewportDataSource.options.followingFrameOptions.maxZoom = followZoomLevel
 
         navigationCamera = NavigationCamera(
             mapboxMap,
@@ -332,21 +353,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 //NavigationCameraState.IDLE -> binding.recenter.visibility = View.VISIBLE
             //}
         }
-        
-        val padding = mapPadding
 
-        if (padding != null) {
-            viewportDataSource.followingPadding = EdgeInsets(
-                padding.size() > 0 ? (padding.getDouble(0) * pixelDensity) : 0,
-                padding.size() > 1 ? (padding.getDouble(1) * pixelDensity) : 0,
-                padding.size() > 2 ? (padding.getDouble(2) * pixelDensity) : 0,
-                padding.size() > 3 ? (padding.getDouble(3) * pixelDensity) : 0
-            )
-        } else {
-            viewportDataSource.followingPadding = EdgeInsets(0, 0, 0, 0)
-        }
-        
-        viewportDataSource.overviewPadding = overviewPadding
+        navigationCamera.requestNavigationCameraToFollowing()
 
         // make sure to use the same DistanceFormatterOptions across different features
         val distanceFormatterOptions = mapboxNavigation.navigationOptions.distanceFormatterOptions
@@ -365,8 +373,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         // and later when a route is set also receiving route progress updates
         mapboxNavigation.startTripSession()
         mapboxNavigation.registerLocationObserver(locationObserver)
-
-        navigationCamera.requestNavigationCameraToFollowing()
 
         // load map style
         mapboxMap.loadStyleUri(
