@@ -304,6 +304,25 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             NavigationBasicGesturesHandler(navigationCamera)
         )
         navigationCamera.registerNavigationCameraStateChangeObserver { navigationCameraState ->
+            var stateStr = "idle"
+
+            if (navigationCameraState != null) {
+                if (navigationCameraState == NavigationCameraState.TRANSITION_TO_FOLLOWING) {
+                    stateStr = "transitionToFollowing"
+                } else if (navigationCameraState == NavigationCameraState.FOLLOWING) {
+                    stateStr = "following"
+                } else if (navigationCameraState == NavigationCameraState.TRANSITION_TO_OVERVIEW) {
+                    stateStr = "transitionToOverview"
+                } else if (navigationCameraState == NavigationCameraState.OVERVIEW) {
+                    stateStr = "overview"
+                }
+            }
+
+            val event = Arguments.createMap()
+            event.putDouble("state", stateStr)
+            context
+                .getJSModule(RCTEventEmitter::class.java)
+                .receiveEvent(id, "onTrackingStateChange", event)
             // shows/hide the recenter button depending on the camera state
             //when (navigationCameraState) {
                 //NavigationCameraState.TRANSITION_TO_FOLLOWING,
@@ -320,7 +339,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         // make sure to use the same DistanceFormatterOptions across different features
         val distanceFormatterOptions = mapboxNavigation.navigationOptions.distanceFormatterOptions
 
-
         // initialize route line, the withRouteLineBelowLayerId is specified to place
         // the route line below road labels layer on the map
         // the value of this option will depend on the style that you are using
@@ -335,6 +353,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         // and later when a route is set also receiving route progress updates
         mapboxNavigation.startTripSession()
         mapboxNavigation.registerLocationObserver(locationObserver)
+
+        navigationCamera.requestNavigationCameraToFollowing()
 
         // load map style
         mapboxMap.loadStyleUri(
@@ -354,7 +374,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
-        if (mapboxNavigation.isInitialized) {
+        if (::mapboxNavigation.isInitialized) {
             //mapboxNavigation.unregisterRoutesObserver(routesObserver)
             mapboxNavigation.unregisterLocationObserver(locationObserver)
             //mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
