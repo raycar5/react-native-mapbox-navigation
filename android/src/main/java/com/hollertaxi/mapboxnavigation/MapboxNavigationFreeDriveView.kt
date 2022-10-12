@@ -258,6 +258,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         } else {
             // remove the route line and route arrow from the map
             val style = mapboxMap.getStyle()
+
             if (style != null) {
                 routeLineApi.clearRouteLine { value ->
                     routeLineView.renderClearRouteLineValue(
@@ -265,7 +266,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                         value
                     )
                 }
-                routeArrowView.render(style, routeArrowApi.clearArrows())
             }
 
             // remove the route reference from camera position evaluations
@@ -500,7 +500,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
             if (origin != null) {
                 currentOrigin = Point.fromLngLat(origin.getDouble(0), origin.getDouble(1))
-                routeWaypoints.add(currentOrigin)
+                routeWaypoints.plus(currentOrigin)
             }
 
             if (waypoints != null) {
@@ -508,15 +508,15 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
                 for (waypoint in waypoints) {
                     if (waypoint != null) {
-                        currentWaypoints.add(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
-                        routeWaypoints.add(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
+                        currentWaypoints.plus(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
+                        routeWaypoints.plus(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
                     }
                 }
             }
 
             if (destination != null) {
                 currentDestination = Point.fromLngLat(destination.getDouble(0), destination.getDouble(1))
-                routeWaypoints.add(currentDestination)
+                routeWaypoints.plus(currentDestination)
             }
 
             currentLegIndex = legIndex
