@@ -89,9 +89,9 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var followZoomLevel: Double = 16.0
     private var showSpeedLimit: Boolean = true
     private var speedLimitAnchor: ReadableArray? = null
-    private var userPuckImage: Double? = null
+    private var userPuckImage: ReadableMap? = null
     private var userPuckScale: Double = 1.0
-    private var destinationImage: Double? = null
+    private var destinationImage: ReadableMap? = null
     private var mapPadding: ReadableArray? = null
     private var routeCasingColor: String = "#2F7AC6"
     private var traversedRouteColor: String = "#FFFFFF"
@@ -256,8 +256,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         binding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
 
-            if (userPuckImage != null) {
-                val resourceId = context.getResources().getIdentifier(userPuckImage.uri, "drawable", context.getPackageName())
+            if (userPuckImage != null && userPuckImage.hasKey('uri')) {
+                val resourceId = context.getResources().getIdentifier(userPuckImage.getString('uri'), "drawable", context.getPackageName())
 
                 this.locationPuck = LocationPuck2D(
                     bearingImage = ContextCompat.getDrawable(
