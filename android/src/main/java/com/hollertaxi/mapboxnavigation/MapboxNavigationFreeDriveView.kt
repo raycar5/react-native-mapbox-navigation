@@ -319,7 +319,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             }
 
             val event = Arguments.createMap()
-            event.putDouble("state", stateStr)
+            event.putString("state", stateStr)
             context
                 .getJSModule(RCTEventEmitter::class.java)
                 .receiveEvent(id, "onTrackingStateChange", event)
