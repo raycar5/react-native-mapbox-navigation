@@ -333,8 +333,20 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             //}
         }
         
+        val padding = mapPadding
+
+        if (padding != null) {
+            viewportDataSource.followingPadding = EdgeInsets(
+                padding.size() > 0 ? (padding.getDouble(0) * pixelDensity) : 0,
+                padding.size() > 1 ? (padding.getDouble(1) * pixelDensity) : 0,
+                padding.size() > 2 ? (padding.getDouble(2) * pixelDensity) : 0,
+                padding.size() > 3 ? (padding.getDouble(3) * pixelDensity) : 0
+            )
+        } else {
+            viewportDataSource.followingPadding = EdgeInsets(0, 0, 0, 0)
+        }
+        
         viewportDataSource.overviewPadding = overviewPadding
-        viewportDataSource.followingPadding = followingPadding
 
         // make sure to use the same DistanceFormatterOptions across different features
         val distanceFormatterOptions = mapboxNavigation.navigationOptions.distanceFormatterOptions
