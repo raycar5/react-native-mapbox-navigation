@@ -111,6 +111,11 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var attributionVisible: Boolean = true
     private var attributionPadding: ReadableArray? = null
 
+    private var currentOrigin: Point? = null
+    private var currentDestination: Point? = null
+    private var currentWaypoints: Array<Point>? = null
+    private var currentLegIndex: Int = -1
+
     /**
      * Bindings to the example layout.
      */
@@ -297,13 +302,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         if (padding != null) {
             viewportDataSource.followingPadding = EdgeInsets(
-                if (padding.size() > 0) padding.getDouble(0) * pixelDensity else 0,
-                if (padding.size() > 1) padding.getDouble(1) * pixelDensity else 0,
-                if (padding.size() > 2) padding.getDouble(2) * pixelDensity else 0,
-                if (padding.size() > 3) padding.getDouble(3) * pixelDensity else 0
+                if (padding.size() > 0) padding.getDouble(0) * pixelDensity else 0.0,
+                if (padding.size() > 1) padding.getDouble(1) * pixelDensity else 0.0,
+                if (padding.size() > 2) padding.getDouble(2) * pixelDensity else 0.0,
+                if (padding.size() > 3) padding.getDouble(3) * pixelDensity else 0.0
             )
         } else {
-            viewportDataSource.followingPadding = EdgeInsets(0, 0, 0, 0)
+            viewportDataSource.followingPadding = EdgeInsets(0.0, 0.0, 0.0, 0.0)
         }
         
         viewportDataSource.overviewPadding = overviewPadding
@@ -405,40 +410,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         routeLineView.cancel()
     }
 
-    private fun findRoute(origin: Point, destination: Point) {
-        try {
-            mapboxNavigation.requestRoutes(
-                RouteOptions.builder()
-                    .applyDefaultNavigationOptions()
-                    .applyLanguageAndVoiceUnitOptions(context)
-                    .coordinatesList(listOf(origin, destination))
-                    .profile(DirectionsCriteria.PROFILE_DRIVING)
-                    .steps(true)
-                    .build(),
-                object : RouterCallback {
-                    override fun onRoutesReady(
-                        routes: List<DirectionsRoute>,
-                        routerOrigin: RouterOrigin
-                    ) {
-                        setRouteAndStartNavigation(routes)
-                    }
-
-                    override fun onFailure(
-                        reasons: List<RouterFailure>,
-                        routeOptions: RouteOptions
-                    ) {
-                        sendErrorToReact("Error finding route $reasons")
-                    }
-
-                    override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
-                        // no impl
-                    }
-                }
-            )
-        } catch (ex: Exception) {
-            sendErrorToReact(ex.toString())
-        }
-
+    private fun findRoute(origin: Point, destination: Point, waypoints: Array<Point>?) {
+        
     }
 
     private fun sendErrorToReact(error: String?) {
@@ -468,7 +441,68 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
 
     fun showRoute(origin: ReadableArray?, destination: ReadableArray?, waypoints: ReadableArray?, styles: ReadableArray?, legIndex: Int?, cameraType: String?, padding: ReadableArray?)  {
-        //
+        try {
+            var routeWaypoints = listOf<Point>()
+
+            if (origin != null) {
+                currentOrigin = Point.fromLngLat(origin.getDouble(0), origin.getDouble(1))
+                routeWaypoints.add(currentOrigin)
+            }
+
+            if (waypoints != null) {
+                currentWaypoints = listOf<Point>()
+
+                for (waypoint in waypoints) {
+                    if (waypoint != null) {
+                        currentWaypoints.add(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
+                        routeWaypoints.add(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
+                    }
+                }
+            }
+
+            if (destination != null) {
+                currentDestination = Point.fromLngLat(destination.getDouble(0), destination.getDouble(1))
+                routeWaypoints.add(currentDestination)
+            }
+
+            currentLegIndex = legIndex
+
+            mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .applyDefaultNavigationOptions()
+                    //.applyLanguageAndVoiceUnitOptions(context)
+                    .coordinatesList(routeWaypoints)
+                    .profile(DirectionsCriteria.PROFILE_DRIVING)
+                    .steps(true)
+                    .build(),
+                object : RouterCallback {
+                    override fun onRoutesReady(
+                        routes: List<DirectionsRoute>,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        //setRouteAndStartNavigation(routes)
+                        if (cameraType == "follow") {
+                            follow()
+                        } else if (cameraType == "overview") {
+                            moveToOverview(padding)
+                        }
+                    }
+
+                    override fun onFailure(
+                        reasons: List<RouterFailure>,
+                        routeOptions: RouteOptions
+                    ) {
+                        sendErrorToReact("Error finding route $reasons")
+                    }
+
+                    override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
+                        // no impl
+                    }
+                }
+            )
+        } catch (ex: Exception) {
+            sendErrorToReact(ex.toString())
+        }
     }
 
     fun clearRoute() {
@@ -476,15 +510,15 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
     
     fun follow() {
-        //
+        navigationCamera.requestNavigationCameraToFollowing()
     }
     
     fun moveToOverview(padding: ReadableArray?) {
-        //
+        navigationCamera.requestNavigationCameraToOverview()
     }
     
     fun fitCamera(padding: ReadableArray?) {
-        //
+        navigationCamera.requestNavigationCameraToOverview()
     }
 
     fun onDropViewInstance() {

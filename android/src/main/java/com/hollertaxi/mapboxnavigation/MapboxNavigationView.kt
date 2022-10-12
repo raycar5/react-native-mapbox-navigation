@@ -210,10 +210,10 @@ class MapboxNavigationView(private val context: ThemedReactContext, private val 
         set(value) {
             field = value
             if (value) {
-                binding.soundButton.muteAndExtend(BUTTON_ANIMATION_DURATION)
+                //binding.soundButton.muteAndExtend(BUTTON_ANIMATION_DURATION)
                 voiceInstructionsPlayer.volume(SpeechVolume(0f))
             } else {
-                binding.soundButton.unmuteAndExtend(BUTTON_ANIMATION_DURATION)
+                //binding.soundButton.unmuteAndExtend(BUTTON_ANIMATION_DURATION)
                 voiceInstructionsPlayer.volume(SpeechVolume(1f))
             }
         }
@@ -334,19 +334,19 @@ class MapboxNavigationView(private val context: ThemedReactContext, private val 
                 ).show()
             },
             {
-                binding.maneuverView.visibility = View.VISIBLE
-                binding.maneuverView.updatePrimaryManeuverTextAppearance(R.style.PrimaryManeuverTextAppearance)
-                binding.maneuverView.updateSecondaryManeuverTextAppearance(R.style.ManeuverTextAppearance)
-                binding.maneuverView.updateSubManeuverTextAppearance(R.style.ManeuverTextAppearance)
-                binding.maneuverView.updateStepDistanceTextAppearance(R.style.StepDistanceRemainingAppearance)
-                binding.maneuverView.renderManeuvers(maneuvers)
+                //binding.maneuverView.visibility = View.VISIBLE
+                //binding.maneuverView.updatePrimaryManeuverTextAppearance(R.style.PrimaryManeuverTextAppearance)
+                //binding.maneuverView.updateSecondaryManeuverTextAppearance(R.style.ManeuverTextAppearance)
+                //binding.maneuverView.updateSubManeuverTextAppearance(R.style.ManeuverTextAppearance)
+                //binding.maneuverView.updateStepDistanceTextAppearance(R.style.StepDistanceRemainingAppearance)
+                //binding.maneuverView.renderManeuvers(maneuvers)
             }
         )
 
         // update bottom trip progress summary
-        binding.tripProgressView.render(
-            tripProgressApi.getTripProgress(routeProgress)
-        )
+        //binding.tripProgressView.render(
+            //tripProgressApi.getTripProgress(routeProgress)
+        //)
 
         val event = Arguments.createMap()
         event.putDouble("distanceTraveled", routeProgress.distanceTraveled.toDouble())
@@ -511,10 +511,10 @@ class MapboxNavigationView(private val context: ThemedReactContext, private val 
             // shows/hide the recenter button depending on the camera state
             when (navigationCameraState) {
                 NavigationCameraState.TRANSITION_TO_FOLLOWING,
-                NavigationCameraState.FOLLOWING -> binding.recenter.visibility = View.INVISIBLE
+                //NavigationCameraState.FOLLOWING -> binding.recenter.visibility = View.INVISIBLE
                 NavigationCameraState.TRANSITION_TO_OVERVIEW,
                 NavigationCameraState.OVERVIEW,
-                NavigationCameraState.IDLE -> binding.recenter.visibility = View.VISIBLE
+                //NavigationCameraState.IDLE -> binding.recenter.visibility = View.VISIBLE
             }
         }
         // set the padding values depending on screen orientation and visible view layout
@@ -588,29 +588,29 @@ class MapboxNavigationView(private val context: ThemedReactContext, private val 
         )
 
         // initialize view interactions
-        binding.stop.setOnClickListener {
+        //binding.stop.setOnClickListener {
 //            clearRouteAndStopNavigation() // TODO: figure out how we want to address this since a user cannot reinitialize a route once it is canceled.
-            val event = Arguments.createMap()
-            event.putString("onCancelNavigation", "Navigation Closed")
-            context
-                .getJSModule(RCTEventEmitter::class.java)
-                .receiveEvent(id, "onCancelNavigation", event)
-        }
-        binding.recenter.setOnClickListener {
-            navigationCamera.requestNavigationCameraToFollowing()
-            binding.routeOverview.showTextAndExtend(BUTTON_ANIMATION_DURATION)
-        }
-        binding.routeOverview.setOnClickListener {
-            navigationCamera.requestNavigationCameraToOverview()
-            binding.recenter.showTextAndExtend(BUTTON_ANIMATION_DURATION)
-        }
-        binding.soundButton.setOnClickListener {
+            //val event = Arguments.createMap()
+            //event.putString("onCancelNavigation", "Navigation Closed")
+            //context
+                //.getJSModule(RCTEventEmitter::class.java)
+                //.receiveEvent(id, "onCancelNavigation", event)
+        //}
+        //binding.recenter.setOnClickListener {
+            //navigationCamera.requestNavigationCameraToFollowing()
+            //binding.routeOverview.showTextAndExtend(BUTTON_ANIMATION_DURATION)
+        //}
+        //binding.routeOverview.setOnClickListener {
+            //navigationCamera.requestNavigationCameraToOverview()
+            //binding.recenter.showTextAndExtend(BUTTON_ANIMATION_DURATION)
+        //}
+        //binding.soundButton.setOnClickListener {
             // mute/unmute voice instructions
-            isVoiceInstructionsMuted = !isVoiceInstructionsMuted
-        }
+            //isVoiceInstructionsMuted = !isVoiceInstructionsMuted
+        //}
 
         // set initial sounds button state
-        binding.soundButton.unmute()
+        //binding.soundButton.unmute()
 
         // start the trip session to being receiving location updates in free drive
         // and later when a route is set also receiving route progress updates
@@ -708,9 +708,9 @@ class MapboxNavigationView(private val context: ThemedReactContext, private val 
         }
 
         // show UI elements
-        binding.soundButton.visibility = View.VISIBLE
-        binding.routeOverview.visibility = View.VISIBLE
-        binding.tripProgressCard.visibility = View.VISIBLE
+        //binding.soundButton.visibility = View.VISIBLE
+        //binding.routeOverview.visibility = View.VISIBLE
+        //binding.tripProgressCard.visibility = View.VISIBLE
 
         // move the camera to overview when new route is available
         navigationCamera.requestNavigationCameraToFollowing()
@@ -724,10 +724,10 @@ class MapboxNavigationView(private val context: ThemedReactContext, private val 
         mapboxReplayer.stop()
 
         // hide UI elements
-        binding.soundButton.visibility = View.INVISIBLE
-        binding.maneuverView.visibility = View.INVISIBLE
-        binding.routeOverview.visibility = View.INVISIBLE
-        binding.tripProgressCard.visibility = View.INVISIBLE
+        //binding.soundButton.visibility = View.INVISIBLE
+        //binding.maneuverView.visibility = View.INVISIBLE
+        //binding.routeOverview.visibility = View.INVISIBLE
+        //binding.tripProgressCard.visibility = View.INVISIBLE
     }
 
     private fun startSimulation(route: DirectionsRoute) {
