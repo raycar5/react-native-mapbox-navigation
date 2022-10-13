@@ -361,8 +361,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         binding.mapView.scalebar.enabled = false
         binding.mapView.gestures.pitchEnabled = false
         binding.mapView.gestures.rotateEnabled = false
-        binding.mapView.gestures.pinchScrollEnabled = false
-        binding.mapView.gestures.simultaneousRotateAndPinchToZoomEnabled = false
 
         // initialize Mapbox Navigation
         mapboxNavigation = if (MapboxNavigationProvider.isCreated()) {
