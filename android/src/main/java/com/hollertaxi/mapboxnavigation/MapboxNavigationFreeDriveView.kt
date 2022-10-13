@@ -327,20 +327,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         mapboxMap = binding.mapView.getMapboxMap()
 
-        binding.mapView.compass.enabled = false
-        binding.mapView.scalebar.enabled = false
-        binding.mapView.gestures.pitchEnabled = false
-        binding.mapView.gestures.rotateEnabled = false
-        binding.mapView.gestures.pinchScrollEnabled = false
-        binding.mapView.gestures.simultaneousRotateAndPinchToZoomEnabled = false
-
         // initialize the location puck
         binding.mapView.location.apply {
             val puckImage = userPuckImage
 
-            if (puckImage != null) {
-                var name = puckImage.getString("uri").toLowerCase().replace("-", "_")
-                val resourceId = context.getResources().getIdentifier(name.substring(name.lastindexof("/") + 1, name.lastindexof(".")), "drawable", context.getPackageName())
+            if (puckImage != null && puckImage.hasKey("uri")) {
+                var name = puckImage.getString("uri")!!.toLowerCase().replace("-", "_")
+                val resourceId = context.getResources().getIdentifier(name.substring(name.lastIndexOf("/") + 1, name.lastIndexOf(".")), "drawable", context.getPackageName())
 
                 this.locationPuck = LocationPuck2D(
                     bearingImage = ContextCompat.getDrawable(
@@ -360,6 +353,18 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             setLocationProvider(navigationLocationProvider)
 
             enabled = true
+        }
+        binding.mapView.compass.apply {
+            enabled = false
+        }
+        binding.mapView.scalebar.apply {
+            enabled = false
+        }
+        binding.mapView.gestures.apply {
+            pitchEnabled = false
+            rotateEnabled = false
+            pinchScrollEnabled = false
+            simultaneousRotateAndPinchToZoomEnabled = false
         }
 
         // initialize Mapbox Navigation
@@ -632,9 +637,9 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     
     fun setMapPadding(mapPadding: ReadableArray?) {
         if (mapPadding != null) {
-            newPadding = arrayOf<Double>()
+            var newPadding = arrayOf<Double>()
 
-            for (ii in 0 until mapPadding.size) {
+            for (ii in 0 until mapPadding.size()) {
                 newPadding.plus(mapPadding.getDouble(ii))
             }
 
