@@ -206,6 +206,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
      * and the updates enhanced by the Navigation SDK (cleaned up and matched to the road).
      */
     private val locationObserver = object : LocationObserver {
+        var firstLocationUpdateReceived = false
+
         override fun onNewRawLocation(rawLocation: Location) {
             // not handled
         }
@@ -215,13 +217,26 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             // update location puck's position on the map
             navigationLocationProvider.changePosition(
                 location = enhancedLocation,
-                keyPoints = locationMatcherResult.keyPoints,
+                keyPoints = locationMatcherResult.keyPoints
             )
 
             // update camera position to account for new location
             viewportDataSource.onLocationChanged(enhancedLocation)
             viewportDataSource.evaluate()
 
+            // if this is the first location update the activity has received,
+            // it's best to immediately move the camera to the current user location
+            if (!firstLocationUpdateReceived) {
+                firstLocationUpdateReceived = true
+
+                navigationCamera.requestNavigationCameraToOverview(
+                    stateTransitionOptions = NavigationCameraTransitionOptions.Builder()
+                        .maxDuration(0) // instant transition
+                        .build()
+                )
+            }
+
+            // location event
             val event = Arguments.createMap()
             event.putDouble("longitude", enhancedLocation.longitude)
             event.putDouble("latitude", enhancedLocation.latitude)
@@ -314,8 +329,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         // initialize the location puck
         binding.mapView.location.apply {
-            setLocationProvider(navigationLocationProvider)
-
             val puckImage = userPuckImage
 
             if (puckImage > -1) {
@@ -335,6 +348,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                     )
                 )
             }
+            
+            setLocationProvider(navigationLocationProvider)
 
             enabled = true
         }
@@ -379,11 +394,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             binding.mapView.camera,
             viewportDataSource
         )
+
         // set the animations lifecycle listener to ensure the NavigationCamera stops
         // automatically following the user location when the map is interacted with
-        binding.mapView.camera.addCameraAnimationsLifecycleListener(
-            NavigationBasicGesturesHandler(navigationCamera)
-        )
+        //binding.mapView.camera.addCameraAnimationsLifecycleListener(
+            //NavigationBasicGesturesHandler(navigationCamera)
+        //)
+        
         navigationCamera.registerNavigationCameraStateChangeObserver { navigationCameraState ->
             var stateStr = "idle"
 
@@ -430,9 +447,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         // start the trip session to being receiving location updates in free drive
         // and later when a route is set also receiving route progress updates
         mapboxNavigation.startTripSession()
-        mapboxNavigation.registerLocationObserver(locationObserver)
-
-        //setCameraPositionToOrigin()
 
         // load map style
         mapboxMap.loadStyleUri(
@@ -441,6 +455,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             //
         }
 
+        mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
     }
 
@@ -462,9 +477,10 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
 
     private fun onDestroy() {
-        MapboxNavigationProvider.destroy()
+        super.onDestroy()
         routeLineApi.cancel()
         routeLineView.cancel()
+        MapboxNavigationProvider.destroy()
     }
 
     private fun sendErrorToReact(error: String?) {

@@ -55,13 +55,23 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
         )
     }
 
-    override fun receiveCommand(view: MapboxNavigationFreeDriveView, commandId: String, args: ReadableArray?) {
+    override fun getCommandsMap(): MutableMap<String, Int> {
+        return mutableMapOf(
+            "showRouteViaManager" to 1,
+            "clearRouteViaManager" to 2,
+            "followViaManager" to 3,
+            "moveToOverviewViaManager" to 4,
+            "fitCameraViaManager" to 5
+        )
+    }
+
+    override fun receiveCommand(view: MapboxNavigationFreeDriveView, commandId: Int, args: ReadableArray?) {
         when (commandId) {
-            "showRouteViaManager" -> view.showRoute(args?.getArray(0), args?.getArray(1), args?.getArray(2), args?.getArray(3), args?.getInt(4), args?.getString(5), args?.getArray(6))
-            "clearRouteViaManager" -> view.clearRoute()
-            "followViaManager" -> view.follow()
-            "moveToOverviewViaManager" -> view.moveToOverview(args?.getArray(0))
-            "fitCameraViaManager" -> view.fitCamera(args?.getArray(0))
+            1 -> view.showRoute(args?.getArray(0), args?.getArray(1), args?.getArray(2), args?.getArray(3), args?.getInt(4), args?.getString(5), args?.getArray(6))
+            2 -> view.clearRoute()
+            3 -> view.follow()
+            4 -> view.moveToOverview(args?.getArray(0))
+            5 -> view.fitCamera(args?.getArray(0))
         }
     }
 
