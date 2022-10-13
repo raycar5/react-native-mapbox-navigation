@@ -49,9 +49,9 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
         return MapBuilder.of<String, Map<String, String>>(
             "onLocationChange", MapBuilder.of("registrationName", "onLocationChange"),
             "onRouteProgressChange", MapBuilder.of("registrationName", "onRouteProgressChange"),
-            "onRouteChangeEvent", MapBuilder.of("registrationName", "onRouteChangeEvent"),
-            "onTrackingStateChangeEvent", MapBuilder.of("registrationName", "onTrackingStateChangeEvent"),
-            "onErrorEvent", MapBuilder.of("registrationName", "onErrorEvent")
+            "onRouteChange", MapBuilder.of("registrationName", "onRouteChange"),
+            "onTrackingStateChange", MapBuilder.of("registrationName", "onTrackingStateChange"),
+            "onError", MapBuilder.of("registrationName", "onError")
         )
     }
 
