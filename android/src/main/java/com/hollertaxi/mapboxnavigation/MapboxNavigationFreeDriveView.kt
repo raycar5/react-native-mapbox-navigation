@@ -25,6 +25,9 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.maps.plugin.compass.compass
+import com.mapbox.maps.plugin.scalebar.scalebar
+import com.mapbox.maps.plugin.gestures.*
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -354,6 +357,12 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
             enabled = true
         }
+        binding.mapView.compass.enabled = false
+        binding.mapView.scalebar.enabled = false
+        binding.mapView.gestures.pitchEnabled = false
+        binding.mapView.gestures.rotateEnabled = false
+        binding.mapView.gestures.pinchScrollEnabled = false
+        binding.mapView.gestures.simultaneousRotateAndPinchToZoomEnabled = false
 
         // initialize Mapbox Navigation
         mapboxNavigation = if (MapboxNavigationProvider.isCreated()) {
@@ -453,12 +462,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxMap.loadStyleUri(
             Style.LIGHT
         ) {
-            binding.mapView.compass.enabled = false
-            binding.mapView.scalebar.enabled = false
-            binding.mapView.gestures.pitchEnabled = false
-            binding.mapView.gestures.rotateEnabled = false
-            binding.mapView.gestures.pinchScrollEnabled = false
-            binding.mapView.gestures.simultaneousRotateAndPinchToZoomEnabled = false
+            //
         }
 
         mapboxNavigation.registerLocationObserver(locationObserver)
