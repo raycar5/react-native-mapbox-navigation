@@ -354,18 +354,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
             enabled = true
         }
-        binding.mapView.compass.apply {
-            enabled = false
-        }
-        binding.mapView.scalebar.apply {
-            enabled = false
-        }
-        binding.mapView.gestures.apply {
-            pitchEnabled = false
-            rotateEnabled = false
-            pinchScrollEnabled = false
-            simultaneousRotateAndPinchToZoomEnabled = false
-        }
 
         // initialize Mapbox Navigation
         mapboxNavigation = if (MapboxNavigationProvider.isCreated()) {
@@ -465,7 +453,12 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxMap.loadStyleUri(
             Style.LIGHT
         ) {
-            //
+            binding.mapView.compass.enabled = false
+            binding.mapView.scalebar.enabled = false
+            binding.mapView.gestures.pitchEnabled = false
+            binding.mapView.gestures.rotateEnabled = false
+            binding.mapView.gestures.pinchScrollEnabled = false
+            binding.mapView.gestures.simultaneousRotateAndPinchToZoomEnabled = false
         }
 
         mapboxNavigation.registerLocationObserver(locationObserver)
