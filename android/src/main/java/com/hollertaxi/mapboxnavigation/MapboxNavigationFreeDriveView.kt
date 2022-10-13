@@ -89,10 +89,10 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var followZoomLevel: Double = 16.0
     private var showSpeedLimit: Boolean = true
     private var speedLimitAnchor: ReadableArray? = null
-    private var userPuckImage: Int = -1
+    private var userPuckImage: ReadableMap? = null
     private var userPuckScale: Double = 1.0
     private var destinationImage: ReadableMap? = null
-    private var mapPadding: ReadableArray? = null
+    private var mapPadding: Array<Double>? = null
     private var routeCasingColor: String = "#2F7AC6"
     private var traversedRouteColor: String = "#FFFFFF"
     private var trafficUnknownColor: String = "#56A8FB"
@@ -327,17 +327,25 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         mapboxMap = binding.mapView.getMapboxMap()
 
+        binding.mapView.compass.enabled = false
+        binding.mapView.scalebar.enabled = false
+        binding.mapView.gestures.pitchEnabled = false
+        binding.mapView.gestures.rotateEnabled = false
+        binding.mapView.gestures.pinchScrollEnabled = false
+        binding.mapView.gestures.simultaneousRotateAndPinchToZoomEnabled = false
+
         // initialize the location puck
         binding.mapView.location.apply {
             val puckImage = userPuckImage
 
-            if (puckImage > -1) {
-                //val resourceId = context.getResources().getIdentifier(puckImage.getString("uri").toLowerCase().replace("-", "_"), "drawable", context.getPackageName())
+            if (puckImage != null) {
+                var name = puckImage.getString("uri").toLowerCase().replace("-", "_")
+                val resourceId = context.getResources().getIdentifier(name.substring(name.lastindexof("/") + 1, name.lastindexof(".")), "drawable", context.getPackageName())
 
                 this.locationPuck = LocationPuck2D(
                     bearingImage = ContextCompat.getDrawable(
                         context,
-                        puckImage
+                        resourceId
                     )
                 )
             } else {
@@ -372,10 +380,10 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         if (padding != null) {
             viewportDataSource.followingPadding = EdgeInsets(
-                if (padding.size() > 0) padding.getDouble(0) * pixelDensity else 0.0,
-                if (padding.size() > 1) padding.getDouble(1) * pixelDensity else 0.0,
-                if (padding.size() > 2) padding.getDouble(2) * pixelDensity else 0.0,
-                if (padding.size() > 3) padding.getDouble(3) * pixelDensity else 0.0
+                if (padding.size > 0) (padding.get(0) * pixelDensity) else 0.0,
+                if (padding.size > 1) (padding.get(1) * pixelDensity) else 0.0,
+                if (padding.size > 2) (padding.get(2) * pixelDensity) else 0.0,
+                if (padding.size > 3) (padding.get(3) * pixelDensity) else 0.0
             )
         } else {
             viewportDataSource.followingPadding = EdgeInsets(0.0, 0.0, 0.0, 0.0)
@@ -397,9 +405,9 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         // set the animations lifecycle listener to ensure the NavigationCamera stops
         // automatically following the user location when the map is interacted with
-        //binding.mapView.camera.addCameraAnimationsLifecycleListener(
-            //NavigationBasicGesturesHandler(navigationCamera)
-        //)
+        binding.mapView.camera.addCameraAnimationsLifecycleListener(
+            NavigationBasicGesturesHandler(navigationCamera)
+        )
         
         navigationCamera.registerNavigationCameraStateChangeObserver { navigationCameraState ->
             var stateStr = "idle"
@@ -610,7 +618,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.followZoomLevel = followZoomLevel
     }
     
-    fun setUserPuckImage(userPuckImage: Int) {
+    fun setUserPuckImage(userPuckImage: ReadableMap?) {
         this.userPuckImage = userPuckImage
     }
     
@@ -623,7 +631,17 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
     
     fun setMapPadding(mapPadding: ReadableArray?) {
-        this.mapPadding = mapPadding
+        if (mapPadding != null) {
+            newPadding = arrayOf<Double>()
+
+            for (ii in 0 until mapPadding.size) {
+                newPadding.plus(mapPadding.getDouble(ii))
+            }
+
+            this.mapPadding = newPadding
+        } else {
+            this.mapPadding = null
+        }
     }
     
     fun setLogoVisible(logoVisible: Boolean) {

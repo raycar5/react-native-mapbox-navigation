@@ -91,7 +91,7 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
     }
     
     @ReactProp(name = "userPuckImage")
-    fun setUserPuckImage(view: MapboxNavigationFreeDriveView, userPuckImage: Int) {
+    fun setUserPuckImage(view: MapboxNavigationFreeDriveView, userPuckImage: ReadableMap?) {
         view.setUserPuckImage(userPuckImage)
     }
     
