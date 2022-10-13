@@ -477,7 +477,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
 
     private fun onDestroy() {
-        super.onDestroy()
         routeLineApi.cancel()
         routeLineView.cancel()
         MapboxNavigationProvider.destroy()
