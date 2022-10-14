@@ -24,6 +24,8 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.scalebar.scalebar
@@ -503,6 +505,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
+        mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
     }
 
     private fun startRoute() {
@@ -518,13 +521,14 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.unregisterRoutesObserver(routesObserver)
             mapboxNavigation.unregisterLocationObserver(locationObserver)
-            //mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
+            mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         }
     }
 
     private fun onDestroy() {
         routeLineApi.cancel()
         routeLineView.cancel()
+        binding.mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
         MapboxNavigationProvider.destroy()
     }
 
@@ -590,7 +594,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 RouteOptions.builder()
                     .applyDefaultNavigationOptions()
                     //.applyLanguageAndVoiceUnitOptions(context)
-                    .coordinates(routeWaypoints.toList())
+                    .coordinates(routeWaypoints.asList())
                     .steps(true)
                     .build(),
                 object : RouterCallback {
