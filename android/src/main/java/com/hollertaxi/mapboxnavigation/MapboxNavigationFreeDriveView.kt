@@ -598,7 +598,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                         routes: List<DirectionsRoute>,
                         routerOrigin: RouterOrigin
                     ) {
-                        //setRouteAndStartNavigation(routes)
+                        if (routes.isEmpty()) {
+                            sendErrorToReact("No route found")
+                            return;
+                        }
+                        
+                        mapboxNavigation.setRoutes(routes, if (legIndex != null) legIndex!! else -1)
+
                         if (cameraType == "follow") {
                             follow()
                         } else if (cameraType == "overview") {
