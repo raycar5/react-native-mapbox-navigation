@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.Toast
+import android.graphics.Color
 import androidx.core.content.ContextCompat
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.uimanager.ThemedReactContext
@@ -505,14 +506,14 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
-        mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
+        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
     }
 
     private fun startRoute() {
         // register event listeners
         //mapboxNavigation.registerRoutesObserver(routesObserver)
         //mapboxNavigation.registerLocationObserver(locationObserver)
-        //mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
+        //mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
     }
 
     override fun onDetachedFromWindow() {
@@ -521,7 +522,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.unregisterRoutesObserver(routesObserver)
             mapboxNavigation.unregisterLocationObserver(locationObserver)
-            mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
+            mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         }
     }
 
@@ -594,8 +595,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 RouteOptions.builder()
                     .applyDefaultNavigationOptions()
                     //.applyLanguageAndVoiceUnitOptions(context)
-                    .coordinates(routeWaypoints.asList())
-                    .steps(true)
+                    .coordinatesList(routeWaypoints.asList())
+                    //.steps(true)
                     .build(),
                 object : RouterCallback {
                     override fun onRoutesReady(
