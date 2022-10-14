@@ -67,6 +67,8 @@ import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
 import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
@@ -248,6 +250,21 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 .receiveEvent(id, "onLocationChange", event)
         }
     }
+    
+    /**
+     * Gets notified with progress along the currently active route.
+     */
+    private val routeProgressObserver = RouteProgressObserver { routeProgress ->
+        // update the camera position to account for the progressed fragment of the route
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+        viewportDataSource.evaluate()
+
+        routeLineApi.updateWithRouteProgress(routeProgress) { result ->
+            mapboxMap.getStyle()?.apply {
+                routeLineView.renderRouteLineUpdate(this, result)
+            }
+        }
+    }
 
     /**
      * Gets notified whenever the tracked routes change.
@@ -289,6 +306,15 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             // remove the route reference from camera position evaluations
             viewportDataSource.clearRouteData()
             viewportDataSource.evaluate()
+        }
+    }
+
+    private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
+        val result = routeLineApi.updateTraveledRouteLine(point)
+        
+        mapboxMap.getStyle()?.apply {
+            // Render the result to update the map.
+            routeLineView.renderRouteLineUpdate(this, result)
         }
     }
 
@@ -447,10 +473,22 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         // the value of this option will depend on the style that you are using
         // and under which layer the route line should be placed on the map layers stack
         val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context)
+            .withVanishingRouteLineEnabled(true)
+            .withRouteLineResources(RouteLineResources.Builder()
+                .routeLineColorResources(RouteLineColorResources.Builder()
+                    .routeDefaultColor(Color.parseColor(routeCasingColor))
+                    .inActiveRouteLegsColor(Color.parseColor(traversedRouteColor))
+                    .build()
+                )
+                .build()
+            )
             .withRouteLineBelowLayerId("road-label")
+            .displayRestrictedRoadSections(true)
             .build()
         routeLineApi = MapboxRouteLineApi(mapboxRouteLineOptions)
         routeLineView = MapboxRouteLineView(mapboxRouteLineOptions)
+
+        binding.mapView.location.addOnIndicatorPositionChangedListener(onPositionChangedListener)
 
         // start the trip session to being receiving location updates in free drive
         // and later when a route is set also receiving route progress updates
@@ -552,8 +590,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 RouteOptions.builder()
                     .applyDefaultNavigationOptions()
                     //.applyLanguageAndVoiceUnitOptions(context)
-                    .coordinatesList(routeWaypoints.toList())
-                    .profile(DirectionsCriteria.PROFILE_DRIVING)
+                    .coordinates(routeWaypoints.toList())
                     .steps(true)
                     .build(),
                 object : RouterCallback {
@@ -582,7 +619,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 }
             )
         } catch (ex: Exception) {
-            sendErrorToReact(ex.toString())
+            sendErrorToReact(ex.toString() + "||" + ex.getStackTrace().joinToString())
         }
     }
 
