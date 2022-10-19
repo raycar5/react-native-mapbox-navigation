@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Platform, findNodeHandle, requireNativeComponent, UIManager, StyleSheet } from 'react-native';
+import { Platform, findNodeHandle, requireNativeComponent, UIManager, StyleSheet, Image } from 'react-native';
 const MapboxNavigation = (props) => {
     return <RNMapboxNavigation style={styles.container} {...props}/>;
 };
@@ -52,7 +52,15 @@ const MapboxNavigationFreeDrive = React.forwardRef((props, ref) => {
             UIManager.dispatchViewManagerCommand(findNodeHandle(mapboxNavigationFreeDriveRef.current), UIManager.MapboxNavigationFreeDrive.Commands.fitCameraViaManager, [padding]);
         }
     };
-    return <RNMapboxNavigationFreeDrive ref={mapboxNavigationFreeDriveRef} style={styles.container} {...props}/>;
+    const getUserImage = () => {
+        if (Platform.OS === 'ios' || !props.userPuckImage) {
+            return props.userPuckImage;
+        }
+        else {
+            return (Image.resolveAssetSource(props.userPuckImage) || {}).uri;
+        }
+    };
+    return <RNMapboxNavigationFreeDrive ref={mapboxNavigationFreeDriveRef} style={styles.container} {...Object.assign(Object.assign({}, props), { userPuckImage: getUserImage() })}/>;
 });
 const RNMapboxNavigation = requireNativeComponent('MapboxNavigation', MapboxNavigation);
 const RNMapboxNavigationFreeDrive = requireNativeComponent('MapboxNavigationFreeDrive', MapboxNavigationFreeDrive);

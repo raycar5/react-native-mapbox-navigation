@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Platform, findNodeHandle, requireNativeComponent, UIManager, StyleSheet, NativeModules } from 'react-native';
+import { Platform, findNodeHandle, requireNativeComponent, UIManager, StyleSheet, Image } from 'react-native';
 
 import { IMapboxNavigationProps, IMapboxNavigationFreeDriveProps } from './typings';
 
@@ -98,7 +98,15 @@ const MapboxNavigationFreeDrive = React.forwardRef((props: IMapboxNavigationFree
     }
   }
 
-  return <RNMapboxNavigationFreeDrive ref={mapboxNavigationFreeDriveRef} style={styles.container} {...props} />;
+  const getUserImage = () => {
+    if (Platform.OS === 'ios' || !props.userPuckImage) {
+      return props.userPuckImage
+    } else {
+      return (Image.resolveAssetSource(props.userPuckImage) || {}).uri
+    }
+  }
+
+  return <RNMapboxNavigationFreeDrive ref={mapboxNavigationFreeDriveRef} style={styles.container} {...{...props, userPuckImage: getUserImage() }} />;
 });
 
 const RNMapboxNavigation = requireNativeComponent(
