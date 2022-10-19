@@ -68,6 +68,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var userPuckScale: NSNumber = 1.0
   @objc var destinationImage: UIImage?
   @objc var mapPadding: [NSNumber] = []
+  @objc var routeColor: NSString = "#2F7AC6"
   @objc var routeCasingColor: NSString = "#2F7AC6" {
     didSet {
       if (embedded == true && navigationMapView != nil) {
@@ -205,7 +206,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationMapView?.navigationCamera?.follow()
   }
 
-  @objc func follow() {
+  @objc func follow(padding: [NSNumber]) {
     navigationMapView?.navigationCamera?.follow()
   }
 

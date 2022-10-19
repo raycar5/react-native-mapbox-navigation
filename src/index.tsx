@@ -50,18 +50,18 @@ const MapboxNavigationFreeDrive = React.forwardRef((props: IMapboxNavigationFree
     }
   }
 
-  const follow = () => {
+  const follow = (padding = []) => {
     if (Platform.OS === "android") {
       UIManager.dispatchViewManagerCommand(
         findNodeHandle(mapboxNavigationFreeDriveRef.current),
         UIManager.MapboxNavigationFreeDrive.Commands.followViaManager,
-        []
+        [padding]
       )
     } else if (Platform.OS === "ios") {
       UIManager.dispatchViewManagerCommand(
         findNodeHandle(mapboxNavigationFreeDriveRef.current),
         UIManager.MapboxNavigationFreeDrive.Commands.followViaManager,
-        []
+        [padding]
       )
     }
   }

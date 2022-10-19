@@ -70,6 +70,7 @@ export interface IMapboxNavigationFreeDriveProps {
   logoPadding?: Coordinate;
   attributionVisible?: boolean;
   attributionPadding?: Coordinate;
+  routeColor?: string;
   routeCasingColor?: string;
   traversedRouteColor?: string;
   trafficUnknownColor?: string;

@@ -31,6 +31,8 @@ import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.scalebar.scalebar
 import com.mapbox.maps.plugin.gestures.*
+import com.mapbox.maps.plugin.attribution.*
+import com.mapbox.maps.plugin.logo.*
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -96,11 +98,12 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
     private var followZoomLevel: Double = 16.0
     private var showSpeedLimit: Boolean = true
-    private var speedLimitAnchor: ReadableArray? = null
+    private var speedLimitAnchor: Array<Double>? = null
     private var userPuckImage: ReadableMap? = null
     private var userPuckScale: Double = 1.0
     private var destinationImage: ReadableMap? = null
     private var mapPadding: Array<Double>? = null
+    private var routeColor: String = "#2F7AC6"
     private var routeCasingColor: String = "#2F7AC6"
     private var traversedRouteColor: String = "#FFFFFF"
     private var trafficUnknownColor: String = "#56A8FB"
@@ -115,9 +118,9 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var waypointStrokeOpacity: Int = 1
     private var waypointStrokeColor: String = "#FFFFFF"
     private var logoVisible: Boolean = true
-    private var logoPadding: ReadableArray? = null
+    private var logoPadding: Array<Double>? = null
     private var attributionVisible: Boolean = true
-    private var attributionPadding: ReadableArray? = null
+    private var attributionPadding: Array<Double>? = null
 
     private var currentOrigin: Point? = null
     private var currentDestination: Point? = null
@@ -168,36 +171,36 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
      * other elements are overlaid on top of the map (including instruction view, buttons, etc.)
      */
     private val pixelDensity = Resources.getSystem().displayMetrics.density
-    private val overviewPadding: EdgeInsets by lazy {
+    private var overviewPadding: EdgeInsets by lazy {
         EdgeInsets(
-            140.0 * pixelDensity,
-            40.0 * pixelDensity,
-            120.0 * pixelDensity,
-            40.0 * pixelDensity
+            0.0,
+            0.0,
+            0.0,
+            0.0
         )
     }
     private val landscapeOverviewPadding: EdgeInsets by lazy {
         EdgeInsets(
-            30.0 * pixelDensity,
-            380.0 * pixelDensity,
-            110.0 * pixelDensity,
-            20.0 * pixelDensity
+            0.0,
+            0.0,
+            0.0,
+            0.0
         )
     }
     private val followingPadding: EdgeInsets by lazy {
         EdgeInsets(
-            180.0 * pixelDensity,
-            40.0 * pixelDensity,
-            150.0 * pixelDensity,
-            40.0 * pixelDensity
+            0.0,
+            0.0,
+            0.0,
+            0.0
         )
     }
     private val landscapeFollowingPadding: EdgeInsets by lazy {
         EdgeInsets(
-            30.0 * pixelDensity,
-            380.0 * pixelDensity,
-            110.0 * pixelDensity,
-            40.0 * pixelDensity
+            0.0,
+            0.0,
+            0.0,
+            0.0
         )
     }
 
@@ -404,21 +407,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         // initialize Navigation Camera
         viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
-        
-        val padding = mapPadding
-
-        if (padding != null) {
-            viewportDataSource.followingPadding = EdgeInsets(
-                if (padding.size > 0) (padding.get(0) * pixelDensity) else 0.0,
-                if (padding.size > 1) (padding.get(1) * pixelDensity) else 0.0,
-                if (padding.size > 2) (padding.get(2) * pixelDensity) else 0.0,
-                if (padding.size > 3) (padding.get(3) * pixelDensity) else 0.0
-            )
-        } else {
-            viewportDataSource.followingPadding = EdgeInsets(0.0, 0.0, 0.0, 0.0)
-        }
-        
-        viewportDataSource.overviewPadding = overviewPadding
+        viewportDataSource.followingPadding = getPadding()
+        viewportDataSource.overviewPadding = getPadding()
         viewportDataSource.options.followingFrameOptions.centerUpdatesAllowed = true
         viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = true
         viewportDataSource.options.followingFrameOptions.bearingUpdatesAllowed = true
@@ -479,7 +469,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             .withVanishingRouteLineEnabled(true)
             .withRouteLineResources(RouteLineResources.Builder()
                 .routeLineColorResources(RouteLineColorResources.Builder()
-                    .routeDefaultColor(Color.parseColor(routeCasingColor))
+                    .routeDefaultColor(Color.parseColor(routeColor))
                     .inActiveRouteLegsColor(Color.parseColor(traversedRouteColor))
                     .build()
                 )
@@ -559,6 +549,52 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxNavigation.setRoutes(listOf())
     }
 
+    private fun getPadding(padding: Array<Double>?) {
+        val mainPadding = mapPadding
+        var top = 0.0
+        var left = 0.0
+        var bottom = 0.0
+        var right = 0.0
+        
+        if (padding != null) {
+            if (padding.size > 0) {
+                top = padding.get(0) * pixelDensity
+            } else if (mainPadding != null && mainPadding.size > 0) {
+                top = mainPadding.get(0) * pixelDensity
+            }
+
+            if (padding.size > 1) {
+                top = padding.get(1) * pixelDensity
+            } else if (mainPadding != null && mainPadding.size > 1) {
+                top = mainPadding.get(1) * pixelDensity
+            }
+
+            if (padding.size > 2) {
+                top = padding.get(2) * pixelDensity
+            } else if (mainPadding != null && mainPadding.size > 2) {
+                top = mainPadding.get(2) * pixelDensity
+            }
+
+            if (padding.size > 3) {
+                top = padding.get(3) * pixelDensity
+            } else if (mainPadding != null && mainPadding.size > 3) {
+                top = mainPadding.get(3) * pixelDensity
+            }
+        } else if (mainPadding != null) {
+            top = if (mainPadding.size > 0) (mainPadding.get(0) * pixelDensity) else 0.0
+            left = if (mainPadding.size > 1) (mainPadding.get(1) * pixelDensity) else 0.0
+            bottom = if (mainPadding.size > 2) (mainPadding.get(2) * pixelDensity) else 0.0
+            right = if (mainPadding.size > 3) (mainPadding.get(3) * pixelDensity) else 0.0
+        }
+
+        return EdgeInsets(
+            top,
+            left,
+            bottom,
+            right
+        )
+    }
+
     fun showRoute(origin: ReadableArray?, destination: ReadableArray?, waypoints: ReadableArray?, styles: ReadableArray?, legIndex: Int?, cameraType: String?, padding: ReadableArray?)  {
         try {
             var routeWaypoints = arrayOf<Point>()
@@ -589,6 +625,18 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 routeWaypoints.plus(Point.fromLngLat(destination.getDouble(0), destination.getDouble(1)))
             }
 
+            if (styles != null) {
+                for (ii in 0 until styles.size()) {
+                    val style = styles.getMap(ii)
+
+                    if (style != null) {
+                        if (style.hasKey("name")) {
+                            routeWaypointNames.plus(style.getString("name"))
+                        }
+                    }
+                }
+            }
+
             currentLegIndex = if (legIndex != null) legIndex!! else -1
 
             mapboxNavigation.requestRoutes(
@@ -596,6 +644,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                     .applyDefaultNavigationOptions()
                     //.applyLanguageAndVoiceUnitOptions(context)
                     .coordinatesList(routeWaypoints.asList())
+                    .waypointNamesList(routeWaypointNames.asList())
+                    .way
                     //.steps(true)
                     .build(),
                 object : RouterCallback {
@@ -611,8 +661,28 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                         mapboxNavigation.setRoutes(routes, if (legIndex != null) legIndex!! else -1)
 
                         if (cameraType == "follow") {
+                            var newPadding = arrayOf<Point>()
+
+                            if (padding != null) {
+                                for (ii in 0 until padding.size()) {
+                                    newPadding.plus(padding.getDouble(ii))
+                                }
+                            }
+
+                            viewportDataSource.followingPadding = getPadding(newPadding)
+
                             follow()
                         } else if (cameraType == "overview") {
+                            var newPadding = arrayOf<Point>()
+
+                            if (padding != null) {
+                                for (ii in 0 until padding.size()) {
+                                    newPadding.plus(padding.getDouble(ii))
+                                }
+                            }
+
+                            viewportDataSource.overviewPadding = getPadding(newPadding)
+
                             moveToOverview(padding)
                         }
                     }
@@ -638,15 +708,45 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         //
     }
     
-    fun follow() {
+    fun follow(padding: ReadableArray?) {) {
+        var newPadding = arrayOf<Point>()
+
+        if (padding != null) {
+            for (ii in 0 until padding.size()) {
+                newPadding.plus(padding.getDouble(ii))
+            }
+        }
+
+        viewportDataSource.followingPadding = getPadding(newPadding)
+
         navigationCamera.requestNavigationCameraToFollowing()
     }
     
     fun moveToOverview(padding: ReadableArray?) {
+        var newPadding = arrayOf<Point>()
+
+        if (padding != null) {
+            for (ii in 0 until padding.size()) {
+                newPadding.plus(padding.getDouble(ii))
+            }
+        }
+
+        viewportDataSource.overviewPadding = getPadding(newPadding)
+
         navigationCamera.requestNavigationCameraToOverview()
     }
     
     fun fitCamera(padding: ReadableArray?) {
+        var newPadding = arrayOf<Point>()
+
+        if (padding != null) {
+            for (ii in 0 until padding.size()) {
+                newPadding.plus(padding.getDouble(ii))
+            }
+        }
+
+        viewportDataSource.overviewPadding = getPadding(newPadding)
+
         navigationCamera.requestNavigationCameraToOverview()
     }
 
@@ -659,7 +759,17 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
 
     fun setSpeedLimitAnchor(speedLimitAnchor: ReadableArray?) {
-        this.speedLimitAnchor = speedLimitAnchor
+        if (speedLimitAnchor != null) {
+            var newAnchor = arrayOf<Double>()
+
+            for (ii in 0 until speedLimitAnchor.size()) {
+                newAnchor.plus(speedLimitAnchor.getDouble(ii))
+            }
+
+            this.speedLimitAnchor = newAnchor
+        } else {
+            this.speedLimitAnchor = null
+        }
     }
     
     fun setFollowZoomLevel(followZoomLevel: Double) {
@@ -697,15 +807,71 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
     
     fun setLogoPadding(logoPadding: ReadableArray?) {
-        this.logoPadding = logoPadding
+        if (logoPadding != null) {
+            var newPadding = arrayOf<Double>()
+
+            for (ii in 0 until logoPadding.size()) {
+                newPadding.plus(logoPadding.getDouble(ii))
+            }
+
+            this.logoPadding = newPadding
+
+            mapView.attribution.updateSettings {
+                marginTop = if (newPadding.size > 0) newPadding.get(0) else 0.0
+                marginLeft = if (newPadding.size > 1) newPadding.get(1) else 0.0
+                marginBottom = if (newPadding.size > 2) newPadding.get(2) else 0.0
+                marginRight = if (newPadding.size > 3) newPadding.get(3) else 0.0
+            }
+        } else {
+            this.logoPadding = null
+
+            mapView.attribution.updateSettings {
+                marginTop = 0.0
+                marginLeft = 0.0
+                marginBottom = 0.0
+                marginRight = 0.0
+            }
+        }
     }
     
     fun setAttributionVisible(attributionVisible: Boolean) {
         this.attributionVisible = attributionVisible
+
+        mapView.attribution.updateSettings {
+            enabled = attributionVisible
+        }
     }
     
     fun setAttributionPadding(attributionPadding: ReadableArray?) {
-        this.attributionPadding = attributionPadding
+        if (attributionPadding != null) {
+            var newPadding = arrayOf<Double>()
+
+            for (ii in 0 until attributionPadding.size()) {
+                newPadding.plus(attributionPadding.getDouble(ii))
+            }
+
+            this.attributionPadding = newPadding
+
+            mapView.attribution.updateSettings {
+                marginTop = if (newPadding.size > 0) newPadding.get(0) else 0.0
+                marginLeft = if (newPadding.size > 1) newPadding.get(1) else 0.0
+                marginBottom = if (newPadding.size > 2) newPadding.get(2) else 0.0
+                marginRight = if (newPadding.size > 3) newPadding.get(3) else 0.0
+            }
+        } else {
+            this.attributionPadding = null
+
+            mapView.attribution.updateSettings {
+                marginTop = 0.0
+                marginLeft = 0.0
+                marginBottom = 0.0
+                marginRight = 0.0
+            }
+        }
+    }
+    
+    fun setRouteColor(routeColor: String) {
+        this.routeColor = routeColor
     }
     
     fun setRouteCasingColor(routeCasingColor: String) {

@@ -69,7 +69,7 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
         when (commandId) {
             1 -> view.showRoute(args?.getArray(0), args?.getArray(1), args?.getArray(2), args?.getArray(3), args?.getInt(4), args?.getString(5), args?.getArray(6))
             2 -> view.clearRoute()
-            3 -> view.follow()
+            3 -> view.follow(args?.getArray(0))
             4 -> view.moveToOverview(args?.getArray(0))
             5 -> view.fitCamera(args?.getArray(0))
         }
@@ -128,6 +128,11 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
     @ReactProp(name = "attributionPadding")
     fun setAttributionPadding(view: MapboxNavigationFreeDriveView, attributionPadding: ReadableArray?) {
         view.setAttributionPadding(attributionPadding)
+    }
+    
+    @ReactProp(name = "routeColor")
+    fun setRouteColor(view: MapboxNavigationFreeDriveView, routeColor: String) {
+        view.setRouteColor(routeColor)
     }
     
     @ReactProp(name = "routeCasingColor")
