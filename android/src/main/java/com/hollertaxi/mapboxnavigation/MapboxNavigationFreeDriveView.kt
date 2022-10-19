@@ -597,32 +597,32 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
     fun showRoute(origin: ReadableArray?, destination: ReadableArray?, waypoints: ReadableArray?, styles: ReadableArray?, legIndex: Int?, cameraType: String?, padding: ReadableArray?)  {
         try {
-            var routeWaypoints = arrayOf<Point>()
-            var routeWaypointNames = arrayOf<String>()
+            var routeWaypoints = mutableListOf<Point>()
+            var routeWaypointNames = mutableListOf<String>()
 
             if (origin != null) {
                 currentOrigin = Point.fromLngLat(origin.getDouble(0), origin.getDouble(1))
-                routeWaypoints.plus(Point.fromLngLat(origin.getDouble(0), origin.getDouble(1)))
+                routeWaypoints.add(Point.fromLngLat(origin.getDouble(0), origin.getDouble(1)))
             }
 
             if (waypoints != null) {
-                var newCurrentWaypoints = arrayOf<Point>()
+                var newCurrentWaypoints = mutableListOf<Point>()
 
                 for (ii in 0 until waypoints.size()) {
                     val waypoint = waypoints.getArray(ii)
 
                     if (waypoint != null) {
-                        newCurrentWaypoints.plus(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
-                        routeWaypoints.plus(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
+                        newCurrentWaypoints.add(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
+                        routeWaypoints.add(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
                     }
                 }
 
-                currentWaypoints = newCurrentWaypoints
+                currentWaypoints = newCurrentWaypoints.toTypedArray()
             }
 
             if (destination != null) {
                 currentDestination = Point.fromLngLat(destination.getDouble(0), destination.getDouble(1))
-                routeWaypoints.plus(Point.fromLngLat(destination.getDouble(0), destination.getDouble(1)))
+                routeWaypoints.add(Point.fromLngLat(destination.getDouble(0), destination.getDouble(1)))
             }
 
             if (styles != null) {
@@ -631,7 +631,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
                     if (style != null) {
                         if (style.hasKey("name")) {
-                            routeWaypointNames.plus(style.getString("name")!!)
+                            routeWaypointNames.add(style.getString("name")!!)
                         }
                     }
                 }
@@ -688,43 +688,43 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
     
     fun follow(padding: ReadableArray?) {
-        var newPadding = arrayOf<Double>()
+        var newPadding = mutableListOf<Double>()
 
         if (padding != null) {
             for (ii in 0 until padding.size()) {
-                newPadding.plus(padding.getDouble(ii))
+                newPadding.add(padding.getDouble(ii))
             }
         }
 
-        viewportDataSource.followingPadding = getPadding(newPadding)
+        viewportDataSource.followingPadding = getPadding(newPadding.toTypedArray())
 
         navigationCamera.requestNavigationCameraToFollowing()
     }
     
     fun moveToOverview(padding: ReadableArray?) {
-        var newPadding = arrayOf<Double>()
+        var newPadding = mutableListOf<Double>()
 
         if (padding != null) {
             for (ii in 0 until padding.size()) {
-                newPadding.plus(padding.getDouble(ii))
+                newPadding.add(padding.getDouble(ii))
             }
         }
 
-        viewportDataSource.overviewPadding = getPadding(newPadding)
+        viewportDataSource.overviewPadding = getPadding(newPadding.toTypedArray())
 
         navigationCamera.requestNavigationCameraToOverview()
     }
     
     fun fitCamera(padding: ReadableArray?) {
-        var newPadding = arrayOf<Double>()
+        var newPadding = mutableListOf<Double>()
 
         if (padding != null) {
             for (ii in 0 until padding.size()) {
-                newPadding.plus(padding.getDouble(ii))
+                newPadding.add(padding.getDouble(ii))
             }
         }
 
-        viewportDataSource.overviewPadding = getPadding(newPadding)
+        viewportDataSource.overviewPadding = getPadding(newPadding.toTypedArray())
 
         navigationCamera.requestNavigationCameraToOverview()
     }
@@ -739,13 +739,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
     fun setSpeedLimitAnchor(speedLimitAnchor: ReadableArray?) {
         if (speedLimitAnchor != null) {
-            var newAnchor = arrayOf<Double>()
+            var newAnchor = mutableListOf<Double>()
 
             for (ii in 0 until speedLimitAnchor.size()) {
-                newAnchor.plus(speedLimitAnchor.getDouble(ii))
+                newAnchor.add(speedLimitAnchor.getDouble(ii))
             }
 
-            this.speedLimitAnchor = newAnchor
+            this.speedLimitAnchor = newAnchor.toTypedArray()
         } else {
             this.speedLimitAnchor = null
         }
@@ -769,13 +769,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     
     fun setMapPadding(mapPadding: ReadableArray?) {
         if (mapPadding != null) {
-            var newPadding = arrayOf<Double>()
+            var newPadding = mutableListOf<Double>()
 
             for (ii in 0 until mapPadding.size()) {
-                newPadding.plus(mapPadding.getDouble(ii))
+                newPadding.add(mapPadding.getDouble(ii))
             }
 
-            this.mapPadding = newPadding
+            this.mapPadding = newPadding.toTypedArray()
         } else {
             this.mapPadding = null
         }
@@ -791,19 +791,19 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     
     fun setLogoPadding(logoPadding: ReadableArray?) {
         if (logoPadding != null) {
-            var newPadding = arrayOf<Double>()
+            var newPadding = mutableListOf<Double>()
 
             for (ii in 0 until logoPadding.size()) {
-                newPadding.plus(logoPadding.getDouble(ii))
+                newPadding.add(logoPadding.getDouble(ii))
             }
 
-            this.logoPadding = newPadding
+            this.logoPadding = newPadding.toTypedArray()
 
             binding.mapView.logo.updateSettings {
-                marginTop = if (newPadding.size > 0) newPadding.get(0).toFloat() else 0.0f
-                marginLeft = if (newPadding.size > 1) newPadding.get(1).toFloat() else 0.0f
-                marginBottom = if (newPadding.size > 2) newPadding.get(2).toFloat() else 0.0f
-                marginRight = if (newPadding.size > 3) newPadding.get(3).toFloat() else 0.0f
+                marginTop = if (newPadding.size > 0) newPadding.getOrNull(0).toFloat() else 0.0f
+                marginLeft = if (newPadding.size > 1) newPadding.getOrNull(1).toFloat() else 0.0f
+                marginBottom = if (newPadding.size > 2) newPadding.getOrNull(2).toFloat() else 0.0f
+                marginRight = if (newPadding.size > 3) newPadding.getOrNull(3).toFloat() else 0.0f
             }
         } else {
             this.logoPadding = null
@@ -827,19 +827,19 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     
     fun setAttributionPadding(attributionPadding: ReadableArray?) {
         if (attributionPadding != null) {
-            var newPadding = arrayOf<Double>()
+            var newPadding = mutableListOf<Double>()
 
             for (ii in 0 until attributionPadding.size()) {
-                newPadding.plus(attributionPadding.getDouble(ii))
+                newPadding.add(attributionPadding.getDouble(ii))
             }
 
-            this.attributionPadding = newPadding
+            this.attributionPadding = newPadding.toTypedArray()
 
             binding.mapView.attribution.updateSettings {
-                marginTop = if (newPadding.size > 0) newPadding.get(0).toFloat() else 0.0f
-                marginLeft = if (newPadding.size > 1) newPadding.get(1).toFloat() else 0.0f
-                marginBottom = if (newPadding.size > 2) newPadding.get(2).toFloat() else 0.0f
-                marginRight = if (newPadding.size > 3) newPadding.get(3).toFloat() else 0.0f
+                marginTop = if (newPadding.size > 0) newPadding.getOrNull(0).toFloat() else 0.0f
+                marginLeft = if (newPadding.size > 1) newPadding.getOrNull(1).toFloat() else 0.0f
+                marginBottom = if (newPadding.size > 2) newPadding.getOrNull(2).toFloat() else 0.0f
+                marginRight = if (newPadding.size > 3) newPadding.getOrNull(3).toFloat() else 0.0f
             }
         } else {
             this.attributionPadding = null
