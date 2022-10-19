@@ -171,7 +171,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
      * other elements are overlaid on top of the map (including instruction view, buttons, etc.)
      */
     private val pixelDensity = Resources.getSystem().displayMetrics.density
-    private var overviewPadding: EdgeInsets by lazy {
+    private val overviewPadding: EdgeInsets by lazy {
         EdgeInsets(
             0.0,
             0.0,
@@ -549,7 +549,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxNavigation.setRoutes(listOf())
     }
 
-    private fun getPadding(padding: Array<Double>?) {
+    private fun getPadding(padding: Array<Double>?): EdgeInsets {
         val mainPadding = mapPadding
         var top = 0.0
         var left = 0.0
@@ -688,7 +688,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
     
     fun follow(padding: ReadableArray?) {
-        var newPadding = arrayOf<Point>()
+        var newPadding = arrayOf<Double>()
 
         if (padding != null) {
             for (ii in 0 until padding.size()) {
@@ -702,7 +702,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
     
     fun moveToOverview(padding: ReadableArray?) {
-        var newPadding = arrayOf<Point>()
+        var newPadding = arrayOf<Double>()
 
         if (padding != null) {
             for (ii in 0 until padding.size()) {
@@ -716,7 +716,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
     
     fun fitCamera(padding: ReadableArray?) {
-        var newPadding = arrayOf<Point>()
+        var newPadding = arrayOf<Double>()
 
         if (padding != null) {
             for (ii in 0 until padding.size()) {
@@ -795,7 +795,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
             this.logoPadding = newPadding
 
-            mapView.attribution.updateSettings {
+            binding.mapView.attribution.updateSettings {
                 marginTop = if (newPadding.size > 0) newPadding.get(0) else 0.0
                 marginLeft = if (newPadding.size > 1) newPadding.get(1) else 0.0
                 marginBottom = if (newPadding.size > 2) newPadding.get(2) else 0.0
@@ -804,7 +804,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         } else {
             this.logoPadding = null
 
-            mapView.attribution.updateSettings {
+            binding.mapView.attribution.updateSettings {
                 marginTop = 0.0
                 marginLeft = 0.0
                 marginBottom = 0.0
