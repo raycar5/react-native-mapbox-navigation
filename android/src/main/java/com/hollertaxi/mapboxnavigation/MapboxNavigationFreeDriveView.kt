@@ -784,7 +784,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     fun setLogoVisible(logoVisible: Boolean) {
         this.logoVisible = logoVisible
 
-        mapView.logo.updateSettings {
+        binding.mapView.logo.updateSettings {
             enabled = logoVisible
         }
     }
@@ -800,19 +800,19 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             this.logoPadding = newPadding
 
             binding.mapView.logo.updateSettings {
-                marginTop = if (newPadding.size > 0) newPadding.get(0).toFloat() else 0.0
-                marginLeft = if (newPadding.size > 1) newPadding.get(1).toFloat() else 0.0
-                marginBottom = if (newPadding.size > 2) newPadding.get(2).toFloat() else 0.0
-                marginRight = if (newPadding.size > 3) newPadding.get(3).toFloat() else 0.0
+                marginTop = if (newPadding.size > 0) newPadding.get(0).toFloat() else 0.0f
+                marginLeft = if (newPadding.size > 1) newPadding.get(1).toFloat() else 0.0f
+                marginBottom = if (newPadding.size > 2) newPadding.get(2).toFloat() else 0.0f
+                marginRight = if (newPadding.size > 3) newPadding.get(3).toFloat() else 0.0f
             }
         } else {
             this.logoPadding = null
 
             binding.mapView.logo.updateSettings {
-                marginTop = 0.0
-                marginLeft = 0.0
-                marginBottom = 0.0
-                marginRight = 0.0
+                marginTop = 0.0f
+                marginLeft = 0.0f
+                marginBottom = 0.0f
+                marginRight = 0.0f
             }
         }
     }
@@ -836,19 +836,19 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             this.attributionPadding = newPadding
 
             binding.mapView.attribution.updateSettings {
-                marginTop = if (newPadding.size > 0) newPadding.get(0).toFloat() else 0.0
-                marginLeft = if (newPadding.size > 1) newPadding.get(1).toFloat() else 0.0
-                marginBottom = if (newPadding.size > 2) newPadding.get(2).toFloat() else 0.0
-                marginRight = if (newPadding.size > 3) newPadding.get(3).toFloat() else 0.0
+                marginTop = if (newPadding.size > 0) newPadding.get(0).toFloat() else 0.0f
+                marginLeft = if (newPadding.size > 1) newPadding.get(1).toFloat() else 0.0f
+                marginBottom = if (newPadding.size > 2) newPadding.get(2).toFloat() else 0.0f
+                marginRight = if (newPadding.size > 3) newPadding.get(3).toFloat() else 0.0f
             }
         } else {
             this.attributionPadding = null
 
             binding.mapView.attribution.updateSettings {
-                marginTop = 0.0
-                marginLeft = 0.0
-                marginBottom = 0.0
-                marginRight = 0.0
+                marginTop = 0.0f
+                marginLeft = 0.0f
+                marginBottom = 0.0f
+                marginRight = 0.0f
             }
         }
     }
