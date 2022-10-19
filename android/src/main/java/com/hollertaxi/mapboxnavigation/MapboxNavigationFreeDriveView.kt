@@ -517,10 +517,10 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
 
     private fun onDestroy() {
+        MapboxNavigationProvider.destroy()
         routeLineApi.cancel()
         routeLineView.cancel()
-        binding.mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
-        MapboxNavigationProvider.destroy()
+        //binding.mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
     }
 
     private fun sendErrorToReact(error: String?) {
