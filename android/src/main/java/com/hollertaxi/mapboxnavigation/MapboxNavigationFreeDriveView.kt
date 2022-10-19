@@ -643,8 +643,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 RouteOptions.builder()
                     .applyDefaultNavigationOptions()
                     //.applyLanguageAndVoiceUnitOptions(context)
-                    .coordinatesList(routeWaypoints.asList())
-                    .waypointNamesList(routeWaypointNames.asList())
+                    .coordinatesList(routeWaypoints.toList())
+                    .waypointNamesList(routeWaypointNames.toList())
                     //.steps(true)
                     .build(),
                 object : RouterCallback {
