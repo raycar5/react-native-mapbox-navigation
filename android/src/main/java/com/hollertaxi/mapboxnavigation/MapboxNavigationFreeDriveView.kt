@@ -407,8 +407,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         // initialize Navigation Camera
         viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
-        viewportDataSource.followingPadding = getPadding()
-        viewportDataSource.overviewPadding = getPadding()
+        viewportDataSource.followingPadding = getPadding(null)
+        viewportDataSource.overviewPadding = getPadding(null)
         viewportDataSource.options.followingFrameOptions.centerUpdatesAllowed = true
         viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = true
         viewportDataSource.options.followingFrameOptions.bearingUpdatesAllowed = true
@@ -631,7 +631,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
                     if (style != null) {
                         if (style.hasKey("name")) {
-                            routeWaypointNames.plus(style.getString("name"))
+                            routeWaypointNames.plus(style.getString("name")!!)
                         }
                     }
                 }
@@ -645,7 +645,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                     //.applyLanguageAndVoiceUnitOptions(context)
                     .coordinatesList(routeWaypoints.asList())
                     .waypointNamesList(routeWaypointNames.asList())
-                    .way
                     //.steps(true)
                     .build(),
                 object : RouterCallback {
@@ -661,28 +660,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                         mapboxNavigation.setRoutes(routes, if (legIndex != null) legIndex!! else -1)
 
                         if (cameraType == "follow") {
-                            var newPadding = arrayOf<Point>()
-
-                            if (padding != null) {
-                                for (ii in 0 until padding.size()) {
-                                    newPadding.plus(padding.getDouble(ii))
-                                }
-                            }
-
-                            viewportDataSource.followingPadding = getPadding(newPadding)
-
-                            follow()
+                            follow(padding)
                         } else if (cameraType == "overview") {
-                            var newPadding = arrayOf<Point>()
-
-                            if (padding != null) {
-                                for (ii in 0 until padding.size()) {
-                                    newPadding.plus(padding.getDouble(ii))
-                                }
-                            }
-
-                            viewportDataSource.overviewPadding = getPadding(newPadding)
-
                             moveToOverview(padding)
                         }
                     }
@@ -708,7 +687,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         //
     }
     
-    fun follow(padding: ReadableArray?) {) {
+    fun follow(padding: ReadableArray?) {
         var newPadding = arrayOf<Point>()
 
         if (padding != null) {
