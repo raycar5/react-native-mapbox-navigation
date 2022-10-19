@@ -783,6 +783,10 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     
     fun setLogoVisible(logoVisible: Boolean) {
         this.logoVisible = logoVisible
+
+        mapView.logo.updateSettings {
+            enabled = logoVisible
+        }
     }
     
     fun setLogoPadding(logoPadding: ReadableArray?) {
@@ -795,16 +799,16 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
             this.logoPadding = newPadding
 
-            binding.mapView.attribution.updateSettings {
-                marginTop = if (newPadding.size > 0) newPadding.get(0) else 0.0
-                marginLeft = if (newPadding.size > 1) newPadding.get(1) else 0.0
-                marginBottom = if (newPadding.size > 2) newPadding.get(2) else 0.0
-                marginRight = if (newPadding.size > 3) newPadding.get(3) else 0.0
+            binding.mapView.logo.updateSettings {
+                marginTop = if (newPadding.size > 0) newPadding.get(0).toFloat() else 0.0
+                marginLeft = if (newPadding.size > 1) newPadding.get(1).toFloat() else 0.0
+                marginBottom = if (newPadding.size > 2) newPadding.get(2).toFloat() else 0.0
+                marginRight = if (newPadding.size > 3) newPadding.get(3).toFloat() else 0.0
             }
         } else {
             this.logoPadding = null
 
-            binding.mapView.attribution.updateSettings {
+            binding.mapView.logo.updateSettings {
                 marginTop = 0.0
                 marginLeft = 0.0
                 marginBottom = 0.0
@@ -816,7 +820,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     fun setAttributionVisible(attributionVisible: Boolean) {
         this.attributionVisible = attributionVisible
 
-        mapView.attribution.updateSettings {
+        binding.mapView.attribution.updateSettings {
             enabled = attributionVisible
         }
     }
@@ -831,16 +835,16 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
             this.attributionPadding = newPadding
 
-            mapView.attribution.updateSettings {
-                marginTop = if (newPadding.size > 0) newPadding.get(0) else 0.0
-                marginLeft = if (newPadding.size > 1) newPadding.get(1) else 0.0
-                marginBottom = if (newPadding.size > 2) newPadding.get(2) else 0.0
-                marginRight = if (newPadding.size > 3) newPadding.get(3) else 0.0
+            binding.mapView.attribution.updateSettings {
+                marginTop = if (newPadding.size > 0) newPadding.get(0).toFloat() else 0.0
+                marginLeft = if (newPadding.size > 1) newPadding.get(1).toFloat() else 0.0
+                marginBottom = if (newPadding.size > 2) newPadding.get(2).toFloat() else 0.0
+                marginRight = if (newPadding.size > 3) newPadding.get(3).toFloat() else 0.0
             }
         } else {
             this.attributionPadding = null
 
-            mapView.attribution.updateSettings {
+            binding.mapView.attribution.updateSettings {
                 marginTop = 0.0
                 marginLeft = 0.0
                 marginBottom = 0.0
