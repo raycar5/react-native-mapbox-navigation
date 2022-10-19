@@ -10,11 +10,13 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.Toast
 import android.graphics.Color
+import android.net.Uri
 import androidx.core.content.ContextCompat
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.views.imagehelper.ResourceDrawableIdHelper
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -99,9 +101,9 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var followZoomLevel: Double = 16.0
     private var showSpeedLimit: Boolean = true
     private var speedLimitAnchor: Array<Double>? = null
-    private var userPuckImage: ReadableMap? = null
+    private var userPuckImage: String? = null
     private var userPuckScale: Double = 1.0
-    private var destinationImage: ReadableMap? = null
+    private var destinationImage: String? = null
     private var mapPadding: Array<Double>? = null
     private var routeColor: String = "#2F7AC6"
     private var routeCasingColor: String = "#2F7AC6"
@@ -366,15 +368,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         binding.mapView.location.apply {
             val puckImage = userPuckImage
 
-            if (puckImage != null && puckImage.hasKey("uri")) {
-                var name = puckImage.getString("uri")!!.toLowerCase().replace("-", "_")
-                val resourceId = context.getResources().getIdentifier(name.substring(name.lastIndexOf("/") + 1, name.lastIndexOf(".")), "drawable", context.getPackageName())
+            if (puckImage != null) {
+                //contentUri.getPath()
+                //var name = puckImage!!.toLowerCase().replace("-", "_")
+                //val resourceId = context.getResources().getIdentifier(name.substring(name.lastIndexOf("/") + 1, name.lastIndexOf(".")), "drawable", context.getPackageName())
 
                 this.locationPuck = LocationPuck2D(
-                    bearingImage = ContextCompat.getDrawable(
-                        context,
-                        resourceId
-                    )
+                    bearingImage = ResourceDrawableIdHelper.getInstance().getResourceDrawable(context, puckImage)
                 )
             } else {
                 this.locationPuck = LocationPuck2D(
@@ -755,7 +755,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.followZoomLevel = followZoomLevel
     }
     
-    fun setUserPuckImage(userPuckImage: ReadableMap?) {
+    fun setUserPuckImage(userPuckImage: String?) {
         this.userPuckImage = userPuckImage
     }
     
@@ -763,7 +763,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.userPuckScale = userPuckScale
     }
     
-    fun setDestinationImage(destinationImage: ReadableMap?) {
+    fun setDestinationImage(destinationImage: String?) {
         this.destinationImage = destinationImage
     }
     
