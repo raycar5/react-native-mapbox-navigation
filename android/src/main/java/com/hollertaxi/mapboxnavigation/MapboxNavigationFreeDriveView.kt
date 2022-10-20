@@ -800,10 +800,10 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             this.logoPadding = newPadding.toTypedArray()
 
             binding.mapView.logo.updateSettings {
-                marginTop = if (newPadding.size > 0) newPadding.getOrElse(0, 0.0).toFloat() else 0.0f
-                marginLeft = if (newPadding.size > 1) newPadding.getOrElse(1, 0.0).toFloat() else 0.0f
-                marginBottom = if (newPadding.size > 2) newPadding.getOrElse(2, 0.0).toFloat() else 0.0f
-                marginRight = if (newPadding.size > 3) newPadding.getOrElse(3, 0.0).toFloat() else 0.0f
+                marginTop = if (newPadding.size > 0) newPadding.get(0).toFloat() else 0.0f
+                marginLeft = if (newPadding.size > 1) newPadding.get(1).toFloat() else 0.0f
+                marginBottom = if (newPadding.size > 2) newPadding.get(2).toFloat() else 0.0f
+                marginRight = if (newPadding.size > 3) newPadding.get(3).toFloat() else 0.0f
             }
         } else {
             this.logoPadding = null
@@ -836,10 +836,10 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             this.attributionPadding = newPadding.toTypedArray()
 
             binding.mapView.attribution.updateSettings {
-                marginTop = if (newPadding.size > 0) newPadding.getOrElse(0, 0.0).toFloat() else 0.0f
-                marginLeft = if (newPadding.size > 1) newPadding.getOrElse(1, 0.0).toFloat() else 0.0f
-                marginBottom = if (newPadding.size > 2) newPadding.getOrElse(2, 0.0).toFloat() else 0.0f
-                marginRight = if (newPadding.size > 3) newPadding.getOrElse(3, 0.0).toFloat() else 0.0f
+                marginTop = if (newPadding.size > 0) newPadding.get(0).toFloat() else 0.0f
+                marginLeft = if (newPadding.size > 1) newPadding.get(1).toFloat() else 0.0f
+                marginBottom = if (newPadding.size > 2) newPadding.get(2).toFloat() else 0.0f
+                marginRight = if (newPadding.size > 3) newPadding.get(3).toFloat() else 0.0f
             }
         } else {
             this.attributionPadding = null
