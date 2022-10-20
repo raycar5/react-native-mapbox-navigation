@@ -140,9 +140,29 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
         view.setRouteCasingColor(routeCasingColor)
     }
     
+    @ReactProp(name = "routeClosureColor")
+    fun setRouteClosureColor(view: MapboxNavigationFreeDriveView, routeClosureColor: String) {
+        view.setRouteClosureColor(routeClosureColor)
+    }
+    
+    @ReactProp(name = "alternateRouteColor")
+    fun setAlternateRouteColor(view: MapboxNavigationFreeDriveView, alternateRouteColor: String) {
+        view.setAlternateRouteColor(alternateRouteColor)
+    }
+    
+    @ReactProp(name = "alternateRouteCasingColor")
+    fun setAlternateRouteCasingColor(view: MapboxNavigationFreeDriveView, alternateRouteCasingColor: String) {
+        view.setAlternateRouteCasingColor(alternateRouteCasingColor)
+    }
+    
     @ReactProp(name = "traversedRouteColor")
-    fun setTraversedRouteColor(view: MapboxNavigationFreeDriveView, traversedRouteColor: String) {
+    fun setTraversedRouteColor(view: MapboxNavigationFreeDriveView, traversedRouteColor: String?) {
         view.setTraversedRouteColor(traversedRouteColor)
+    }
+    
+    @ReactProp(name = "traversedRouteCasingColor")
+    fun setTraversedRouteCasingColor(view: MapboxNavigationFreeDriveView, traversedRouteCasingColor: String?) {
+        view.setTraversedRouteCasingColor(traversedRouteCasingColor)
     }
     
     @ReactProp(name = "trafficUnknownColor")
@@ -168,6 +188,11 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
     @ReactProp(name = "trafficSevereColor")
     fun setTrafficSevereColor(view: MapboxNavigationFreeDriveView, trafficSevereColor: String) {
         view.setTrafficSevereColor(trafficSevereColor)
+    }
+    
+    @ReactProp(name = "restrictedRoadColor")
+    fun setRestrictedRoadColor(view: MapboxNavigationFreeDriveView, restrictedRoadColor: String) {
+        view.setRestrictedRoadColor(restrictedRoadColor)
     }
     
     @ReactProp(name = "waypointColor")

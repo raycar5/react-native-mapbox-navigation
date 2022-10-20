@@ -68,7 +68,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var userPuckScale: NSNumber = 1.0
   @objc var destinationImage: UIImage?
   @objc var mapPadding: [NSNumber] = []
-  @objc var routeColor: NSString = "#2F7AC6"
+  @objc var routeColor: NSString = "#56A8FB"
   @objc var routeCasingColor: NSString = "#2F7AC6" {
     didSet {
       if (embedded == true && navigationMapView != nil) {
@@ -76,13 +76,21 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       }
     }
   }
-  @objc var traversedRouteColor: NSString = "#FFFFFF" {
+  @objc var routeClosureColor: NSString = "#000000"
+  @objc var alternateRouteColor: NSString = "#8694A5"
+  @objc var alternateRouteCasingColor: NSString = "#727E8D"
+  @objc var traversedRouteColor: NSString? {
     didSet {
       if (embedded == true && navigationMapView != nil) {
-        navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor as String)
+        if (traversedRouteColor != nil) {
+          navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor as String)
+        } else {
+          navigationMapView.traversedRouteColor = UIColor.clear
+        }
       }
     }
   }
+  @objc var traversedRouteCasingColor: NSString?
   @objc var trafficUnknownColor: NSString = "#56A8FB" {
     didSet {
       if (embedded == true && navigationMapView != nil) {
@@ -97,27 +105,28 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       }
     }
   }
-  @objc var trafficModerateColor: NSString = "#FF9500" {
+  @objc var trafficModerateColor: NSString = "#ff9500" {
     didSet {
       if (embedded == true && navigationMapView != nil) {
         navigationMapView.trafficModerateColor = UIColor(hex: trafficModerateColor as String)
       }
     }
   }
-  @objc var trafficHeavyColor: NSString = "#FF4D4D" {
+  @objc var trafficHeavyColor: NSString = "#ff4d4d" {
     didSet {
       if (embedded == true && navigationMapView != nil) {
         navigationMapView.trafficHeavyColor = UIColor(hex: trafficHeavyColor as String)
       }
     }
   }
-  @objc var trafficSevereColor: NSString = "#8F2447" {
+  @objc var trafficSevereColor: NSString = "#8f2447" {
     didSet {
       if (embedded == true && navigationMapView != nil) {
         navigationMapView.trafficSevereColor = UIColor(hex: trafficSevereColor as String)
       }
     }
   }
+  @objc var restrictedRoadColor: NSString = "#000000"
   @objc var waypointColor: NSString = "#2F7AC6"
   @objc var waypointRadius: NSNumber = 8
   @objc var waypointOpacity: NSNumber = 1

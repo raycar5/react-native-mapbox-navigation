@@ -105,14 +105,19 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var userPuckScale: Double = 1.0
     private var destinationImage: String? = null
     private var mapPadding: Array<Double>? = null
-    private var routeColor: String = "#2F7AC6"
+    private var routeColor: String = "#56A8FB"
     private var routeCasingColor: String = "#2F7AC6"
-    private var traversedRouteColor: String = "#FFFFFF"
+    private var routeClosureColor: String = "#000000"
+    private var alternateRouteColor: String = "#8694A5"
+    private var alternateRouteCasingColor: String = "#727E8D"
+    private var traversedRouteColor: String? = null
+    private var traversedRouteCasingColor: String? = null
     private var trafficUnknownColor: String = "#56A8FB"
     private var trafficLowColor: String = "#56A8FB"
-    private var trafficModerateColor: String = "#FF9500"
-    private var trafficHeavyColor: String = "#FF4D4D"
-    private var trafficSevereColor: String = "#8F2447"
+    private var trafficModerateColor: String = "#ff9500"
+    private var trafficHeavyColor: String = "#ff4d4d"
+    private var trafficSevereColor: String = "#8f2447"
+    private var restrictedRoadColor: String = "#000000"
     private var waypointColor: String = "#2F7AC6"
     private var waypointRadius: Int = 8
     private var waypointOpacity: Int = 1
@@ -448,14 +453,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             context
                 .getJSModule(RCTEventEmitter::class.java)
                 .receiveEvent(id, "onTrackingStateChange", event)
-            // shows/hide the recenter button depending on the camera state
-            //when (navigationCameraState) {
-                //NavigationCameraState.TRANSITION_TO_FOLLOWING,
-                //NavigationCameraState.FOLLOWING -> binding.recenter.visibility = View.INVISIBLE
-                //NavigationCameraState.TRANSITION_TO_OVERVIEW,
-                //NavigationCameraState.OVERVIEW,
-                //NavigationCameraState.IDLE -> binding.recenter.visibility = View.VISIBLE
-            //}
         }
 
         // make sure to use the same DistanceFormatterOptions across different features
@@ -470,6 +467,25 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             .withRouteLineResources(RouteLineResources.Builder()
                 .routeLineColorResources(RouteLineColorResources.Builder()
                     .routeDefaultColor(Color.parseColor(routeColor))
+                    .routeCasingColor(Color.parseColor(routeCasingColor))
+                    .routeClosureColor(Color.parseColor(routeClosureColor))
+                    .restrictedRoadColor(Color.parseColor(restrictedRoadColor))
+                    .routeLineTraveledColor(if (traversedRouteColor != null) Color.parseColor(traversedRouteColor) else Color.TRANSPARENT)
+                    .routeLineTraveledCasingColor(if (traversedRouteCasingColor != null) ? Color.parseColor(traversedRouteCasingColor) else Color.TRANSPARENT)
+                    .routeUnknownCongestionColor(Color.parseColor(trafficUnknownColor))
+                    .routeLowCongestionColor(Color.parseColor(trafficLowColor))
+                    .routeModerateCongestionColor(Color.parseColor(trafficModerateColor))
+                    .routeHeavyCongestionColor(Color.parseColor(trafficHeavyColor))
+                    .routeSevereCongestionColor(Color.parseColor(trafficSevereColor))
+                    .alternativeRouteDefaultColor(Color.parseColor(alternateRouteColor))
+                    .alternativeRouteCasingColor(Color.parseColor(alternateRouteCasingColor))
+                    .alternativeRouteClosureColor(Color.parseColor(routeClosureColor))
+                    .alternativeRouteRestrictedRoadColor(Color.parseColor(restrictedRoadColor))
+                    .alternativeRouteUnknownCongestionColor(Color.parseColor(trafficUnknownColor))
+                    .alternativeRouteLowCongestionColor(Color.parseColor(trafficLowColor))
+                    .alternativeRouteModerateCongestionColor(Color.parseColor(trafficModerateColor))
+                    .alternativeRouteHeavyCongestionColor(Color.parseColor(trafficHeavyColor))
+                    .alternativeRouteSevereCongestionColor(Color.parseColor(trafficSevereColor))
                     .inActiveRouteLegsColor(Color.parseColor(traversedRouteColor))
                     .build()
                 )
@@ -491,7 +507,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxMap.loadStyleUri(
             Style.LIGHT
         ) {
-            //
+            updateLogoPadding()
+            updateAttributionPadding()
         }
 
         mapboxNavigation.registerLocationObserver(locationObserver)
@@ -504,23 +521,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         //mapboxNavigation.registerRoutesObserver(routesObserver)
         //mapboxNavigation.registerLocationObserver(locationObserver)
         //mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-
-        if (::mapboxNavigation.isInitialized) {
-            mapboxNavigation.unregisterRoutesObserver(routesObserver)
-            mapboxNavigation.unregisterLocationObserver(locationObserver)
-            mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        }
-    }
-
-    private fun onDestroy() {
-        MapboxNavigationProvider.destroy()
-        routeLineApi.cancel()
-        routeLineView.cancel()
-        //binding.mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
     }
 
     private fun sendErrorToReact(error: String?) {
@@ -541,7 +541,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxNavigation.setRoutes(routes)
 
         // move the camera to overview when new route is available
-        navigationCamera.requestNavigationCameraToFollowing()
+        navigationCamera.requestNavigationCameraToOverview()
     }
 
     private fun clearRouteAndStopNavigation() {
@@ -550,7 +550,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
 
     private fun getPadding(padding: Array<Double>?): EdgeInsets {
-        val mainPadding = mapPadding
+        val mainPadding = this.mapPadding
         var top = 0.0
         var left = 0.0
         var bottom = 0.0
@@ -593,6 +593,67 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             bottom,
             right
         )
+    }
+    
+    private fun updateLogoPadding() {
+        val padding = this.logoPadding
+
+        if (padding != null) {
+            binding.mapView.logo.updateSettings {
+                marginTop = 0.0f
+                marginLeft = if (padding.size > 1) padding.get(1).toFloat() else 0.0f
+                marginBottom = if (padding.size > 0) padding.get(0).toFloat() else 0.0f
+                marginRight = 0.0f
+            }
+        } else {
+            binding.mapView.logo.updateSettings {
+                marginTop = 0.0f
+                marginLeft = 0.0f
+                marginBottom = 0.0f
+                marginRight = 0.0f
+            }
+        }
+    }
+    
+    private fun updateAttributionPadding() {
+        val padding = this.attributionPadding
+
+        if (padding != null) {
+            binding.mapView.attribution.updateSettings {
+                marginTop = 0.0f
+                marginLeft = 0.0f
+                marginBottom = if (padding.size > 0) padding.get(0).toFloat() else 0.0f
+                marginRight = if (padding.size > 1) padding.get(1).toFloat() else 0.0f
+            }
+        } else {
+            binding.mapView.attribution.updateSettings {
+                marginTop = 0.0f
+                marginLeft = 0.0f
+                marginBottom = 0.0f
+                marginRight = 0.0f
+            }
+        }
+    }
+
+    private fun onDestroy() {
+        MapboxNavigationProvider.destroy()
+        routeLineApi.cancel()
+        routeLineView.cancel()
+        //binding.mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+
+        if (::mapboxNavigation.isInitialized) {
+            mapboxNavigation.unregisterRoutesObserver(routesObserver)
+            mapboxNavigation.unregisterLocationObserver(locationObserver)
+            mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        }
+    }
+
+    fun onDropViewInstance() {
+        this.onDestroy()
     }
 
     fun showRoute(origin: ReadableArray?, destination: ReadableArray?, waypoints: ReadableArray?, styles: ReadableArray?, legIndex: Int?, cameraType: String?, padding: ReadableArray?)  {
@@ -684,7 +745,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
 
     fun clearRoute() {
-        //
+        clearRouteAndStopNavigation()
     }
     
     fun follow(padding: ReadableArray?) {
@@ -727,10 +788,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         viewportDataSource.overviewPadding = getPadding(newPadding.toTypedArray())
 
         navigationCamera.requestNavigationCameraToOverview()
-    }
-
-    fun onDropViewInstance() {
-        this.onDestroy()
     }
     
     fun setShowSpeedLimit(showSpeedLimit: Boolean) {
@@ -798,23 +855,11 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             }
 
             this.logoPadding = newPadding.toTypedArray()
-
-            binding.mapView.logo.updateSettings {
-                marginTop = if (newPadding.size > 0) newPadding.get(0).toFloat() else 0.0f
-                marginLeft = if (newPadding.size > 1) newPadding.get(1).toFloat() else 0.0f
-                marginBottom = if (newPadding.size > 2) newPadding.get(2).toFloat() else 0.0f
-                marginRight = if (newPadding.size > 3) newPadding.get(3).toFloat() else 0.0f
-            }
         } else {
             this.logoPadding = null
-
-            binding.mapView.logo.updateSettings {
-                marginTop = 0.0f
-                marginLeft = 0.0f
-                marginBottom = 0.0f
-                marginRight = 0.0f
-            }
         }
+
+        updateLogoPadding()
     }
     
     fun setAttributionVisible(attributionVisible: Boolean) {
@@ -834,23 +879,11 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             }
 
             this.attributionPadding = newPadding.toTypedArray()
-
-            binding.mapView.attribution.updateSettings {
-                marginTop = if (newPadding.size > 0) newPadding.get(0).toFloat() else 0.0f
-                marginLeft = if (newPadding.size > 1) newPadding.get(1).toFloat() else 0.0f
-                marginBottom = if (newPadding.size > 2) newPadding.get(2).toFloat() else 0.0f
-                marginRight = if (newPadding.size > 3) newPadding.get(3).toFloat() else 0.0f
-            }
         } else {
             this.attributionPadding = null
-
-            binding.mapView.attribution.updateSettings {
-                marginTop = 0.0f
-                marginLeft = 0.0f
-                marginBottom = 0.0f
-                marginRight = 0.0f
-            }
         }
+
+        updateAttributionPadding()
     }
     
     fun setRouteColor(routeColor: String) {
@@ -861,8 +894,24 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.routeCasingColor = routeCasingColor
     }
     
-    fun setTraversedRouteColor(traversedRouteColor: String) {
+    fun setRouteClosureColor(routeClosureColor: String) {
+        this.routeClosureColor = routeClosureColor
+    }
+    
+    fun setAlternateRouteColor(alternateRouteColor: String) {
+        this.alternateRouteColor = alternateRouteColor
+    }
+    
+    fun setAlternateRouteCasingColor(alternateRouteCasingColor: String) {
+        this.alternateRouteCasingColor = alternateRouteCasingColor
+    }
+    
+    fun setTraversedRouteColor(traversedRouteColor: String?) {
         this.traversedRouteColor = traversedRouteColor
+    }
+    
+    fun setTraversedRouteCasingColor(traversedRouteCasingColor: String?) {
+        this.traversedRouteCasingColor = traversedRouteCasingColor
     }
     
     fun setTrafficUnknownColor(trafficUnknownColor: String) {
@@ -883,6 +932,10 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     
     fun setTrafficSevereColor(trafficSevereColor: String) {
         this.trafficSevereColor = trafficSevereColor
+    }
+    
+    fun setRestrictedRoadColor(restrictedRoadColor: String) {
+        this.restrictedRoadColor = restrictedRoadColor
     }
     
     fun setWaypointColor(waypointColor: String) {

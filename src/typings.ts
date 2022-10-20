@@ -72,12 +72,17 @@ export interface IMapboxNavigationFreeDriveProps {
   attributionPadding?: Coordinate;
   routeColor?: string;
   routeCasingColor?: string;
+  routeClosureColor?: string;
+  alternateRouteColor?: string;
+  alternateRouteCasingColor?: string;
   traversedRouteColor?: string;
+  traversedRouteCasingColor?: string;
   trafficUnknownColor?: string;
   trafficLowColor?: string;
   trafficModerateColor?: string;
   trafficHeavyColor?: string;
   trafficSevereColor?: string;
+  restrictedRoadColor?: string;
   waypointColor?: string;
   waypointRadius?: number;
   waypointOpacity?: number;
