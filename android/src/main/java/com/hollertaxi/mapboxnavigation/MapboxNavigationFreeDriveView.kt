@@ -374,12 +374,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             val puckImage = userPuckImage
 
             if (puckImage != null) {
+                val contentUri = Uri.parse(puckImage!!)
                 //contentUri.getPath()
                 //var name = puckImage!!.toLowerCase().replace("-", "_")
                 //val resourceId = context.getResources().getIdentifier(name.substring(name.lastIndexOf("/") + 1, name.lastIndexOf(".")), "drawable", context.getPackageName())
 
                 this.locationPuck = LocationPuck2D(
-                    bearingImage = ResourceDrawableIdHelper.getInstance().getResourceDrawable(context, puckImage)
+                    bearingImage = ResourceDrawableIdHelper.getInstance().getResourceDrawable(context, contentUri.getPath())
                 )
             } else {
                 this.locationPuck = LocationPuck2D(
@@ -557,34 +558,34 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         var right = 0.0
         
         if (padding != null) {
-            if (padding.size > 0) {
-                top = padding.get(0) * pixelDensity
-            } else if (mainPadding != null && mainPadding.size > 0) {
-                top = mainPadding.get(0) * pixelDensity
+            if (padding!!.size > 0) {
+                top = padding!!.get(0) * pixelDensity
+            } else if (mainPadding != null && mainPadding!!.size > 0) {
+                top = mainPadding!!.get(0) * pixelDensity
             }
 
-            if (padding.size > 1) {
-                top = padding.get(1) * pixelDensity
-            } else if (mainPadding != null && mainPadding.size > 1) {
-                top = mainPadding.get(1) * pixelDensity
+            if (padding!!.size > 1) {
+                top = padding!!.get(1) * pixelDensity
+            } else if (mainPadding != null && mainPadding!!.size > 1) {
+                top = mainPadding!!.get(1) * pixelDensity
             }
 
-            if (padding.size > 2) {
-                top = padding.get(2) * pixelDensity
-            } else if (mainPadding != null && mainPadding.size > 2) {
-                top = mainPadding.get(2) * pixelDensity
+            if (padding!!.size > 2) {
+                top = padding!!.get(2) * pixelDensity
+            } else if (mainPadding != null && mainPadding!!.size > 2) {
+                top = mainPadding!!.get(2) * pixelDensity
             }
 
-            if (padding.size > 3) {
-                top = padding.get(3) * pixelDensity
-            } else if (mainPadding != null && mainPadding.size > 3) {
-                top = mainPadding.get(3) * pixelDensity
+            if (padding!!.size > 3) {
+                top = padding!!.get(3) * pixelDensity
+            } else if (mainPadding != null && mainPadding!!.size > 3) {
+                top = mainPadding!!.get(3) * pixelDensity
             }
         } else if (mainPadding != null) {
-            top = if (mainPadding.size > 0) (mainPadding.get(0) * pixelDensity) else 0.0
-            left = if (mainPadding.size > 1) (mainPadding.get(1) * pixelDensity) else 0.0
-            bottom = if (mainPadding.size > 2) (mainPadding.get(2) * pixelDensity) else 0.0
-            right = if (mainPadding.size > 3) (mainPadding.get(3) * pixelDensity) else 0.0
+            top = if (mainPadding!!.size > 0) (mainPadding!!.get(0) * pixelDensity) else 0.0
+            left = if (mainPadding!!.size > 1) (mainPadding!!.get(1) * pixelDensity) else 0.0
+            bottom = if (mainPadding!!.size > 2) (mainPadding!!.get(2) * pixelDensity) else 0.0
+            right = if (mainPadding!!.size > 3) (mainPadding!!.get(3) * pixelDensity) else 0.0
         }
 
         return EdgeInsets(
@@ -601,8 +602,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         if (padding != null) {
             binding.mapView.logo.updateSettings {
                 marginTop = 0.0f
-                marginLeft = if (padding.size > 1) padding.get(1).toFloat() else 0.0f
-                marginBottom = if (padding.size > 0) padding.get(0).toFloat() else 0.0f
+                marginLeft = if (padding!!.size > 1) padding!!.get(1).toFloat() else 0.0f
+                marginBottom = if (padding!!.size > 0) padding!!.get(0).toFloat() else 0.0f
                 marginRight = 0.0f
             }
         } else {
@@ -622,8 +623,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             binding.mapView.attribution.updateSettings {
                 marginTop = 0.0f
                 marginLeft = 0.0f
-                marginBottom = if (padding.size > 0) padding.get(0).toFloat() else 0.0f
-                marginRight = if (padding.size > 1) padding.get(1).toFloat() else 0.0f
+                marginBottom = if (padding!!.size > 0) padding!!.get(0).toFloat() else 0.0f
+                marginRight = if (padding!!.size > 1) padding!!.get(1).toFloat() else 0.0f
             }
         } else {
             binding.mapView.attribution.updateSettings {
@@ -766,8 +767,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         var newPadding = mutableListOf<Double>()
 
         if (padding != null) {
-            for (ii in 0 until padding.size()) {
-                newPadding.add(padding.getDouble(ii))
+            for (ii in 0 until padding!!.size()) {
+                newPadding.add(padding!!.getDouble(ii))
             }
         }
 
@@ -780,8 +781,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         var newPadding = mutableListOf<Double>()
 
         if (padding != null) {
-            for (ii in 0 until padding.size()) {
-                newPadding.add(padding.getDouble(ii))
+            for (ii in 0 until padding!!.size()) {
+                newPadding.add(padding!!.getDouble(ii))
             }
         }
 
@@ -828,8 +829,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         if (mapPadding != null) {
             var newPadding = mutableListOf<Double>()
 
-            for (ii in 0 until mapPadding.size()) {
-                newPadding.add(mapPadding.getDouble(ii))
+            for (ii in 0 until mapPadding!!.size()) {
+                newPadding.add(mapPadding!!.getDouble(ii))
             }
 
             this.mapPadding = newPadding.toTypedArray()
@@ -850,8 +851,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         if (logoPadding != null) {
             var newPadding = mutableListOf<Double>()
 
-            for (ii in 0 until logoPadding.size()) {
-                newPadding.add(logoPadding.getDouble(ii))
+            for (ii in 0 until logoPadding!!.size()) {
+                newPadding.add(logoPadding!!.getDouble(ii))
             }
 
             this.logoPadding = newPadding.toTypedArray()
@@ -874,8 +875,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         if (attributionPadding != null) {
             var newPadding = mutableListOf<Double>()
 
-            for (ii in 0 until attributionPadding.size()) {
-                newPadding.add(attributionPadding.getDouble(ii))
+            for (ii in 0 until attributionPadding!!.size()) {
+                newPadding.add(attributionPadding!!.getDouble(ii))
             }
 
             this.attributionPadding = newPadding.toTypedArray()
