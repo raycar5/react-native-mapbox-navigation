@@ -368,7 +368,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         }
 
         mapboxMap = binding.mapView.getMapboxMap()
-        
+
         updateLogoPadding()
         updateAttributionPadding()
 
@@ -603,8 +603,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         if (padding != null) {
             binding.mapView.logo.updateSettings {
-                marginLeft = if (padding!!.size > 1) padding!!.get(1).toFloat() else 0.0f
-                marginBottom = if (padding!!.size > 0) padding!!.get(0).toFloat() else 0.0f
+                marginLeft = if (padding!!.size > 0) (padding!!.get(0).toFloat() * pixelDensity) else 0.0f
+                marginBottom = if (padding!!.size > 1) (padding!!.get(1).toFloat() * pixelDensity) else 0.0f
             }
         } else {
             binding.mapView.logo.updateSettings {
@@ -619,8 +619,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         if (padding != null) {
             binding.mapView.attribution.updateSettings {
-                marginBottom = if (padding!!.size > 0) padding!!.get(0).toFloat() else 0.0f
-                marginRight = if (padding!!.size > 1) padding!!.get(1).toFloat() else 0.0f
+                marginBottom = if (padding!!.size > 1) (padding!!.get(1).toFloat() * pixelDensity) else 0.0f
+                marginRight = if (padding!!.size > 0) (padding!!.get(0).toFloat() * pixelDensity) else 0.0f
             }
         } else {
             binding.mapView.attribution.updateSettings {
