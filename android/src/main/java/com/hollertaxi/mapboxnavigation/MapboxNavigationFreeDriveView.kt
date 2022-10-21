@@ -554,40 +554,73 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
     private fun getPadding(padding: Array<Double>?): EdgeInsets {
         val mainPadding = this.mapPadding
-        var top = 0.0
-        var left = 0.0
-        var bottom = 0.0
-        var right = 0.0
-        
-        if (padding != null) {
+        var top = if (padding != null) {
             if (padding!!.size > 0) {
-                top = padding!!.get(0) * pixelDensity
+                padding!!.get(0) * pixelDensity
             } else if (mainPadding != null && mainPadding!!.size > 0) {
-                top = mainPadding!!.get(0) * pixelDensity
-            }
-
-            if (padding!!.size > 1) {
-                left = padding!!.get(1) * pixelDensity
-            } else if (mainPadding != null && mainPadding!!.size > 1) {
-                left = mainPadding!!.get(1) * pixelDensity
-            }
-
-            if (padding!!.size > 2) {
-                bottom = padding!!.get(2) * pixelDensity
-            } else if (mainPadding != null && mainPadding!!.size > 2) {
-                bottom = mainPadding!!.get(2) * pixelDensity
-            }
-
-            if (padding!!.size > 3) {
-                right = padding!!.get(3) * pixelDensity
-            } else if (mainPadding != null && mainPadding!!.size > 3) {
-                right = mainPadding!!.get(3) * pixelDensity
+                mainPadding!!.get(0) * pixelDensity
+            } else {
+                0.0
             }
         } else if (mainPadding != null) {
-            top = if (mainPadding!!.size > 0) (mainPadding!!.get(0) * pixelDensity) else 0.0
-            left = if (mainPadding!!.size > 1) (mainPadding!!.get(1) * pixelDensity) else 0.0
-            bottom = if (mainPadding!!.size > 2) (mainPadding!!.get(2) * pixelDensity) else 0.0
-            right = if (mainPadding!!.size > 3) (mainPadding!!.get(3) * pixelDensity) else 0.0
+            if (mainPadding!!.size > 0) {
+                mainPadding!!.get(0) * pixelDensity
+            } else {
+                0.0
+            }
+        } else {
+            0.0
+        }
+        var left = if (padding != null) {
+            if (padding!!.size > 1) {
+                padding!!.get(1) * pixelDensity
+            } else if (mainPadding != null && mainPadding!!.size > 1) {
+                mainPadding!!.get(1) * pixelDensity
+            } else {
+                0.0
+            }
+        } else if (mainPadding != null) {
+            if (mainPadding!!.size > 1) {
+                mainPadding!!.get(1) * pixelDensity
+            } else {
+                0.0
+            }
+        } else {
+            0.0
+        }
+        var bottom = if (padding != null) {
+            if (padding!!.size > 2) {
+                padding!!.get(2) * pixelDensity
+            } else if (mainPadding != null && mainPadding!!.size > 2) {
+                mainPadding!!.get(2) * pixelDensity
+            } else {
+                0.0
+            }
+        } else if (mainPadding != null) {
+            if (mainPadding!!.size > 2) {
+                mainPadding!!.get(2) * pixelDensity
+            } else {
+                0.0
+            }
+        } else {
+            0.0
+        }
+        var right = if (padding != null) {
+            if (padding!!.size > 3) {
+                padding!!.get(3) * pixelDensity
+            } else if (mainPadding != null && mainPadding!!.size > 3) {
+                mainPadding!!.get(3) * pixelDensity
+            } else {
+                0.0
+            }
+        } else if (mainPadding != null) {
+            if (mainPadding!!.size > 3) {
+                mainPadding!!.get(3) * pixelDensity
+            } else {
+                0.0
+            }
+        } else {
+            0.0
         }
 
         return EdgeInsets(
