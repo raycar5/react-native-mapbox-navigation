@@ -433,14 +433,14 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         // initialize Navigation Camera
         viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
         viewportDataSource.followingPadding = getPadding(null)
-        viewportDataSource.options.followingFrameOptions.centerUpdatesAllowed = true
-        viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = true
-        viewportDataSource.options.followingFrameOptions.bearingUpdatesAllowed = true
-        viewportDataSource.options.followingFrameOptions.paddingUpdatesAllowed = false
-        viewportDataSource.options.followingFrameOptions.minZoom = followZoomLevel
-        viewportDataSource.options.followingFrameOptions.maxZoom = followZoomLevel
+        //viewportDataSource.options.followingFrameOptions.centerUpdatesAllowed = true
+        //viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = true
+        //viewportDataSource.options.followingFrameOptions.bearingUpdatesAllowed = true
+        //viewportDataSource.options.followingFrameOptions.paddingUpdatesAllowed = false
+        //viewportDataSource.options.followingFrameOptions.minZoom = followZoomLevel
+        //viewportDataSource.options.followingFrameOptions.maxZoom = followZoomLevel
         viewportDataSource.overviewPadding = getPadding(null)
-        viewportDataSource.options.overviewFrameOptions.paddingUpdatesAllowed = false
+        //viewportDataSource.options.overviewFrameOptions.paddingUpdatesAllowed = false
         
         navigationCamera = NavigationCamera(
             mapboxMap,
