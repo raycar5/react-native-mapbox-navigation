@@ -64,6 +64,7 @@ import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
+import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
@@ -431,6 +432,17 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             binding.mapView.camera,
             viewportDataSource
         )
+
+        // debugging
+        val debugger = MapboxNavigationViewportDataSourceDebugger(
+            context,
+            mapView,
+            layerAbove = "road-label"
+        ).apply {
+            enabled = true
+        }
+        viewportDataSource.debugger = debugger
+        navigationCamera.debugger = debugger
 
         // set the animations lifecycle listener to ensure the NavigationCamera stops
         // automatically following the user location when the map is interacted with
