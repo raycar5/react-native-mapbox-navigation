@@ -35,6 +35,7 @@ import com.mapbox.maps.plugin.scalebar.scalebar
 import com.mapbox.maps.plugin.gestures.*
 import com.mapbox.maps.plugin.attribution.*
 import com.mapbox.maps.plugin.logo.*
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -361,6 +362,20 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         )
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private fun addDebug() {
+        // debugging
+        val debugger = MapboxNavigationViewportDataSourceDebugger(
+            context,
+            binding.mapView,
+            layerAbove = "road-label"
+        ).apply {
+            enabled = true
+        }
+        viewportDataSource.debugger = debugger
+        navigationCamera.debugger = debugger
+    }
+
     @SuppressLint("MissingPermission")
     fun onCreate() {
         if (accessToken == null) {
@@ -426,23 +441,12 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         viewportDataSource.options.followingFrameOptions.maxZoom = followZoomLevel
         viewportDataSource.overviewPadding = getPadding(null)
         viewportDataSource.options.overviewFrameOptions.paddingUpdatesAllowed = false
-
+        
         navigationCamera = NavigationCamera(
             mapboxMap,
             binding.mapView.camera,
             viewportDataSource
         )
-
-        // debugging
-        val debugger = MapboxNavigationViewportDataSourceDebugger(
-            context,
-            mapView,
-            layerAbove = "road-label"
-        ).apply {
-            enabled = true
-        }
-        viewportDataSource.debugger = debugger
-        navigationCamera.debugger = debugger
 
         // set the animations lifecycle listener to ensure the NavigationCamera stops
         // automatically following the user location when the map is interacted with
@@ -471,6 +475,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 .getJSModule(RCTEventEmitter::class.java)
                 .receiveEvent(id, "onTrackingStateChange", event)
         }
+        
+        addDebug()
 
         // make sure to use the same DistanceFormatterOptions across different features
         val distanceFormatterOptions = mapboxNavigation.navigationOptions.distanceFormatterOptions
