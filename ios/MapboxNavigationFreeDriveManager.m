@@ -35,6 +35,7 @@ RCT_EXPORT_VIEW_PROPERTY(waypointOpacity, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(waypointStrokeWidth, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(waypointStrokeOpacity, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(waypointStrokeColor, NSString)
+RCT_EXPORT_VIEW_PROPERTY(debug, BOOL)
 
 RCT_EXTERN_METHOD(
   showRouteViaManager: (nonnull NSNumber *)node 

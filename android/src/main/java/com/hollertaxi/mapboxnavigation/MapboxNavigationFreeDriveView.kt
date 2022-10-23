@@ -130,6 +130,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var logoPadding: Array<Double>? = null
     private var attributionVisible: Boolean = true
     private var attributionPadding: Array<Double>? = null
+    private var debug: Boolean = false
 
     private var currentOrigin: Point? = null
     private var currentDestination: Point? = null
@@ -476,7 +477,10 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 .receiveEvent(id, "onTrackingStateChange", event)
         }
         
-        addDebug()
+        // add debug
+        if (this.debug) {
+            addDebug()
+        }
 
         // make sure to use the same DistanceFormatterOptions across different features
         val distanceFormatterOptions = mapboxNavigation.navigationOptions.distanceFormatterOptions
@@ -656,11 +660,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             binding.mapView.logo.updateSettings {
                 marginLeft = if (padding!!.size > 0) (padding!!.get(0).toFloat() * pixelDensity) else 0.0f
                 marginBottom = if (padding!!.size > 1) (padding!!.get(1).toFloat() * pixelDensity) else 0.0f
+                position = Gravity.BOTTOM or Gravity.LEFT
             }
         } else {
             binding.mapView.logo.updateSettings {
                 marginLeft = 0.0f
                 marginBottom = 0.0f
+                position = Gravity.BOTTOM or Gravity.LEFT
             }
         }
     }
@@ -672,11 +678,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             binding.mapView.attribution.updateSettings {
                 marginBottom = if (padding!!.size > 1) (padding!!.get(1).toFloat() * pixelDensity) else 0.0f
                 marginRight = if (padding!!.size > 0) (padding!!.get(0).toFloat() * pixelDensity) else 0.0f
+                position = Gravity.BOTTOM or Gravity.RIGHT
             }
         } else {
             binding.mapView.attribution.updateSettings {
                 marginBottom = 0.0f
                 marginRight = 0.0f
+                position = Gravity.BOTTOM or Gravity.RIGHT
             }
         }
     }
@@ -1006,5 +1014,9 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     
     fun setWaypointStrokeColor(waypointStrokeColor: String) {
         this.waypointStrokeColor = waypointStrokeColor
+    }
+    
+    fun setDebug(debug: Boolean) {
+        this.debug = debug
     }
 }

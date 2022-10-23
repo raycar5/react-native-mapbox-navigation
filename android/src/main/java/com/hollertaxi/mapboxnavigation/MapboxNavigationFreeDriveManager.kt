@@ -224,4 +224,9 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
     fun setWaypointStrokeColor(view: MapboxNavigationFreeDriveView, waypointStrokeColor: String) {
         view.setWaypointStrokeColor(waypointStrokeColor)
     }
+    
+    @ReactProp(name = "debug")
+    fun setDebug(view: MapboxNavigationFreeDriveView, debug: Boolean) {
+        view.setDebug(debug)
+    }
 }
