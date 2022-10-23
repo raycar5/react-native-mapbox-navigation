@@ -7,6 +7,7 @@ import android.location.Location
 import android.location.LocationManager
 import android.view.LayoutInflater
 import android.view.View
+import android.view.Gravity
 import android.widget.FrameLayout
 import android.widget.Toast
 import android.graphics.Color
