@@ -69,6 +69,17 @@ RCT_EXTERN_METHOD(
 
 RCT_EXTERN_METHOD(
   startNavigationViaManager: (nonnull NSNumber *)node
+  origin: (NSArray *)origin 
+  destination: (NSArray *)destination 
+  waypoints: (NSArray *)waypoints 
+  styles: (NSDictionaryArray *)styles 
+  legIndex: (nonnull NSNumber *)legIndex 
+  cameraType: (NSString *)cameraType 
+  padding: (NSArray *)padding
+)
+
+RCT_EXTERN_METHOD(
+  pauseNavigationViaManager: (nonnull NSNumber *)node
 )
 
 RCT_EXTERN_METHOD(

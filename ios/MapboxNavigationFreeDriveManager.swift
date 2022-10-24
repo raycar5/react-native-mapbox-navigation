@@ -48,11 +48,19 @@ class MapboxNavigationFreeDriveManager: RCTViewManager {
     }
   }
 
-  @objc func startNavigationViaManager(_ node: NSNumber) {
+  @objc func startNavigationViaManager(_ node: NSNumber, origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, cameraType: NSString, padding: [NSNumber]) {
     DispatchQueue.main.async {
       let mapboxNavigationFreeDriveView = self.bridge.uiManager.view(forReactTag: node) as! MapboxNavigationFreeDriveView
       
       mapboxNavigationFreeDriveView.startNavigation()
+    }
+  }
+
+  @objc func pauseNavigationViaManager(_ node: NSNumber) {
+    DispatchQueue.main.async {
+      let mapboxNavigationFreeDriveView = self.bridge.uiManager.view(forReactTag: node) as! MapboxNavigationFreeDriveView
+      
+      mapboxNavigationFreeDriveView.pauseNavigation()
     }
   }
 

@@ -17,6 +17,7 @@ const MapboxNavigationFreeDrive = React.forwardRef((props: IMapboxNavigationFree
     moveToOverview,
     fitCamera,
     startNavigation,
+    pauseNavigation,
     stopNavigation
   }))
 
@@ -60,10 +61,18 @@ const MapboxNavigationFreeDrive = React.forwardRef((props: IMapboxNavigationFree
     )
   }
 
-  const startNavigation = () => {
+  const startNavigation = (origin = [], destination = [], waypoints = [], styles = [], legIndex = -1, cameraType = 'none', padding = []) => {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(mapboxNavigationFreeDriveRef.current),
       UIManager.MapboxNavigationFreeDrive.Commands.startNavigationViaManager,
+      [origin, destination, waypoints, styles, legIndex, cameraType, padding]
+    )
+  }
+
+  const pauseNavigation = () => {
+    UIManager.dispatchViewManagerCommand(
+      findNodeHandle(mapboxNavigationFreeDriveRef.current),
+      UIManager.MapboxNavigationFreeDrive.Commands.pauseNavigationViaManager,
       []
     )
   }

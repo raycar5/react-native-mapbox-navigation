@@ -63,7 +63,8 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
             "moveToOverviewViaManager" to 4,
             "fitCameraViaManager" to 5,
             "startNavigationViaManager" to 6,
-            "stopNavigationViaManager" to 7
+            "pauseNavigationViaManager" to 7,
+            "stopNavigationViaManager" to 8
         )
     }
 
@@ -74,8 +75,9 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
             3 -> view.follow(args?.getArray(0))
             4 -> view.moveToOverview(args?.getArray(0))
             5 -> view.fitCamera(args?.getArray(0))
-            6 -> view.startNavigation()
-            7 -> view.stopNavigation()
+            6 -> view.startNavigation(args?.getArray(0), args?.getArray(1), args?.getArray(2), args?.getArray(3), args?.getInt(4), args?.getString(5), args?.getArray(6))
+            7 -> view.pauseNavigation()
+            8 -> view.stopNavigation()
         }
     }
 

@@ -141,7 +141,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var currentDestination: Point? = null
     private var currentWaypoints: Array<Point>? = null
     private var currentLegIndex: Int = -1
-    private var currentRoutes: List<NavigationRoute>? = null
+    private var currentActiveRoutes: List<NavigationRoute>? = null
+    private var currentPreviewRoutes: List<NavigationRoute>? = null
 
     /**
      * Bindings to the example layout.
@@ -669,35 +670,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         // register event listeners
         mapboxNavigation.registerLocationObserver(locationObserver)
-        mapboxNavigation.registerRoutesObserver(routesObserver)
-        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
 
         // start the trip session to being receiving location updates in free drive
         // and later when a route is set also receiving route progress updates
         mapboxNavigation.startTripSession()
     }
 
-    private fun startRoute() {
-        // register event listeners
-        //mapboxNavigation.registerRoutesObserver(routesObserver)
-        //mapboxNavigation.registerLocationObserver(locationObserver)
-        //mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-    }
-
-    private fun setRouteAndStartNavigation(routes: List<DirectionsRoute>) {
-        if (routes.isEmpty()) {
-            sendErrorToReact("No route found")
-            return;
-        }
-        // set routes, where the first route in the list is the primary route that
-        // will be used for active guidance
-        mapboxNavigation.setRoutes(routes)
-
-        // move the camera to overview when new route is available
-        navigationCamera.requestNavigationCameraToOverview()
-    }
-
-    private fun fetchRoutes(routeWaypoints: List<Point>, routeWaypointNames: List<String>, onSuccess: (result: List<NavigationRoute>) -> Unit) {
+    private fun fetchRoutes(routeWaypoints: List<Point>, routeWaypointNames: List<String>, onSuccess: (routes: List<NavigationRoute>) -> Unit) {
         val originLocation = navigationLocationProvider.lastLocation
         val originPoint = originLocation?.let {
             Point.fromLngLat(it.longitude, it.latitude)
@@ -731,7 +710,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                         return;
                     }
                     
-                    previewRoutes(routes)
+                    onSuccess.invoke(routes)
                 }
 
                 override fun onFailure(
@@ -749,7 +728,9 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
 
     private fun previewRoutes(routes: List<NavigationRoute>) {
-        this.currentRoutes = routes
+        pauseActiveGuidance()
+
+        this.currentPreviewRoutes = routes
 
         // Mapbox navigation doesn't have a special state for route preview.
         // Preview state is managed by an application.
@@ -766,21 +747,37 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
 
     private fun startActiveGuidance() {
-        val routes = this.currentRoutes
+        this.currentPreviewRoutes = null
+        val routes = this.currentActiveRoutes
 
         if (routes != null) {
             // Set routes to switch navigator from free drive to active guidance state.
             // In active guidance navigator emits your route progress, voice and banner instructions, etc.
             mapboxNavigation.setNavigationRoutes(routes)
+            mapboxNavigation.registerRoutesObserver(routesObserver)
+            mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+
             navigationCamera.requestNavigationCameraToFollowing()
         }
     }
 
+    private fun pauseActiveGuidance() {
+        routeLineApi.setNavigationRoutes(emptyList())
+        mapboxNavigation.setNavigationRoutes(emptyList())
+        mapboxNavigation.unregisterRoutesObserver(routesObserver)
+        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        navigationCamera.requestNavigationCameraToOverview()
+    }
+
     private fun clearRouteAndStopActiveGuidance() {
         // clear
-        this.currentRoutes = null
+        this.currentActiveRoutes = null
+        this.currentPreviewRoutes = null
 
+        routeLineApi.setNavigationRoutes(emptyList())
         mapboxNavigation.setNavigationRoutes(emptyList())
+        mapboxNavigation.unregisterRoutesObserver(routesObserver)
+        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         navigationCamera.requestNavigationCameraToOverview()
     }
 
@@ -799,12 +796,12 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         super.onDetachedFromWindow()
 
         try {
-            routeLineApi.cancel()
-            routeLineView.cancel()
-            mapboxNavigation.unregisterRoutesObserver(routesObserver)
             mapboxNavigation.unregisterLocationObserver(locationObserver)
+            mapboxNavigation.unregisterRoutesObserver(routesObserver)
             mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
             binding.mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
+            routeLineApi.cancel()
+            routeLineView.cancel()
         } catch (ex: Exception) {
             sendErrorToReact(ex.toString())
         }
@@ -858,12 +855,9 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
             currentLegIndex = if (legIndex != null) legIndex!! else -1
 
-            fetchRoutes(routeWaypoints.toList(), routeWaypointNames.toList()) { result -> 
-                if (cameraType == "follow") {
-                    follow(padding)
-                } else if (cameraType == "overview") {
-                    moveToOverview(padding)
-                }
+            fetchRoutes(routeWaypoints.toList(), routeWaypointNames.toList()) { routes -> 
+                moveToOverview(padding)
+                previewRoutes(routes)
             }
         } catch (ex: Exception) {
             sendErrorToReact(ex.toString())
@@ -874,8 +868,67 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         clearRouteAndStopActiveGuidance()
     }
 
-    fun startNavigation() {
-        startActiveGuidance()
+    fun startNavigation(origin: ReadableArray?, destination: ReadableArray?, waypoints: ReadableArray?, styles: ReadableArray?, legIndex: Int?, cameraType: String?, padding: ReadableArray?) {
+        if (this.currentActiveRoutes != null) {
+            startActiveGuidance()
+        } else {
+            try {
+                var routeWaypoints = mutableListOf<Point>()
+                var routeWaypointNames = mutableListOf<String>()
+    
+                if (origin != null) {
+                    currentOrigin = Point.fromLngLat(origin.getDouble(0), origin.getDouble(1))
+                    routeWaypoints.add(Point.fromLngLat(origin.getDouble(0), origin.getDouble(1)))
+                }
+    
+                if (waypoints != null) {
+                    var newCurrentWaypoints = mutableListOf<Point>()
+    
+                    for (ii in 0 until waypoints.size()) {
+                        val waypoint = waypoints.getArray(ii)
+    
+                        if (waypoint != null) {
+                            newCurrentWaypoints.add(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
+                            routeWaypoints.add(Point.fromLngLat(waypoint.getDouble(0), waypoint.getDouble(1)))
+                        }
+                    }
+    
+                    currentWaypoints = newCurrentWaypoints.toTypedArray()
+                }
+    
+                if (destination != null) {
+                    currentDestination = Point.fromLngLat(destination.getDouble(0), destination.getDouble(1))
+                    routeWaypoints.add(Point.fromLngLat(destination.getDouble(0), destination.getDouble(1)))
+                }
+    
+                if (styles != null) {
+                    for (ii in 0 until styles.size()) {
+                        val style = styles.getMap(ii)
+    
+                        if (style != null) {
+                            if (style.hasKey("name")) {
+                                routeWaypointNames.add(style.getString("name")!!)
+                            }
+                        }
+                    }
+                }
+    
+                currentLegIndex = if (legIndex != null) legIndex!! else -1
+    
+                fetchRoutes(routeWaypoints.toList(), routeWaypointNames.toList()) { routes -> 
+                    this.currentActiveRoutes = routes
+
+                    follow(padding)
+                    startActiveGuidance()
+                }
+            } catch (ex: Exception) {
+                sendErrorToReact(ex.toString())
+            }
+        }
+    }
+    
+    fun pauseNavigation() {
+        pauseActiveGuidance()
     }
 
     fun stopNavigation() {

@@ -239,7 +239,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     showCurrentRoute()
   }
 
-  @objc func startNavigation() {
+  @objc func startNavigation(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, cameraType: NSString, padding: [NSNumber])  {
+    //
+  }
+
+  @objc func pauseNavigation() {
     //
   }
 
