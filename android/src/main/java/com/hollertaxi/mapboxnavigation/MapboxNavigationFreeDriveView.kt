@@ -676,14 +676,17 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             Point.fromLngLat(it.longitude, it.latitude)
         } ?: return
         var bearings = mutableListOf<Bearing?>()
+        var layers = mutableListOf<Int?>()
 
         bearings.add(Bearing.builder()
             .angle(originLocation.bearing.toDouble())
             .degrees(45.0)
             .build())
+        layers.add(mapboxNavigation.getZLevel())
 
         for (ii in 1 until routeWaypoints.size) {
             bearings.add(null)
+            layers.add(null)
         }
 
         mapboxNavigation.requestRoutes(
@@ -693,7 +696,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 .coordinatesList(routeWaypoints)
                 .bearingsList(bearings.toList())
                 .waypointNamesList(routeWaypointNames)
-                .layersList(listOf(mapboxNavigation.getZLevel(), null))
+                .layersList(layers.toList())
                 .alternatives(true)
                 .build(),
             object : NavigationRouterCallback {
