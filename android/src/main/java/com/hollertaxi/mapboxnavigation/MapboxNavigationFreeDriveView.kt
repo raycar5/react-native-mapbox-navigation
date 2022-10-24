@@ -761,14 +761,19 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
 
     private fun pauseActiveGuidance() {
-        routeLineApi.clearRouteLine() { value ->
-            mapboxMap.getStyle()?.apply {
-                routeLineView.renderClearRouteLineValue(this, value)
+        mapboxMap.getStyle()?.let { style ->
+            routeLineApi.clearRouteLine { value ->
+                routeLineView.renderClearRouteLineValue(
+                    style,
+                    value
+                )
             }
         }
         mapboxNavigation.setNavigationRoutes(emptyList())
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        viewportDataSource.clearRouteData()
+        viewportDataSource.evaluate()
         navigationCamera.requestNavigationCameraToOverview()
     }
 
@@ -777,14 +782,19 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.currentActiveRoutes = null
         this.currentPreviewRoutes = null
 
-        routeLineApi.clearRouteLine() { value ->
-            mapboxMap.getStyle()?.apply {
-                routeLineView.renderClearRouteLineValue(this, value)
+        mapboxMap.getStyle()?.let { style ->
+            routeLineApi.clearRouteLine { value ->
+                routeLineView.renderClearRouteLineValue(
+                    style,
+                    value
+                )
             }
         }
         mapboxNavigation.setNavigationRoutes(emptyList())
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        viewportDataSource.clearRouteData()
+        viewportDataSource.evaluate()
         navigationCamera.requestNavigationCameraToOverview()
     }
 
