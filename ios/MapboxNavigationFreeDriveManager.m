@@ -66,4 +66,12 @@ RCT_EXTERN_METHOD(
   padding: (NSArray *)padding
 )
 
+RCT_EXTERN_METHOD(
+  startNavigationViaManager: (nonnull NSNumber *)node
+)
+
+RCT_EXTERN_METHOD(
+  stopNavigationViaManager: (nonnull NSNumber *)node
+)
+
 @end

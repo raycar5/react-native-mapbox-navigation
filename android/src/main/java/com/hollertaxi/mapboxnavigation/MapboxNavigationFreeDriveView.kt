@@ -18,8 +18,10 @@ import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.views.imagehelper.ResourceDrawableIdHelper
-import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
@@ -41,6 +43,8 @@ import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -57,7 +61,6 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.hollertaxi.mapboxnavigation.databinding.NavigationViewBinding
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.arrival.ArrivalObserver
@@ -137,6 +140,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var currentDestination: Point? = null
     private var currentWaypoints: Array<Point>? = null
     private var currentLegIndex: Int = -1
+    private var currentRoutes: List<NavigationRoute>? = null
 
     /**
      * Bindings to the example layout.
@@ -292,12 +296,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
      * - driver got off route and a reroute was executed
      */
     private val routesObserver = RoutesObserver { routeUpdateResult ->
-        if (routeUpdateResult.routes.isNotEmpty()) {
-            // generate route geometries asynchronously and render them
-            val routeLines = routeUpdateResult.routes.map { RouteLine(it, null) }
+        val navigationRoutes = routeUpdateResult.navigationRoutes
 
-            routeLineApi.setRoutes(
-                routeLines
+        if (navigationRoutes.isNotEmpty()) {
+            routeLineApi.setNavigationRoutes(
+                navigationRoutes,
+                // alternative metadata is available only in active guidance.
+                mapboxNavigation.getAlternativeMetadataFor(navigationRoutes)
             ) { value ->
                 mapboxMap.getStyle()?.apply {
                     routeLineView.renderRouteDrawData(this, value)
@@ -308,10 +313,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             viewportDataSource.onRouteChanged(routeUpdateResult.routes.first())
             viewportDataSource.evaluate()
         } else {
-            // remove the route line and route arrow from the map
-            val style = mapboxMap.getStyle()
-
-            if (style != null) {
+            // remove route line from the map
+            mapboxMap.getStyle()?.let { style ->
                 routeLineApi.clearRouteLine { value ->
                     routeLineView.renderClearRouteLineValue(
                         style,
@@ -323,6 +326,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             // remove the route reference from camera position evaluations
             viewportDataSource.clearRouteData()
             viewportDataSource.evaluate()
+            navigationCamera.requestNavigationCameraToOverview()
         }
     }
 
@@ -350,204 +354,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY))
         layout(left, top, right, bottom)
     }
-    
-    private fun setCameraPositionToOrigin() {
-        val startingLocation = Location(LocationManager.GPS_PROVIDER)
-        startingLocation.latitude = currentOrigin!!.latitude()
-        startingLocation.longitude = currentOrigin!!.longitude()
-        viewportDataSource.onLocationChanged(startingLocation)
-
-        navigationCamera.requestNavigationCameraToFollowing(
-            stateTransitionOptions = NavigationCameraTransitionOptions.Builder()
-                .maxDuration(0) // instant transition
-                .build()
-        )
-    }
-
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-    private fun addDebug() {
-        // debugging
-        val debugger = MapboxNavigationViewportDataSourceDebugger(
-            context,
-            binding.mapView,
-            layerAbove = "road-label"
-        ).apply {
-            enabled = true
-        }
-        viewportDataSource.debugger = debugger
-        navigationCamera.debugger = debugger
-    }
-
-    @SuppressLint("MissingPermission")
-    fun onCreate() {
-        if (accessToken == null) {
-            sendErrorToReact("Mapbox access token is not set")
-            return
-        }
-
-        mapboxMap = binding.mapView.getMapboxMap()
-
-        updateLogoPadding()
-        updateAttributionPadding()
-
-        // initialize the location puck
-        binding.mapView.location.apply {
-            val puckImage = userPuckImage
-
-            if (puckImage != null) {
-                val contentUri = Uri.parse(puckImage!!)
-                //contentUri.getPath()
-                //var name = puckImage!!.toLowerCase().replace("-", "_")
-                //val resourceId = context.getResources().getIdentifier(name.substring(name.lastIndexOf("/") + 1, name.lastIndexOf(".")), "drawable", context.getPackageName())
-
-                this.locationPuck = LocationPuck2D(
-                    bearingImage = ResourceDrawableIdHelper.getInstance().getResourceDrawable(context, contentUri.getPath())
-                )
-            } else {
-                this.locationPuck = LocationPuck2D(
-                    bearingImage = ContextCompat.getDrawable(
-                        context,
-                        R.drawable.mapbox_navigation_puck_icon
-                    )
-                )
-            }
-            
-            setLocationProvider(navigationLocationProvider)
-
-            enabled = true
-        }
-        binding.mapView.compass.enabled = false
-        binding.mapView.scalebar.enabled = false
-        binding.mapView.gestures.pitchEnabled = false
-        binding.mapView.gestures.rotateEnabled = false
-
-        // initialize Mapbox Navigation
-        mapboxNavigation = if (MapboxNavigationProvider.isCreated()) {
-            MapboxNavigationProvider.retrieve()
-        } else {
-            MapboxNavigationProvider.create(
-                NavigationOptions.Builder(context)
-                    .accessToken(accessToken)
-                    .build()
-            )
-        }
-
-        // initialize Navigation Camera
-        viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
-        viewportDataSource.followingPadding = getPadding(null)
-        //viewportDataSource.options.followingFrameOptions.centerUpdatesAllowed = true
-        //viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = true
-        //viewportDataSource.options.followingFrameOptions.bearingUpdatesAllowed = true
-        //viewportDataSource.options.followingFrameOptions.paddingUpdatesAllowed = false
-        //viewportDataSource.options.followingFrameOptions.minZoom = followZoomLevel
-        //viewportDataSource.options.followingFrameOptions.maxZoom = followZoomLevel
-        viewportDataSource.overviewPadding = getPadding(null)
-        //viewportDataSource.options.overviewFrameOptions.paddingUpdatesAllowed = false
-        
-        navigationCamera = NavigationCamera(
-            mapboxMap,
-            binding.mapView.camera,
-            viewportDataSource
-        )
-
-        // set the animations lifecycle listener to ensure the NavigationCamera stops
-        // automatically following the user location when the map is interacted with
-        binding.mapView.camera.addCameraAnimationsLifecycleListener(
-            NavigationBasicGesturesHandler(navigationCamera)
-        )
-        
-        navigationCamera.registerNavigationCameraStateChangeObserver { navigationCameraState ->
-            var stateStr = "idle"
-
-            if (navigationCameraState != null) {
-                if (navigationCameraState == NavigationCameraState.TRANSITION_TO_FOLLOWING) {
-                    stateStr = "transitionToFollowing"
-                } else if (navigationCameraState == NavigationCameraState.FOLLOWING) {
-                    stateStr = "following"
-                } else if (navigationCameraState == NavigationCameraState.TRANSITION_TO_OVERVIEW) {
-                    stateStr = "transitionToOverview"
-                } else if (navigationCameraState == NavigationCameraState.OVERVIEW) {
-                    stateStr = "overview"
-                }
-            }
-
-            val event = Arguments.createMap()
-            event.putString("state", stateStr)
-            context
-                .getJSModule(RCTEventEmitter::class.java)
-                .receiveEvent(id, "onTrackingStateChange", event)
-        }
-        
-        // add debug
-        if (this.debug) {
-            addDebug()
-        }
-
-        // make sure to use the same DistanceFormatterOptions across different features
-        val distanceFormatterOptions = mapboxNavigation.navigationOptions.distanceFormatterOptions
-
-        // initialize route line, the withRouteLineBelowLayerId is specified to place
-        // the route line below road labels layer on the map
-        // the value of this option will depend on the style that you are using
-        // and under which layer the route line should be placed on the map layers stack
-        val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context)
-            .withVanishingRouteLineEnabled(true)
-            .withRouteLineResources(RouteLineResources.Builder()
-                .routeLineColorResources(RouteLineColorResources.Builder()
-                    .routeDefaultColor(Color.parseColor(routeColor))
-                    .routeCasingColor(Color.parseColor(routeCasingColor))
-                    .routeClosureColor(Color.parseColor(routeClosureColor))
-                    .restrictedRoadColor(Color.parseColor(restrictedRoadColor))
-                    .routeLineTraveledColor(if (traversedRouteColor != null) Color.parseColor(traversedRouteColor) else Color.TRANSPARENT)
-                    .routeLineTraveledCasingColor(if (traversedRouteCasingColor != null) Color.parseColor(traversedRouteCasingColor) else Color.TRANSPARENT)
-                    .routeUnknownCongestionColor(Color.parseColor(trafficUnknownColor))
-                    .routeLowCongestionColor(Color.parseColor(trafficLowColor))
-                    .routeModerateCongestionColor(Color.parseColor(trafficModerateColor))
-                    .routeHeavyCongestionColor(Color.parseColor(trafficHeavyColor))
-                    .routeSevereCongestionColor(Color.parseColor(trafficSevereColor))
-                    .alternativeRouteDefaultColor(Color.parseColor(alternateRouteColor))
-                    .alternativeRouteCasingColor(Color.parseColor(alternateRouteCasingColor))
-                    .alternativeRouteClosureColor(Color.parseColor(routeClosureColor))
-                    .alternativeRouteRestrictedRoadColor(Color.parseColor(restrictedRoadColor))
-                    .alternativeRouteUnknownCongestionColor(Color.parseColor(trafficUnknownColor))
-                    .alternativeRouteLowCongestionColor(Color.parseColor(trafficLowColor))
-                    .alternativeRouteModerateCongestionColor(Color.parseColor(trafficModerateColor))
-                    .alternativeRouteHeavyCongestionColor(Color.parseColor(trafficHeavyColor))
-                    .alternativeRouteSevereCongestionColor(Color.parseColor(trafficSevereColor))
-                    .inActiveRouteLegsColor(Color.parseColor(traversedRouteColor))
-                    .build()
-                )
-                .build()
-            )
-            .withRouteLineBelowLayerId("road-label")
-            .displayRestrictedRoadSections(true)
-            .build()
-        routeLineApi = MapboxRouteLineApi(mapboxRouteLineOptions)
-        routeLineView = MapboxRouteLineView(mapboxRouteLineOptions)
-
-        binding.mapView.location.addOnIndicatorPositionChangedListener(onPositionChangedListener)
-
-        // start the trip session to being receiving location updates in free drive
-        // and later when a route is set also receiving route progress updates
-        mapboxNavigation.startTripSession()
-
-        // load map style
-        mapboxMap.loadStyleUri(
-            Style.LIGHT
-        ) {
-        }
-
-        mapboxNavigation.registerLocationObserver(locationObserver)
-        mapboxNavigation.registerRoutesObserver(routesObserver)
-        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-    }
-
-    private fun startRoute() {
-        // register event listeners
-        //mapboxNavigation.registerRoutesObserver(routesObserver)
-        //mapboxNavigation.registerLocationObserver(locationObserver)
-        //mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-    }
 
     private fun sendErrorToReact(error: String?) {
         val event = Arguments.createMap()
@@ -555,24 +361,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         context
             .getJSModule(RCTEventEmitter::class.java)
             .receiveEvent(id, "onError", event)
-    }
-
-    private fun setRouteAndStartNavigation(routes: List<DirectionsRoute>) {
-        if (routes.isEmpty()) {
-            sendErrorToReact("No route found")
-            return;
-        }
-        // set routes, where the first route in the list is the primary route that
-        // will be used for active guidance
-        mapboxNavigation.setRoutes(routes)
-
-        // move the camera to overview when new route is available
-        navigationCamera.requestNavigationCameraToOverview()
-    }
-
-    private fun clearRouteAndStopNavigation() {
-        // clear
-        mapboxNavigation.setRoutes(listOf())
     }
 
     private fun getPadding(padding: Array<Double>?): EdgeInsets {
@@ -690,20 +478,306 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         }
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private fun addDebug() {
+        // debugging
+        val debugger = MapboxNavigationViewportDataSourceDebugger(
+            context,
+            binding.mapView,
+            layerAbove = "road-label"
+        ).apply {
+            enabled = true
+        }
+        viewportDataSource.debugger = debugger
+        navigationCamera.debugger = debugger
+    }
+
+    @SuppressLint("MissingPermission")
+    fun onCreate() {
+        if (accessToken == null) {
+            sendErrorToReact("Mapbox access token is not set")
+            return
+        }
+
+        mapboxMap = binding.mapView.getMapboxMap()
+
+        updateLogoPadding()
+        updateAttributionPadding()
+
+        // initialize the location puck
+        binding.mapView.location.apply {
+            val puckImage = userPuckImage
+
+            if (puckImage != null) {
+                val contentUri = Uri.parse(puckImage!!)
+
+                this.locationPuck = LocationPuck2D(
+                    bearingImage = ResourceDrawableIdHelper.getInstance().getResourceDrawable(context, contentUri.getPath())
+                )
+            } else {
+                this.locationPuck = LocationPuck2D(
+                    bearingImage = ContextCompat.getDrawable(
+                        context,
+                        R.drawable.mapbox_navigation_puck_icon
+                    )
+                )
+            }
+            
+            setLocationProvider(navigationLocationProvider)
+
+            enabled = true
+        }
+
+        binding.mapView.location.addOnIndicatorPositionChangedListener(onPositionChangedListener)
+
+        binding.mapView.compass.enabled = false
+        binding.mapView.scalebar.enabled = false
+        binding.mapView.gestures.pitchEnabled = false
+        binding.mapView.gestures.rotateEnabled = false
+
+        // initialize Mapbox Navigation
+        mapboxNavigation = if (MapboxNavigationProvider.isCreated()) {
+            MapboxNavigationProvider.retrieve()
+        } else {
+            MapboxNavigationProvider.create(
+                NavigationOptions.Builder(context)
+                    .accessToken(accessToken)
+                    .build()
+            )
+        }
+
+        // initialize Navigation Camera
+        viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
+        
+        navigationCamera = NavigationCamera(
+            mapboxMap,
+            binding.mapView.camera,
+            viewportDataSource
+        )
+        
+        viewportDataSource.followingPadding = getPadding(null)
+        //viewportDataSource.options.followingFrameOptions.centerUpdatesAllowed = true
+        //viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = true
+        //viewportDataSource.options.followingFrameOptions.bearingUpdatesAllowed = true
+        //viewportDataSource.options.followingFrameOptions.paddingUpdatesAllowed = false
+        //viewportDataSource.options.followingFrameOptions.minZoom = followZoomLevel
+        //viewportDataSource.options.followingFrameOptions.maxZoom = followZoomLevel
+        viewportDataSource.overviewPadding = getPadding(null)
+        //viewportDataSource.options.overviewFrameOptions.paddingUpdatesAllowed = false
+
+        // set the animations lifecycle listener to ensure the NavigationCamera stops
+        // automatically following the user location when the map is interacted with
+        binding.mapView.camera.addCameraAnimationsLifecycleListener(
+            NavigationBasicGesturesHandler(navigationCamera)
+        )
+        
+        navigationCamera.registerNavigationCameraStateChangeObserver { navigationCameraState ->
+            var stateStr = "idle"
+
+            if (navigationCameraState != null) {
+                if (navigationCameraState == NavigationCameraState.TRANSITION_TO_FOLLOWING) {
+                    stateStr = "transitionToFollowing"
+                } else if (navigationCameraState == NavigationCameraState.FOLLOWING) {
+                    stateStr = "following"
+                } else if (navigationCameraState == NavigationCameraState.TRANSITION_TO_OVERVIEW) {
+                    stateStr = "transitionToOverview"
+                } else if (navigationCameraState == NavigationCameraState.OVERVIEW) {
+                    stateStr = "overview"
+                }
+            }
+
+            val event = Arguments.createMap()
+            event.putString("state", stateStr)
+            context
+                .getJSModule(RCTEventEmitter::class.java)
+                .receiveEvent(id, "onTrackingStateChange", event)
+        }
+        
+        // add debug
+        if (this.debug) {
+            addDebug()
+        }
+
+        // load map style
+        mapboxMap.loadStyleUri(
+            Style.LIGHT
+        ) {
+        }
+
+        // initialize route line, the withRouteLineBelowLayerId is specified to place
+        // the route line below road labels layer on the map
+        // the value of this option will depend on the style that you are using
+        // and under which layer the route line should be placed on the map layers stack
+        val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context)
+            .withVanishingRouteLineEnabled(true)
+            .withRouteLineResources(RouteLineResources.Builder()
+                .routeLineColorResources(RouteLineColorResources.Builder()
+                    .routeDefaultColor(Color.parseColor(routeColor))
+                    .routeCasingColor(Color.parseColor(routeCasingColor))
+                    .routeClosureColor(Color.parseColor(routeClosureColor))
+                    .restrictedRoadColor(Color.parseColor(restrictedRoadColor))
+                    .routeLineTraveledColor(if (traversedRouteColor != null) Color.parseColor(traversedRouteColor) else Color.TRANSPARENT)
+                    .routeLineTraveledCasingColor(if (traversedRouteCasingColor != null) Color.parseColor(traversedRouteCasingColor) else Color.TRANSPARENT)
+                    .routeUnknownCongestionColor(Color.parseColor(trafficUnknownColor))
+                    .routeLowCongestionColor(Color.parseColor(trafficLowColor))
+                    .routeModerateCongestionColor(Color.parseColor(trafficModerateColor))
+                    .routeHeavyCongestionColor(Color.parseColor(trafficHeavyColor))
+                    .routeSevereCongestionColor(Color.parseColor(trafficSevereColor))
+                    .alternativeRouteDefaultColor(Color.parseColor(alternateRouteColor))
+                    .alternativeRouteCasingColor(Color.parseColor(alternateRouteCasingColor))
+                    .alternativeRouteClosureColor(Color.parseColor(routeClosureColor))
+                    .alternativeRouteRestrictedRoadColor(Color.parseColor(restrictedRoadColor))
+                    .alternativeRouteUnknownCongestionColor(Color.parseColor(trafficUnknownColor))
+                    .alternativeRouteLowCongestionColor(Color.parseColor(trafficLowColor))
+                    .alternativeRouteModerateCongestionColor(Color.parseColor(trafficModerateColor))
+                    .alternativeRouteHeavyCongestionColor(Color.parseColor(trafficHeavyColor))
+                    .alternativeRouteSevereCongestionColor(Color.parseColor(trafficSevereColor))
+                    .inActiveRouteLegsColor(Color.parseColor(traversedRouteColor))
+                    .build()
+                )
+                .build()
+            )
+            .withRouteLineBelowLayerId("road-label")
+            .displayRestrictedRoadSections(true)
+            .build()
+        routeLineApi = MapboxRouteLineApi(mapboxRouteLineOptions)
+        routeLineView = MapboxRouteLineView(mapboxRouteLineOptions)
+
+        // register event listeners
+        mapboxNavigation.registerLocationObserver(locationObserver)
+        mapboxNavigation.registerRoutesObserver(routesObserver)
+        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+
+        // start the trip session to being receiving location updates in free drive
+        // and later when a route is set also receiving route progress updates
+        mapboxNavigation.startTripSession()
+    }
+
+    private fun startRoute() {
+        // register event listeners
+        //mapboxNavigation.registerRoutesObserver(routesObserver)
+        //mapboxNavigation.registerLocationObserver(locationObserver)
+        //mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+    }
+
+    private fun setRouteAndStartNavigation(routes: List<DirectionsRoute>) {
+        if (routes.isEmpty()) {
+            sendErrorToReact("No route found")
+            return;
+        }
+        // set routes, where the first route in the list is the primary route that
+        // will be used for active guidance
+        mapboxNavigation.setRoutes(routes)
+
+        // move the camera to overview when new route is available
+        navigationCamera.requestNavigationCameraToOverview()
+    }
+
+    private fun fetchRoutes(routeWaypoints: List<Point>, routeWaypointNames: List<String>, onSuccess: (result: List<NavigationRoute>) -> Unit) {
+        val originLocation = navigationLocationProvider.lastLocation
+        val originPoint = originLocation?.let {
+            Point.fromLngLat(it.longitude, it.latitude)
+        } ?: return
+
+        mapboxNavigation.requestRoutes(
+            RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                //.applyLanguageAndVoiceUnitOptions(context)
+                .coordinatesList(routeWaypoints)
+                .bearingsList(
+                    listOf(
+                        Bearing.builder()
+                            .angle(originLocation.bearing.toDouble())
+                            .degrees(45.0)
+                            .build(),
+                        null
+                    )
+                )
+                .waypointNamesList(routeWaypointNames)
+                .layersList(listOf(mapboxNavigation.getZLevel(), null))
+                .alternatives(true)
+                .build(),
+            object : NavigationRouterCallback {
+                override fun onRoutesReady(
+                    routes: List<NavigationRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
+                    if (routes.isEmpty()) {
+                        sendErrorToReact("No route found")
+                        return;
+                    }
+                    
+                    previewRoutes(routes)
+                }
+
+                override fun onFailure(
+                    reasons: List<RouterFailure>,
+                    routeOptions: RouteOptions
+                ) {
+                    sendErrorToReact("Error finding route $reasons")
+                }
+
+                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
+                    // no impl
+                }
+            }
+        )
+    }
+
+    private fun previewRoutes(routes: List<NavigationRoute>) {
+        this.currentRoutes = routes
+
+        // Mapbox navigation doesn't have a special state for route preview.
+        // Preview state is managed by an application.
+        // Display the routes you received on the map.
+        routeLineApi.setNavigationRoutes(routes) { value ->
+            mapboxMap.getStyle()?.apply {
+                routeLineView.renderRouteDrawData(this, value)
+                // update the camera position to account for the new route
+                viewportDataSource.onRouteChanged(routes.first())
+                viewportDataSource.evaluate()
+                navigationCamera.requestNavigationCameraToOverview()
+            }
+        }
+    }
+
+    private fun startActiveGuidance() {
+        if (this.currentRoutes != null) {
+            // Set routes to switch navigator from free drive to active guidance state.
+            // In active guidance navigator emits your route progress, voice and banner instructions, etc.
+            mapboxNavigation.setNavigationRoutes(this.currentRoutes)
+            navigationCamera.requestNavigationCameraToFollowing()
+        }
+    }
+
+    private fun clearRouteAndStopActiveGuidance() {
+        // clear
+        this.currentRoutes = null
+
+        mapboxNavigation.setNavigationRoutes(emptyList())
+        navigationCamera.requestNavigationCameraToOverview()
+    }
+
     private fun onDestroy() {
-        MapboxNavigationProvider.destroy()
-        routeLineApi.cancel()
-        routeLineView.cancel()
-        //binding.mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
+        try {
+            MapboxNavigationProvider.destroy()
+            routeLineApi.cancel()
+            routeLineView.cancel()
+            binding.mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
+        } catch (ex: Exception) {
+            sendErrorToReact(ex.toString())
+        }
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
-        if (::mapboxNavigation.isInitialized) {
+        try {
             mapboxNavigation.unregisterRoutesObserver(routesObserver)
             mapboxNavigation.unregisterLocationObserver(locationObserver)
             mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        } catch (ex: Exception) {
+            sendErrorToReact(ex.toString())
         }
     }
 
@@ -755,52 +829,28 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
             currentLegIndex = if (legIndex != null) legIndex!! else -1
 
-            mapboxNavigation.requestRoutes(
-                RouteOptions.builder()
-                    .applyDefaultNavigationOptions()
-                    //.applyLanguageAndVoiceUnitOptions(context)
-                    .coordinatesList(routeWaypoints.toList())
-                    .waypointNamesList(routeWaypointNames.toList())
-                    //.steps(true)
-                    .build(),
-                object : RouterCallback {
-                    override fun onRoutesReady(
-                        routes: List<DirectionsRoute>,
-                        routerOrigin: RouterOrigin
-                    ) {
-                        if (routes.isEmpty()) {
-                            sendErrorToReact("No route found")
-                            return;
-                        }
-                        
-                        mapboxNavigation.setRoutes(routes)
-
-                        if (cameraType == "follow") {
-                            follow(padding)
-                        } else if (cameraType == "overview") {
-                            moveToOverview(padding)
-                        }
-                    }
-
-                    override fun onFailure(
-                        reasons: List<RouterFailure>,
-                        routeOptions: RouteOptions
-                    ) {
-                        sendErrorToReact("Error finding route $reasons")
-                    }
-
-                    override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
-                        // no impl
-                    }
+            fetchRoutes(routeWaypoints.toList(), routeWaypointNames.toList()) { result -> 
+                if (cameraType == "follow") {
+                    follow(padding)
+                } else if (cameraType == "overview") {
+                    moveToOverview(padding)
                 }
-            )
+            }
         } catch (ex: Exception) {
-            sendErrorToReact(ex.toString() + "||" + ex.getStackTrace().joinToString())
+            sendErrorToReact(ex.toString())
         }
     }
 
     fun clearRoute() {
-        clearRouteAndStopNavigation()
+        clearRouteAndStopActiveGuidance()
+    }
+
+    fun startNavigation() {
+        startActiveGuidance()
+    }
+
+    fun stopNavigation() {
+        clearRouteAndStopActiveGuidance()
     }
     
     fun follow(padding: ReadableArray?) {

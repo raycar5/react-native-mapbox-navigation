@@ -52,6 +52,7 @@ export interface IMapboxNavigationFreeDriveProps {
     onLocationChange?: (event: OnLocationChangeEvent) => void;
     onTrackingStateChange?: (event: OnTrackingStateChangeEvent) => void;
     onRouteChange?: (event: OnRouteChangeEvent) => void;
+    onError?: (event: OnErrorEvent) => void;
     showSpeedLimit?: boolean;
     speedLimitAnchor?: Padding;
     followZoomLevel?: number;

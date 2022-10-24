@@ -47,4 +47,20 @@ class MapboxNavigationFreeDriveManager: RCTViewManager {
       mapboxNavigationFreeDriveView.fitCamera(padding: padding)
     }
   }
+
+  @objc func startNavigationViaManager(_ node: NSNumber) {
+    DispatchQueue.main.async {
+      let mapboxNavigationFreeDriveView = self.bridge.uiManager.view(forReactTag: node) as! MapboxNavigationFreeDriveView
+      
+      mapboxNavigationFreeDriveView.startNavigation()
+    }
+  }
+
+  @objc func stopNavigationViaManager(_ node: NSNumber) {
+    DispatchQueue.main.async {
+      let mapboxNavigationFreeDriveView = self.bridge.uiManager.view(forReactTag: node) as! MapboxNavigationFreeDriveView
+      
+      mapboxNavigationFreeDriveView.stopNavigation()
+    }
+  }
 }

@@ -237,6 +237,14 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationMapView?.showcase(routes, routesPresentationStyle: .single(cameraOptions: cameraOptions), animated: true)
     showCurrentRoute()
   }
+
+  @objc func startNavigation() {
+    //
+  }
+
+  @objc func stopNavigation() {
+    //
+  }
   
   @objc func didUpdatePassiveLocation(_ notification: Notification) {
     let location = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.locationKey] as? CLLocation
