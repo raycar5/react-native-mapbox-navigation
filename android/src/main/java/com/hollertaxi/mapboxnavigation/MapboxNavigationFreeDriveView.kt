@@ -610,6 +610,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         // the route line below road labels layer on the map
         // the value of this option will depend on the style that you are using
         // and under which layer the route line should be placed on the map layers stack
+        val originIcon = originImage
+        val destinationIcon = destinationImage
         val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context)
             .withVanishingRouteLineEnabled(true)
             .withRouteLineResources(RouteLineResources.Builder()
@@ -637,33 +639,25 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                     .inActiveRouteLegsColor(Color.parseColor(traversedRouteColor))
                     .build()
                 )
+                .originWaypointIcon(if (originIcon != null) {
+                    val contentUri = Uri.parse(originIcon!!)
+    
+                    ResourceDrawableIdHelper.getInstance().getResourceDrawable(context, contentUri.getPath())
+                } else {
+                    ContextCompat.getDrawable(context, R.drawable.mapbox_ic_route_origin)
+                })
+                .destinationWaypointIcon(if (destinationIcon != null) {
+                    val contentUri = Uri.parse(destinationIcon!!)
+    
+                    ResourceDrawableIdHelper.getInstance().getResourceDrawable(context, contentUri.getPath())
+                } else {
+                    ContextCompat.getDrawable(context, R.drawable.mapbox_ic_route_destination)
+                })
                 .build()
             )
             .withRouteLineBelowLayerId("road-label")
             .displayRestrictedRoadSections(true)
-            .destinationIcon(if (destinationIcon != null) {
-                val contentUri = Uri.parse(destinationIcon!!)
-
-                ResourceDrawableIdHelper.getInstance().getResourceDrawable(context, contentUri.getPath())
-            } else {
-                ContextCompat.getDrawable(context, R.drawable.mapbox_ic_route_destination)
-            })
             .build()
-
-        val originIcon = originImage
-        val destinationIcon = destinationImage
-
-        if (originIcon != null) {
-            val contentUri = Uri.parse(originIcon!!)
-
-            mapboxRouteLineOptions.originIcon = ResourceDrawableIdHelper.getInstance().getResourceDrawable(context, contentUri.getPath())
-        }
-
-        if (destinationIcon != null) {
-            val contentUri = Uri.parse(destinationIcon!!)
-
-            mapboxRouteLineOptions.destinationIcon = ResourceDrawableIdHelper.getInstance().getResourceDrawable(context, contentUri.getPath())
-        }
 
         routeLineApi = MapboxRouteLineApi(mapboxRouteLineOptions)
         routeLineView = MapboxRouteLineView(mapboxRouteLineOptions)
@@ -762,7 +756,11 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
 
     private fun pauseActiveGuidance() {
-        routeLineApi.setNavigationRoutes(emptyList())
+        routeLineApi.clearRouteLine() { value ->
+            mapboxMap.getStyle()?.apply {
+                routeLineView.renderClearRouteLineValue(this, value)
+            }
+        }
         mapboxNavigation.setNavigationRoutes(emptyList())
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
@@ -774,7 +772,11 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.currentActiveRoutes = null
         this.currentPreviewRoutes = null
 
-        routeLineApi.setNavigationRoutes(emptyList())
+        routeLineApi.clearRouteLine() { value ->
+            mapboxMap.getStyle()?.apply {
+                routeLineView.renderClearRouteLineValue(this, value)
+            }
+        }
         mapboxNavigation.setNavigationRoutes(emptyList())
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
@@ -870,7 +872,15 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
     fun startNavigation(origin: ReadableArray?, destination: ReadableArray?, waypoints: ReadableArray?, styles: ReadableArray?, legIndex: Int?, cameraType: String?, padding: ReadableArray?) {
         if (this.currentActiveRoutes != null) {
+            if (cameraType == null || cameraType!! == "follow") {
+                follow(padding)
+            }
+
             startActiveGuidance()
+
+            if (cameraType != null && cameraType!! == "overview") {
+                moveToOverview(padding)
+            }
         } else {
             try {
                 var routeWaypoints = mutableListOf<Point>()
