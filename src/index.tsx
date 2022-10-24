@@ -93,7 +93,23 @@ const MapboxNavigationFreeDrive = React.forwardRef((props: IMapboxNavigationFree
     }
   }
 
-  return <RNMapboxNavigationFreeDrive ref={mapboxNavigationFreeDriveRef} style={styles.container} {...{...props, userPuckImage: getUserImage() }} />;
+  const getOriginImage = () => {
+    if (Platform.OS === 'ios' || !props.originImage) {
+      return props.originImage
+    } else {
+      return (Image.resolveAssetSource(props.originImage) || {}).uri
+    }
+  }
+
+  const getDestinationImage = () => {
+    if (Platform.OS === 'ios' || !props.destinationImage) {
+      return props.destinationImage
+    } else {
+      return (Image.resolveAssetSource(props.destinationImage) || {}).uri
+    }
+  }
+
+  return <RNMapboxNavigationFreeDrive ref={mapboxNavigationFreeDriveRef} style={styles.container} {...{...props, userPuckImage: getUserImage(), originImage: getOriginImage(), destinationImage: getDestinationImage() }} />;
 });
 
 const RNMapboxNavigation = requireNativeComponent(

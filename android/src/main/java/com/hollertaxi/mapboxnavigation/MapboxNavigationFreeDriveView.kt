@@ -22,6 +22,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
@@ -675,21 +676,23 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         val originPoint = originLocation?.let {
             Point.fromLngLat(it.longitude, it.latitude)
         } ?: return
+        var bearings = mutableListOf<Bearing>()
+
+        bearings.add(Bearing.builder()
+            .angle(originLocation.bearing.toDouble())
+            .degrees(45.0)
+            .build())
+
+        for (ii in 1 until routeWaypoints.size) {
+            bearings.add(null)
+        }
 
         mapboxNavigation.requestRoutes(
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 //.applyLanguageAndVoiceUnitOptions(context)
                 .coordinatesList(routeWaypoints)
-                .bearingsList(
-                    listOf(
-                        Bearing.builder()
-                            .angle(originLocation.bearing.toDouble())
-                            .degrees(45.0)
-                            .build(),
-                        null
-                    )
-                )
+                .bearingsList(bearings.toList())
                 .waypointNamesList(routeWaypointNames)
                 .layersList(listOf(mapboxNavigation.getZLevel(), null))
                 .alternatives(true)
@@ -802,8 +805,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             mapboxNavigation.unregisterRoutesObserver(routesObserver)
             mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
             binding.mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
-            routeLineApi.cancel()
-            routeLineView.cancel()
         } catch (ex: Exception) {
             sendErrorToReact(ex.toString())
         }
