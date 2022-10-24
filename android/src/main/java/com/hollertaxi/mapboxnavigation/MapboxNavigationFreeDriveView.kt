@@ -642,16 +642,16 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 .originWaypointIcon(if (originIcon != null) {
                     val contentUri = Uri.parse(originIcon!!)
     
-                    ResourceDrawableIdHelper.getInstance().getResourceDrawable(context, contentUri.getPath())
+                    ResourceDrawableIdHelper.getInstance().getResourceDrawableId(context, contentUri.getPath())
                 } else {
-                    ContextCompat.getDrawable(context, R.drawable.mapbox_ic_route_origin)
+                    R.drawable.mapbox_ic_route_origin
                 })
                 .destinationWaypointIcon(if (destinationIcon != null) {
                     val contentUri = Uri.parse(destinationIcon!!)
     
-                    ResourceDrawableIdHelper.getInstance().getResourceDrawable(context, contentUri.getPath())
+                    ResourceDrawableIdHelper.getInstance().getResourceDrawableId(context, contentUri.getPath())
                 } else {
-                    ContextCompat.getDrawable(context, R.drawable.mapbox_ic_route_destination)
+                    R.drawable.mapbox_ic_route_destination
                 })
                 .build()
             )
