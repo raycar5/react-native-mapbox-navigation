@@ -104,6 +104,11 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
         view.setUserPuckScale(userPuckScale)
     }
     
+    @ReactProp(name = "originImage")
+    fun setOriginImage(view: MapboxNavigationFreeDriveView, originImage: String?) {
+        view.setOriginImage(originImage)
+    }
+    
     @ReactProp(name = "destinationImage")
     fun setDestinationImage(view: MapboxNavigationFreeDriveView, destinationImage: String?) {
         view.setDestinationImage(destinationImage)

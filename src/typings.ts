@@ -66,6 +66,7 @@ export interface IMapboxNavigationFreeDriveProps {
   userPuckImage?: number;
   userPuckScale?: number;
   destinationImage?: number;
+  originImage?: number;
   mapPadding?: Padding;
   logoVisible?: boolean;
   logoPadding?: Coordinate;

@@ -110,6 +110,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var userPuckImage: String? = null
     private var userPuckScale: Double = 1.0
     private var destinationImage: String? = null
+    private var originImage: String? = null
     private var mapPadding: Array<Double>? = null
     private var routeColor: String = "#56A8FB"
     private var routeCasingColor: String = "#2F7AC6"
@@ -608,6 +609,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         // the route line below road labels layer on the map
         // the value of this option will depend on the style that you are using
         // and under which layer the route line should be placed on the map layers stack
+        val destinationIcon = destinationImage
+        val originIcon = originImage
         val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context)
             .withVanishingRouteLineEnabled(true)
             .withRouteLineResources(RouteLineResources.Builder()
@@ -639,6 +642,20 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             )
             .withRouteLineBelowLayerId("road-label")
             .displayRestrictedRoadSections(true)
+            .originIcon(if (originIcon != null) {
+                val contentUri = Uri.parse(originIcon!!)
+
+                ResourceDrawableIdHelper.getInstance().getResourceDrawable(context, contentUri.getPath())
+            } else {
+                ContextCompat.getDrawable(context, R.drawable.mapbox_ic_route_origin)
+            })
+            .destinationIcon(if (destinationIcon != null) {
+                val contentUri = Uri.parse(destinationIcon!!)
+
+                ResourceDrawableIdHelper.getInstance().getResourceDrawable(context, contentUri.getPath())
+            } else {
+                ContextCompat.getDrawable(context, R.drawable.mapbox_ic_route_destination)
+            })
             .build()
         routeLineApi = MapboxRouteLineApi(mapboxRouteLineOptions)
         routeLineView = MapboxRouteLineView(mapboxRouteLineOptions)
@@ -773,9 +790,12 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         super.onDetachedFromWindow()
 
         try {
+            routeLineApi.cancel()
+            routeLineView.cancel()
             mapboxNavigation.unregisterRoutesObserver(routesObserver)
             mapboxNavigation.unregisterLocationObserver(locationObserver)
             mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+            binding.mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
         } catch (ex: Exception) {
             sendErrorToReact(ex.toString())
         }
@@ -923,6 +943,10 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     
     fun setUserPuckScale(userPuckScale: Double) {
         this.userPuckScale = userPuckScale
+    }
+    
+    fun setOriginImage(originImage: String?) {
+        this.originImage = originImage
     }
     
     fun setDestinationImage(destinationImage: String?) {

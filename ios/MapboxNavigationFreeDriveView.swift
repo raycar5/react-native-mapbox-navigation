@@ -66,6 +66,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
   @objc var userPuckImage: UIImage?
   @objc var userPuckScale: NSNumber = 1.0
+  @objc var originImage: UIImage?
   @objc var destinationImage: UIImage?
   @objc var mapPadding: [NSNumber] = []
   @objc var routeColor: NSString = "#56A8FB"
