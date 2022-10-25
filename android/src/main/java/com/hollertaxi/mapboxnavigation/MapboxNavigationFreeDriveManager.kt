@@ -236,6 +236,11 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
         view.setWaypointStrokeColor(waypointStrokeColor)
     }
     
+    @ReactProp(name = "mute")
+    fun setMute(view: MapboxNavigationFreeDriveView, mute: Boolean) {
+        view.setMute(mute)
+    }
+    
     @ReactProp(name = "debug")
     fun setDebug(view: MapboxNavigationFreeDriveView, debug: Boolean) {
         view.setDebug(debug)

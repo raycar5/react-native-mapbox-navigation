@@ -23,9 +23,8 @@
         android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-        <!-- Uncomment the following line of code to customize the MapboxManeuverView -->
-        <!-- style="@style/MapboxCustomManeuverStyle" --> />
+        app:layout_constraintStart_toStartOf="parent"
+        style="@style/MapboxCustomManeuverStyle" />
 
     <com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
       android:id="@+id/speedLimitView"

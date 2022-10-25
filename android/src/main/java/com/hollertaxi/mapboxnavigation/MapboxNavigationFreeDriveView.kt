@@ -48,6 +48,7 @@ import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -56,6 +57,8 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -102,6 +105,7 @@ import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi
 import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter
 import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import com.facebook.react.uimanager.events.RCTEventEmitter
 
 class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, private val accessToken: String?) : FrameLayout(context.baseContext) {
@@ -142,6 +146,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var logoPadding: Array<Double>? = null
     private var attributionVisible: Boolean = true
     private var attributionPadding: Array<Double>? = null
+    private var mute: Boolean = false
     private var debug: Boolean = false
 
     private var currentOrigin: Point? = null
@@ -206,11 +211,24 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
      */
     private lateinit var routeArrowView: MapboxRouteArrowView
 
+    /**
+     * Extracts message that should be communicated to the driver about the upcoming maneuver.
+     * When possible, downloads a synthesized audio file that can be played back to the driver.
+     */
+    private lateinit var speechApi: MapboxSpeechApi
+
+    /**
+     * Plays the synthesized audio files with upcoming maneuver instructions
+     * or uses an on-device Text-To-Speech engine to communicate the message to the driver.
+     */
+    private lateinit var voiceInstructionsPlayer: MapboxVoiceInstructionsPlayer
+
     /*
      * Below are generated camera padding values to ensure that the route fits well on screen while
      * other elements are overlaid on top of the map (including instruction view, buttons, etc.)
      */
     private val pixelDensity = Resources.getSystem().displayMetrics.density
+    private val routeClickPadding = 30 * pixelDensity
     private val overviewPadding: EdgeInsets by lazy {
         EdgeInsets(
             0.0,
@@ -267,6 +285,65 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     * [MapboxManeuverApi.getRoadShields]
     */
     private val roadShieldCallback = RouteShieldCallback { shields -> binding.maneuverView.renderManeuverWith(shields) }
+
+    /**
+     * Based on whether the synthesized audio file is available, the callback plays the file
+     * or uses the fall back which is played back using the on-device Text-To-Speech engine.
+     */
+    private val speechCallback = MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> { expected ->
+        expected.fold(
+            { error ->
+                // play the instruction via fallback text-to-speech engine
+                voiceInstructionsPlayer.play(
+                    error.fallback,
+                    voiceInstructionsPlayerCallback
+                )
+            },
+            { value ->
+                // play the sound file from the external generator
+                voiceInstructionsPlayer.play(
+                    value.announcement,
+                    voiceInstructionsPlayerCallback
+                )
+            }
+        )
+    }
+
+    /**
+     * When a synthesized audio file was downloaded, this callback cleans up the disk after it was played.
+     */
+    private val voiceInstructionsPlayerCallback = MapboxNavigationConsumer<SpeechAnnouncement> { value ->
+        // remove already consumed file to free-up space
+        speechApi.clean(value)
+    }
+    
+    /**
+     * Observes when a new voice instruction should be played.
+     */
+    private val voiceInstructionsObserver = VoiceInstructionsObserver { voiceInstructions ->
+        speechApi.generate(voiceInstructions, speechCallback)
+    }
+
+    /**
+     * The SDK triggers [NavigationRouteAlternativesObserver] when available alternatives change.
+     */
+    private val alternativesObserver = object : NavigationRouteAlternativesObserver {
+        override fun onRouteAlternatives(
+            routeProgress: RouteProgress,
+            alternatives: List<NavigationRoute>,
+            routerOrigin: RouterOrigin
+        ) {
+            // Set the suggested alternatives
+            val updatedRoutes = mutableListOf<NavigationRoute>()
+            updatedRoutes.add(routeProgress.navigationRoute) // only primary route should persist
+            updatedRoutes.addAll(alternatives) // all old alternatives should be replaced by the new ones
+            mapboxNavigation.setNavigationRoutes(updatedRoutes)
+        }
+
+        override fun onRouteAlternativesError(error: RouteAlternativesError) {
+            // no impl
+        }
+    }
 
     /**
      * Gets notified with location updates.
@@ -355,6 +432,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                     maneuverApi.getRoadShields(maneuverList, roadShieldCallback)
                 }
                 binding.maneuverView.visibility = View.VISIBLE
+                binding.maneuverView.updateUpcomingManeuversVisibility(false)
                 binding.maneuverView.renderManeuvers(maneuvers)
             }
         )  
@@ -410,6 +488,32 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             // Render the result to update the map.
             routeLineView.renderRouteLineUpdate(this, result)
         }
+    }
+
+    /**
+     * Click on any point of the alternative route on the map to make it primary.
+     */
+    private val mapClickListener = OnMapClickListener { point ->
+        routeLineApi.findClosestRoute(
+            point,
+            mapboxMap,
+            routeClickPadding
+        ) {
+            val routeFound = it.value?.navigationRoute
+            // if we clicked on some route that is not primary,
+            // we make this route primary and all the others - alternative
+            if (routeFound != null && routeFound != routeLineApi.getPrimaryNavigationRoute()) {
+                val reOrderedRoutes = routeLineApi.getNavigationRoutes()
+                    .filter { navigationRoute -> navigationRoute != routeFound }
+                    .toMutableList()
+                    .also { list ->
+                        list.add(0, routeFound)
+                    }
+                mapboxNavigation.setNavigationRoutes(reOrderedRoutes)
+            }
+        }
+
+        false
     }
 
     override fun onAttachedToWindow() {
@@ -551,6 +655,16 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         }
     }
 
+    private fun toggleMute(mute: Boolean) {
+        this.mute = mute
+
+        if (mute) {
+            voiceInstructionsPlayer.volume(SpeechVolume(0f))
+        } else {
+            voiceInstructionsPlayer.volume(SpeechVolume(1f))
+        }
+    }
+
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun addDebug() {
         // debugging
@@ -615,6 +729,11 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             MapboxNavigationProvider.create(
                 NavigationOptions.Builder(context)
                     .accessToken(accessToken)
+                    .routeAlternativesOptions(
+                        RouteAlternativesOptions.Builder()
+                            .intervalMillis(TimeUnit.MINUTES.toMillis(3))
+                            .build()
+                    )
                     .build()
             )
         }
@@ -686,6 +805,29 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         } else {
             binding.speedLimitView.visibility = View.INVISIBLE
         }
+
+        /**
+         * The instructions are hardcoded in English in [route] property.
+         * If you request routes via SDK (see [FetchARouteActivity]),
+         * you can specify any language here (for example, `Locale.getDefault().getLanguageTag()`)
+         * and the returned voice instructions will be in the corresponding language.
+         */
+        speechApi = MapboxSpeechApi(
+            context,
+            accessToken,
+            Locale.getDefault().getLanguageTag()
+        )
+        /**
+         * The instructions are hardcoded in English in [route] property.
+         * If you request routes via SDK (see [FetchARouteActivity]),
+         * you can specify any language here (for example, `Locale.getDefault().getLanguageTag()`)
+         * and the returned voice instructions will be in the corresponding language.
+         */
+        voiceInstructionsPlayer = MapboxVoiceInstructionsPlayer(
+            context,
+            accessToken,
+            Locale.getDefault().getLanguageTag()
+        )
         
         // make sure to use the same DistanceFormatterOptions across different features
         val distanceFormatterOptions = mapboxNavigation.navigationOptions.distanceFormatterOptions
@@ -764,6 +906,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         // start the trip session to being receiving location updates in free drive
         // and later when a route is set also receiving route progress updates
         mapboxNavigation.startTripSession()
+
+        binding.mapView.gestures.addOnMapClickListener(mapClickListener)
     }
 
     private fun fetchRoutes(routeWaypoints: List<Point>, routeWaypointNames: List<String>, onSuccess: (routes: List<NavigationRoute>) -> Unit) {
@@ -788,7 +932,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxNavigation.requestRoutes(
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
-                //.applyLanguageAndVoiceUnitOptions(context)
+                .applyLanguageAndVoiceUnitOptions(context)
                 .coordinatesList(routeWaypoints)
                 .bearingsList(bearings.toList())
                 .waypointNamesList(routeWaypointNames)
@@ -851,6 +995,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             mapboxNavigation.setNavigationRoutes(routes)
             mapboxNavigation.registerRoutesObserver(routesObserver)
             mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+            mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
+            mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
 
             if (updateCamera) {
                 navigationCamera.requestNavigationCameraToFollowing()
@@ -870,6 +1016,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxNavigation.setNavigationRoutes(emptyList())
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
+        mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
         viewportDataSource.clearRouteData()
         viewportDataSource.evaluate()
         navigationCamera.requestNavigationCameraToOverview()
@@ -893,6 +1041,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxNavigation.setNavigationRoutes(emptyList())
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
+        mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
         viewportDataSource.clearRouteData()
         viewportDataSource.evaluate()
         navigationCamera.requestNavigationCameraToOverview()
@@ -902,11 +1052,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
     private fun onDestroy() {
         try {
-            MapboxNavigationProvider.destroy()
             routeLineApi.cancel()
             routeLineView.cancel()
             maneuverApi.cancel()
+            speechApi.cancel()
+            voiceInstructionsPlayer.shutdown()
             binding.mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
+            MapboxNavigationProvider.destroy()
         } catch (ex: Exception) {
             sendErrorToReact(ex.toString())
         }
@@ -919,6 +1071,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             mapboxNavigation.unregisterLocationObserver(locationObserver)
             mapboxNavigation.unregisterRoutesObserver(routesObserver)
             mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+            mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
+            mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
             binding.mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
         } catch (ex: Exception) {
             sendErrorToReact(ex.toString())
@@ -1275,6 +1429,10 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     
     fun setWaypointStrokeColor(waypointStrokeColor: String) {
         this.waypointStrokeColor = waypointStrokeColor
+    }
+
+    fun setMute(mute: Boolean) {
+        toggleMute(mute)
     }
     
     fun setDebug(debug: Boolean) {

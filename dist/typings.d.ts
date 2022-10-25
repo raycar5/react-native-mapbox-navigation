@@ -84,6 +84,7 @@ export interface IMapboxNavigationFreeDriveProps {
     waypointStrokeWidth?: number;
     waypointStrokeOpacity?: number;
     waypointStrokeColor?: string;
+    mute?: boolean;
     debug?: boolean;
 }
 export {};
