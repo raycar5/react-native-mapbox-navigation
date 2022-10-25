@@ -83,6 +83,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
 import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
 import com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter
@@ -96,6 +97,10 @@ import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
+import com.mapbox.navigation.ui.shield.model.RouteShieldCallback
+import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi
+import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter
+import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
 import java.util.Locale
 import com.facebook.react.uimanager.events.RCTEventEmitter
 
@@ -125,6 +130,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var trafficHeavyColor: String = "#ff4d4d"
     private var trafficSevereColor: String = "#8f2447"
     private var restrictedRoadColor: String = "#000000"
+    private var routeArrowColor: String = "#FFFFFF"
+    private var routeArrowCasingColor: String = "#2D3F53"
     private var waypointColor: String = "#2F7AC6"
     private var waypointRadius: Int = 8
     private var waypointOpacity: Int = 1
@@ -172,6 +179,12 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
      * Produces the camera frames based on the location and routing data for the [navigationCamera] to execute.
      */
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
+
+    /**
+     * Generates updates for the [MapboxManeuverView] to display the upcoming maneuver instructions
+     * and remaining distance to the maneuver point.
+     */
+    private lateinit var maneuverApi: MapboxManeuverApi
     
     /**
      * Generates updates for the [routeLineView] with the geometries and properties of the routes that should be drawn on the map.
@@ -182,6 +195,16 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
      * Draws route lines on the map based on the data from the [routeLineApi]
      */
     private lateinit var routeLineView: MapboxRouteLineView
+
+    /**
+     * Generates updates for the [routeArrowView] with the geometries and properties of maneuver arrows that should be drawn on the map.
+     */
+    private val routeArrowApi: MapboxRouteArrowApi = MapboxRouteArrowApi()
+
+    /**
+     * Draws maneuver arrows on the map based on the data [routeArrowApi].
+     */
+    private lateinit var routeArrowView: MapboxRouteArrowView
 
     /*
      * Below are generated camera padding values to ensure that the route fits well on screen while
@@ -226,6 +249,24 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     * to the Maps SDK in order to update the user location indicator on the map.
     */
     private val navigationLocationProvider = NavigationLocationProvider()
+    
+    /**
+    * The data in the [MapboxSpeedLimitView] is formatted by different formatting implementations.
+    * Below is the default formatter using default options but you can use your own formatting
+    * classes.
+    */
+    private val speedLimitFormatter: SpeedLimitFormatter
+
+   /**
+    * API used for formatting speed limit related data.
+    */
+   private val speedLimitApi: MapboxSpeedLimitApi
+    
+    /**
+    * The [RouteShieldCallback] will be invoked with an appropriate result for Api call
+    * [MapboxManeuverApi.getRoadShields]
+    */
+    private val roadShieldCallback = RouteShieldCallback { shields -> binding.maneuverView.renderManeuverWith(shields) }
 
     /**
      * Gets notified with location updates.
@@ -264,6 +305,9 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 )
             }
 
+            val speedLimitValue = speedLimitApi.updateSpeedLimit(locationMatcherResult.speedLimit)
+            binding.speedLimitView.render(speedLimitValue)
+
             // location event
             val event = Arguments.createMap()
             event.putDouble("longitude", enhancedLocation.longitude)
@@ -287,6 +331,33 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 routeLineView.renderRouteLineUpdate(this, result)
             }
         }
+
+        // RouteArrow: The next maneuver arrows are driven by route progress events.
+        // Generate the next maneuver arrow update data and pass it to the view class
+        // to visualize the updates on the map.
+        val arrowUpdate = routeArrowApi.addUpcomingManeuverArrow(routeProgress)
+        mapboxMap.getStyle()?.apply {
+            // Render the result to update the map.
+            routeArrowView.renderManeuverUpdate(this, arrowUpdate)
+        }
+
+        val maneuvers = maneuverApi.getManeuvers(routeProgress)
+        maneuvers.fold(
+            { error ->
+                Toast.makeText(
+                    context,
+                    error.errorMessage,
+                    Toast.LENGTH_SHORT
+                ).show()
+            },
+            {
+                maneuvers.onValue { maneuverList ->
+                    maneuverApi.getRoadShields(maneuverList, roadShieldCallback)
+                }
+                binding.maneuverView.visibility = View.VISIBLE
+                binding.maneuverView.renderManeuvers(maneuvers)
+            }
+        )  
     }
 
     /**
@@ -513,11 +584,11 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             if (puckImage != null) {
                 val contentUri = Uri.parse(puckImage!!)
 
-                this.locationPuck = LocationPuck2D(
+                locationPuck = LocationPuck2D(
                     bearingImage = ResourceDrawableIdHelper.getInstance().getResourceDrawable(context, contentUri.getPath())
                 )
             } else {
-                this.locationPuck = LocationPuck2D(
+                locationPuck = LocationPuck2D(
                     bearingImage = ContextCompat.getDrawable(
                         context,
                         R.drawable.mapbox_navigation_puck_icon
@@ -606,6 +677,24 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         ) {
         }
 
+        // speed limit
+        speedLimitFormatter = SpeedLimitFormatter(content)
+        speedLimitApi = MapboxSpeedLimitApi(speedLimitFormatter)
+
+        if (this.showSpeedLimit) {
+            binding.speedLimitView.visibility = View.VISIBLE
+        } else {
+            binding.speedLimitView.visibility = View.INVISIBLE
+        }
+        
+        // make sure to use the same DistanceFormatterOptions across different features
+        val distanceFormatterOptions = mapboxNavigation.navigationOptions.distanceFormatterOptions
+
+        // initialize maneuver api that feeds the data to the top banner maneuver view
+        maneuverApi = MapboxManeuverApi(
+            MapboxDistanceFormatter(distanceFormatterOptions)
+        )
+
         // initialize route line, the withRouteLineBelowLayerId is specified to place
         // the route line below road labels layer on the map
         // the value of this option will depend on the style that you are using
@@ -661,6 +750,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         routeLineApi = MapboxRouteLineApi(mapboxRouteLineOptions)
         routeLineView = MapboxRouteLineView(mapboxRouteLineOptions)
+
+        routeArrowApi = MapboxRouteArrowApi()
+        routeArrowView = MapboxRouteArrowView(RouteArrowOptions.Builder(context)
+            .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+            .withArrowColor(Color.parseColor(routeArrowColor))
+            .withArrowCasingColor(Color.parseColor(routeArrowCasingColor))
+            .build())
 
         // register event listeners
         mapboxNavigation.registerLocationObserver(locationObserver)
@@ -777,6 +873,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         viewportDataSource.clearRouteData()
         viewportDataSource.evaluate()
         navigationCamera.requestNavigationCameraToOverview()
+        binding.maneuverView.visibility = View.INVISIBLE
+        binding.speedLimitView.visibility = View.INVISIBLE
     }
 
     private fun clearRouteAndStopActiveGuidance() {
@@ -798,6 +896,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         viewportDataSource.clearRouteData()
         viewportDataSource.evaluate()
         navigationCamera.requestNavigationCameraToOverview()
+        binding.maneuverView.visibility = View.INVISIBLE
+        binding.speedLimitView.visibility = View.INVISIBLE
     }
 
     private fun onDestroy() {
@@ -805,6 +905,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             MapboxNavigationProvider.destroy()
             routeLineApi.cancel()
             routeLineView.cancel()
+            maneuverApi.cancel()
             binding.mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
         } catch (ex: Exception) {
             sendErrorToReact(ex.toString())

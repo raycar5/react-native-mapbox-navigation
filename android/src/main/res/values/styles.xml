@@ -1,15 +1,7 @@
 <resources>
-    <style name="PrimaryManeuverTextAppearance" parent="TextAppearance.AppCompat">
-        <item name="android:textColor">#FFFFFF</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textSize">30sp</item>
-    </style>
-    <style name="ManeuverTextAppearance" parent="TextAppearance.AppCompat">
-        <item name="android:textColor">#FFFFFF</item>
-        <item name="android:textSize">25sp</item>
-    </style>
-    <style name="StepDistanceRemainingAppearance" parent="TextAppearance.AppCompat">
-        <item name="android:textColor">#FFFFFF</item>
-        <item name="android:textSize">21sp</item>
+    <style name="MapboxCustomManeuverStyle" parent="MapboxStyleManeuverView">
+        <item name="maneuverViewBackgroundColor">#303030</item>
+        <item name="subManeuverViewBackgroundColor">#707070</item>
+        <item name="upcomingManeuverViewBackgroundColor">#707070</item>
     </style>
 </resources>
