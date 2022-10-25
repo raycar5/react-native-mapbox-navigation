@@ -665,6 +665,32 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         }
     }
 
+    private fun toggleSpeedLimit(show: Boolean) {
+        this.showSpeedLimit = show
+
+        if (show) {
+            binding.speedLimitView.visibility = View.VISIBLE
+        } else {
+            binding.speedLimitView.visibility = View.GONE
+        }
+    }
+
+    private fun updateSpeedLimitAnchor() {
+        val anchor = this.speedLimitAnchor
+
+        if (anchor != null) {
+            (binding.speedLimitView.layoutParams as ConstraintLayout.LayoutParams).apply {
+                marginStart = if (anchor!!.size > 0) (anchor!!.get(0) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
+                topMargin = if (anchor!!.size > 1) (anchor!!.get(1) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
+            }
+        } else {
+            (binding.speedLimitView.layoutParams as ConstraintLayout.LayoutParams).apply {
+                marginStart = (20 * pixelDensity).toInt()
+                topMargin = (20* pixelDensity).toInt()
+            }
+        }
+    }
+
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun addDebug() {
         // debugging
@@ -1257,6 +1283,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     
     fun setShowSpeedLimit(showSpeedLimit: Boolean) {
         this.showSpeedLimit = showSpeedLimit
+
+        toggleSpeedLimit(showSpeedLimit)
     }
 
     fun setSpeedLimitAnchor(speedLimitAnchor: ReadableArray?) {
@@ -1271,6 +1299,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         } else {
             this.speedLimitAnchor = null
         }
+
+        updateSpeedLimitAnchor()
     }
     
     fun setFollowZoomLevel(followZoomLevel: Double) {
