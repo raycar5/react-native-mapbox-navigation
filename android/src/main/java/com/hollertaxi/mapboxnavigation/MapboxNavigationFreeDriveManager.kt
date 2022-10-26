@@ -52,7 +52,7 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
             "onRouteChange", MapBuilder.of("registrationName", "onRouteChange"),
             "onTrackingStateChange", MapBuilder.of("registrationName", "onTrackingStateChange"),
             "onError", MapBuilder.of("registrationName", "onError"),
-            "onManueverSizeChange", MapBuilder.of("registrationName", "onManueverSizeChange")
+            "onManeuverSizeChange", MapBuilder.of("registrationName", "onManeuverSizeChange")
         )
     }
 
@@ -245,6 +245,11 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
     @ReactProp(name = "mute")
     fun setMute(view: MapboxNavigationFreeDriveView, mute: Boolean) {
         view.setMute(mute)
+    }
+    
+    @ReactProp(name = "darkMode")
+    fun setDarkMode(view: MapboxNavigationFreeDriveView, darkMode: Boolean) {
+        view.setDarkMode(darkMode)
     }
     
     @ReactProp(name = "debug")

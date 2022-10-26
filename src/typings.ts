@@ -41,7 +41,7 @@ type OnErrorEvent = {
   };
 };
 
-type OnManueverSizeChangeEvent = {
+type OnManeuverSizeChangeEvent = {
   nativeEvent?: {
     width?: number;
     height?: number;
@@ -67,10 +67,10 @@ export interface IMapboxNavigationFreeDriveProps {
   onTrackingStateChange?: (event: OnTrackingStateChangeEvent) => void;
   onRouteChange?: (event: OnRouteChangeEvent) => void;
   onError?: (event: OnErrorEvent) => void;
-  onManueverSizeChange?: (event: OnManueverSizeChangeEvent) => void;
+  onManeuverSizeChange?: (event: OnManeuverSizeChangeEvent) => void;
   showSpeedLimit?: boolean;
   speedLimitAnchor?: Padding;
-  manueverAnchor?: Padding;
+  maneuverAnchor?: Padding;
   followZoomLevel?: number;
   userPuckImage?: number;
   userPuckScale?: number;
@@ -101,5 +101,6 @@ export interface IMapboxNavigationFreeDriveProps {
   waypointStrokeOpacity?: number;
   waypointStrokeColor?: string;
   mute?: boolean;
+  darkMode?: boolean;
   debug?: boolean;
 }

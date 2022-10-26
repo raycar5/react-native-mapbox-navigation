@@ -149,6 +149,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var attributionVisible: Boolean = true
     private var attributionPadding: Array<Double>? = null
     private var mute: Boolean = false
+    private var darkMode: Boolean = false
     private var debug: Boolean = false
 
     private var currentOrigin: Point? = null
@@ -846,7 +847,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         // load map style
         mapboxMap.loadStyleUri(
-            Style.LIGHT
+            if (this.darkMode) Style.DARK else Style.LIGHT
         ) {
         }
 
@@ -917,11 +918,11 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                     .alternativeRouteClosureColor(Color.parseColor(routeClosureColor))
                     .alternativeRouteRestrictedRoadColor(Color.parseColor(restrictedRoadColor))
                     .alternativeRouteUnknownCongestionColor(Color.parseColor(alternateRouteColor))
-                    .alternativeRouteLowCongestionColor(Color.parseColor(trafficLowColor))
+                    .alternativeRouteLowCongestionColor(Color.parseColor(alternateRouteColor))
                     .alternativeRouteModerateCongestionColor(Color.parseColor(trafficModerateColor))
                     .alternativeRouteHeavyCongestionColor(Color.parseColor(trafficHeavyColor))
                     .alternativeRouteSevereCongestionColor(Color.parseColor(trafficSevereColor))
-                    .inActiveRouteLegsColor(Color.parseColor(traversedRouteColor))
+                    .inActiveRouteLegsColor(if (traversedRouteColor.isNullOrBlank()) Color.TRANSPARENT else Color.parseColor(traversedRouteColor))
                     .build()
                 )
                 .originWaypointIcon(if (originIcon != null) {
@@ -964,13 +965,13 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         binding.mapView.gestures.addOnMapClickListener(mapClickListener)
 
         //binding.maneuverView.updateUpcomingManeuversVisibility(View.GONE)
-        binding.maneuverView.updatePrimaryManeuverTextAppearance(R.style.ManeuverTextAppearance)
-        binding.maneuverView.updateSecondaryManeuverTextAppearance(R.style.ManeuverTextAppearance)
-        binding.maneuverView.updateSubManeuverTextAppearance(R.style.ManeuverTextAppearance)
-        binding.maneuverView.updateStepDistanceTextAppearance(R.style.ManeuverTextAppearance)
-        binding.maneuverView.updateUpcomingPrimaryManeuverTextAppearance(R.style.ManeuverTextAppearance)
-        binding.maneuverView.updateUpcomingSecondaryManeuverTextAppearance(R.style.ManeuverTextAppearance)
-        binding.maneuverView.updateUpcomingManeuverStepDistanceTextAppearance(R.style.ManeuverTextAppearance)
+        binding.maneuverView.updatePrimaryManeuverTextAppearance(R.style.PrimaryManeuverTextAppearance)
+        binding.maneuverView.updateSecondaryManeuverTextAppearance(R.style.SecondaryManeuverTextAppearance)
+        binding.maneuverView.updateSubManeuverTextAppearance(R.style.SubManeuverTextAppearance)
+        binding.maneuverView.updateStepDistanceTextAppearance(R.style.StepDistanceTextAppearance)
+        binding.maneuverView.updateUpcomingPrimaryManeuverTextAppearance(R.style.UpcomingPrimaryManeuverTextAppearance)
+        binding.maneuverView.updateUpcomingSecondaryManeuverTextAppearance(R.style.UpcomingSecondaryManeuverTextAppearance)
+        binding.maneuverView.updateUpcomingManeuverStepDistanceTextAppearance(R.style.UpcomingManeuverStepDistanceTextAppearance)
         binding.maneuverView.addOnLayoutChangeListener { view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
             var hasChanged = false
 
@@ -983,11 +984,11 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
             if (hasChanged) {
                 val event = Arguments.createMap()
-                event.putInt("width", view.width)
-                event.putInt("height", view.height)
+                event.putInt("width", (view.width / pixelDensity).toInt())
+                event.putInt("height", (view.height / pixelDensity).toInt())
                 context
                     .getJSModule(RCTEventEmitter::class.java)
-                    .receiveEvent(id, "onManueverSizeChange", event)
+                    .receiveEvent(id, "onManeuverSizeChange", event)
             }
         }
     }
@@ -1529,6 +1530,10 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
     fun setMute(mute: Boolean) {
         toggleMute(mute)
+    }
+    
+    fun setDarkMode(darkMode: Boolean) {
+        this.darkMode = darkMode
     }
     
     fun setDebug(debug: Boolean) {

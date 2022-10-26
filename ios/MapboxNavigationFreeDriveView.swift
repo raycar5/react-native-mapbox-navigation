@@ -64,7 +64,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       }
     }
   }
-  @objc var manueverAnchor: [NSNumber] = []
+  @objc var maneuverAnchor: [NSNumber] = []
   @objc var userPuckImage: UIImage?
   @objc var userPuckScale: NSNumber = 1.0
   @objc var originImage: UIImage?
@@ -151,8 +151,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       }
     }
   }
-  @objc var debug: Bool = false
   @objc var mute: Bool = false
+  @objc var darkMode: Bool = false
+  @objc var debug: Bool = false
 
   @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, cameraType: NSString, padding: [NSNumber])  {
     currentOrigin = origin

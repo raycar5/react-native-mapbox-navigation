@@ -12,8 +12,38 @@
         <item name="laneGuidanceManeuverIconStyle">@style/MapboxCustomManeuverTurnIconStyle</item>
     </style>
 
-    <style name="ManeuverTextAppearance" parent="TextAppearance.AppCompat">
+    <style name="PrimaryManeuverTextAppearance" parent="TextAppearance.AppCompat">
         <item name="android:textColor">#FFFFFF</item>
-        // Similarly you can add any other android text view property here
+        <item name="android:textSize">30dp</item>
+    </style>
+
+    <style name="SecondaryManeuverTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">20dp</item>
+    </style>
+
+    <style name="SubManeuverTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">16dp</item>
+    </style>
+
+    <style name="StepDistanceTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">20dp</item>
+    </style>
+
+    <style name="UpcomingPrimaryManeuverTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">30dp</item>
+    </style>
+
+    <style name="UpcomingSecondaryManeuverTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">20dp</item>
+    </style>
+
+    <style name="UpcomingManeuverStepDistanceTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">16dp</item>
     </style>
 </resources>
