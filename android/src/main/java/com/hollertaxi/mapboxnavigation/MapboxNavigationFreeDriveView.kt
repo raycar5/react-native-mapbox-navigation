@@ -19,6 +19,7 @@ import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.views.imagehelper.ResourceDrawableIdHelper
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
