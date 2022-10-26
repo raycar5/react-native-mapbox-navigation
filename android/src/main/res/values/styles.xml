@@ -14,41 +14,41 @@
 
     <style name="PrimaryManeuverTextAppearance" parent="TextAppearance.AppCompat">
         <item name="android:textColor">#FFFFFF</item>
-        <item name="android:textSize">30dp</item>
+        <item name="android:textSize">24dp</item>
     </style>
 
     <style name="SecondaryManeuverTextAppearance" parent="TextAppearance.AppCompat">
         <item name="android:textColor">#FFFFFF</item>
-        <item name="android:textSize">20dp</item>
+        <item name="android:textSize">16dp</item>
     </style>
 
     <style name="SubManeuverTextAppearance" parent="TextAppearance.AppCompat">
         <item name="android:textColor">#FFFFFF</item>
-        <item name="android:textSize">16dp</item>
+        <item name="android:textSize">14dp</item>
     </style>
 
     <style name="StepDistanceTextAppearance" parent="TextAppearance.AppCompat">
         <item name="android:textColor">#FFFFFF</item>
-        <item name="android:textSize">20dp</item>
+        <item name="android:textSize">16dp</item>
     </style>
 
     <style name="UpcomingPrimaryManeuverTextAppearance" parent="TextAppearance.AppCompat">
         <item name="android:textColor">#FFFFFF</item>
-        <item name="android:textSize">30dp</item>
+        <item name="android:textSize">24dp</item>
     </style>
 
     <style name="UpcomingSecondaryManeuverTextAppearance" parent="TextAppearance.AppCompat">
         <item name="android:textColor">#FFFFFF</item>
-        <item name="android:textSize">20dp</item>
+        <item name="android:textSize">16dp</item>
     </style>
 
     <style name="UpcomingManeuverStepDistanceTextAppearance" parent="TextAppearance.AppCompat">
         <item name="android:textColor">#FFFFFF</item>
-        <item name="android:textSize">16dp</item>
+        <item name="android:textSize">14dp</item>
     </style>
 
     <style name="StatusViewTextAppearance">
         <item name="android:textColor">#FFFFFF</item>
-        <item name="android:textSize">16dp</item>
+        <item name="android:textSize">14dp</item>
     </style>
 </resources>
