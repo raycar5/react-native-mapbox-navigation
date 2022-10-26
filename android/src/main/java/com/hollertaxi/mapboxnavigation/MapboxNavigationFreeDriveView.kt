@@ -1086,24 +1086,10 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
 
     private fun pauseActiveGuidance() {
-        mapboxMap.getStyle()?.let { style ->
-            routeLineApi.clearRouteLine { value ->
-                routeLineView.renderClearRouteLineValue(
-                    style,
-                    value
-                )
-            }
-        }
-        mapboxNavigation.setNavigationRoutes(emptyList())
-        mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
-        mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
-        viewportDataSource.clearRouteData()
-        viewportDataSource.evaluate()
+        clearActiveGuidance()
+        clearMap()
+
         navigationCamera.requestNavigationCameraToOverview()
-        binding.maneuverView.visibility = View.GONE
-        //binding.speedLimitView.visibility = View.GONE
     }
 
     private fun clearRouteAndStopActiveGuidance() {
@@ -1111,6 +1097,24 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.currentActiveRoutes = null
         this.currentPreviewRoutes = null
 
+        clearActiveGuidance()
+        clearMap()
+
+        navigationCamera.requestNavigationCameraToOverview()
+    }
+
+    private fun clearActiveGuidance() {
+        mapboxNavigation.setNavigationRoutes(emptyList())
+        mapboxNavigation.unregisterRoutesObserver(routesObserver)
+        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
+        mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
+        viewportDataSource.clearRouteData()
+        viewportDataSource.evaluate()
+        binding.maneuverView.visibility = View.GONE
+    }
+
+    private fun clearMap() {
         mapboxMap.getStyle()?.let { style ->
             routeLineApi.clearRouteLine { value ->
                 routeLineView.renderClearRouteLineValue(
@@ -1119,16 +1123,12 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 )
             }
         }
-        mapboxNavigation.setNavigationRoutes(emptyList())
-        mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
-        mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
-        viewportDataSource.clearRouteData()
-        viewportDataSource.evaluate()
-        navigationCamera.requestNavigationCameraToOverview()
-        binding.maneuverView.visibility = View.GONE
-        //binding.speedLimitView.visibility = View.GONE
+
+        val arrowUpdate = routeArrowApi.clearArrows()
+        mapboxMap.getStyle()?.apply {
+            // Render the result to update the map.
+            routeArrowView.render(this, arrowUpdate)
+        }
     }
 
     private fun onDestroy() {
