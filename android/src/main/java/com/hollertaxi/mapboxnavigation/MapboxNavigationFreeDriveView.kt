@@ -106,7 +106,7 @@ import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi
 import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter
 import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
 import com.mapbox.navigation.ui.status.model.Status
-import com.mapbox.navigation.ui.status.model.StatusFactory.buildStatus
+import com.mapbox.navigation.ui.status.model.StatusFactory
 import com.mapbox.navigation.ui.status.view.MapboxStatusView
 import java.util.Locale
 import java.util.concurrent.TimeUnit
