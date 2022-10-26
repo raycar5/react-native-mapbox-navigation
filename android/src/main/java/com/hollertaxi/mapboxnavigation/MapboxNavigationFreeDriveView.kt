@@ -751,6 +751,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         }
     }
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     private fun addDebug() {
         // debugging
         val debugger = MapboxNavigationViewportDataSourceDebugger(
