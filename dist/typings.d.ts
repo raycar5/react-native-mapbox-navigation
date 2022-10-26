@@ -35,6 +35,12 @@ declare type OnErrorEvent = {
         message?: string;
     };
 };
+declare type OnManueverSizeChangeEvent = {
+    nativeEvent?: {
+        width?: number;
+        height?: number;
+    };
+};
 export interface IMapboxNavigationProps {
     origin: Coordinate;
     destination: Coordinate;
@@ -53,8 +59,10 @@ export interface IMapboxNavigationFreeDriveProps {
     onTrackingStateChange?: (event: OnTrackingStateChangeEvent) => void;
     onRouteChange?: (event: OnRouteChangeEvent) => void;
     onError?: (event: OnErrorEvent) => void;
+    onManueverSizeChange?: (event: OnManueverSizeChangeEvent) => void;
     showSpeedLimit?: boolean;
     speedLimitAnchor?: Padding;
+    manueverAnchor?: Padding;
     followZoomLevel?: number;
     userPuckImage?: number;
     userPuckScale?: number;

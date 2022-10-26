@@ -1,7 +1,19 @@
 <resources>
+    <style name="MapboxCustomManeuverTurnIconStyle" parent="MapboxStyleTurnIconManeuver">
+        <item name="maneuverTurnIconColor">#FFFFFF</item>
+        <item name="maneuverTurnIconShadowColor">#303030</item>
+    </style>
+
     <style name="MapboxCustomManeuverStyle" parent="MapboxStyleManeuverView">
         <item name="maneuverViewBackgroundColor">#303030</item>
         <item name="subManeuverViewBackgroundColor">#707070</item>
         <item name="upcomingManeuverViewBackgroundColor">#707070</item>
+        <item name="maneuverViewIconStyle">@style/MapboxCustomManeuverTurnIconStyle</item>
+        <item name="laneGuidanceManeuverIconStyle">@style/MapboxCustomManeuverTurnIconStyle</item>
+    </style>
+
+    <style name="ManeuverTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">#FFFFFF</item>
+        // Similarly you can add any other android text view property here
     </style>
 </resources>

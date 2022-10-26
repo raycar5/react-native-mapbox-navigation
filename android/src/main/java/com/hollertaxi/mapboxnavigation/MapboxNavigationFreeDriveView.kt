@@ -433,7 +433,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                     maneuverApi.getRoadShields(maneuverList, roadShieldCallback)
                 }
                 binding.maneuverView.visibility = View.VISIBLE
-                binding.maneuverView.updateUpcomingManeuversVisibility(View.GONE)
                 binding.maneuverView.renderManeuvers(maneuvers)
             }
         )  
@@ -659,10 +658,12 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private fun toggleMute(mute: Boolean) {
         this.mute = mute
 
-        if (mute) {
-            voiceInstructionsPlayer.volume(SpeechVolume(0f))
-        } else {
-            voiceInstructionsPlayer.volume(SpeechVolume(1f))
+        if (::voiceInstructionsPlayer.isInitialized) {
+            if (mute) {
+                voiceInstructionsPlayer.volume(SpeechVolume(0f))
+            } else {
+                voiceInstructionsPlayer.volume(SpeechVolume(1f))
+            }
         }
     }
 
@@ -676,18 +677,43 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         }
     }
 
-    private fun updateSpeedLimitAnchor() {
-        val anchor = this.speedLimitAnchor
+    private fun updateSpeedLimitAnchor(anchor: Array<Double>?) {
+        this.speedLimitAnchor = anchor
 
         if (anchor != null) {
             (binding.speedLimitView.layoutParams as ConstraintLayout.LayoutParams).apply {
                 marginStart = if (anchor!!.size > 0) (anchor!!.get(0) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
                 topMargin = if (anchor!!.size > 1) (anchor!!.get(1) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
+                marginEnd = if (anchor!!.size > 2) (anchor!!.get(2) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
+                bottomMargin = if (anchor!!.size > 3) (anchor!!.get(3) * pixelDensity).toInt() else 0
             }
         } else {
             (binding.speedLimitView.layoutParams as ConstraintLayout.LayoutParams).apply {
                 marginStart = (20 * pixelDensity).toInt()
                 topMargin = (20* pixelDensity).toInt()
+                marginStart = (20 * pixelDensity).toInt()
+                bottomMargin = 0
+            }
+        }
+    }
+
+
+    private fun updateManeuverAnchor(anchor: Array<Double>?) {
+        this.maneuverAnchor = anchor
+
+        if (anchor != null) {
+            (binding.maneuverView.layoutParams as ConstraintLayout.LayoutParams).apply {
+                marginStart = if (anchor!!.size > 0) (anchor!!.get(0) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
+                topMargin = if (anchor!!.size > 1) (anchor!!.get(1) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
+                marginEnd = if (anchor!!.size > 2) (anchor!!.get(2) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
+                bottomMargin = if (anchor!!.size > 3) (anchor!!.get(3) * pixelDensity).toInt() else 0
+            }
+        } else {
+            (binding.maneuverView.layoutParams as ConstraintLayout.LayoutParams).apply {
+                marginStart = (20 * pixelDensity).toInt()
+                topMargin = (20* pixelDensity).toInt()
+                marginStart = (20 * pixelDensity).toInt()
+                bottomMargin = 0
             }
         }
     }
@@ -935,6 +961,34 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxNavigation.startTripSession()
 
         binding.mapView.gestures.addOnMapClickListener(mapClickListener)
+
+        //binding.maneuverView.updateUpcomingManeuversVisibility(View.GONE)
+        binding.maneuverView.updatePrimaryManeuverTextAppearance(R.style.ManeuverTextAppearance)
+        binding.maneuverView.updateSecondaryManeuverTextAppearance(R.style.ManeuverTextAppearance)
+        binding.maneuverView.updateSubManeuverTextAppearance(R.style.ManeuverTextAppearance)
+        binding.maneuverView.updateStepDistanceTextAppearance(R.style.ManeuverTextAppearance)
+        binding.maneuverView.updateUpcomingPrimaryManeuverTextAppearance(R.style.ManeuverTextAppearance)
+        binding.maneuverView.updateUpcomingSecondaryManeuverTextAppearance(R.style.ManeuverTextAppearance)
+        binding.maneuverView.updateUpcomingManeuverStepDistanceTextAppearance(R.style.ManeuverTextAppearance)
+        binding.maneuverView.addOnLayoutChangeListener { view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            var hasChanged = false
+
+            if (view.height != oldBottom - oldTop) {
+                hasChanged = true
+            }
+            if (view.width != oldRight - oldLeft) {
+                hasChanged = true
+            }
+
+            if (hasChanged) {
+                val event = Arguments.createMap()
+                event.putInt("width", view.width)
+                event.putInt("height", view.height)
+                context
+                    .getJSModule(RCTEventEmitter::class.java)
+                    .receiveEvent(id, "onManueverSizeChange", event)
+            }
+        }
     }
 
     private fun fetchRoutes(routeWaypoints: List<Point>, routeWaypointNames: List<String>, onSuccess: (routes: List<NavigationRoute>) -> Unit) {
@@ -1049,7 +1103,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         viewportDataSource.evaluate()
         navigationCamera.requestNavigationCameraToOverview()
         binding.maneuverView.visibility = View.GONE
-        binding.speedLimitView.visibility = View.GONE
+        //binding.speedLimitView.visibility = View.GONE
     }
 
     private fun clearRouteAndStopActiveGuidance() {
@@ -1074,7 +1128,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         viewportDataSource.evaluate()
         navigationCamera.requestNavigationCameraToOverview()
         binding.maneuverView.visibility = View.GONE
-        binding.speedLimitView.visibility = View.GONE
+        //binding.speedLimitView.visibility = View.GONE
     }
 
     private fun onDestroy() {
@@ -1283,8 +1337,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
     
     fun setShowSpeedLimit(showSpeedLimit: Boolean) {
-        this.showSpeedLimit = showSpeedLimit
-
         toggleSpeedLimit(showSpeedLimit)
     }
 
@@ -1296,12 +1348,24 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 newAnchor.add(speedLimitAnchor.getDouble(ii))
             }
 
-            this.speedLimitAnchor = newAnchor.toTypedArray()
+            updateSpeedLimitAnchor(newAnchor.toTypedArray())
         } else {
-            this.speedLimitAnchor = null
+            updateSpeedLimitAnchor(null)
         }
+    }
+    
+    fun setManeuverAnchor(maneuverAnchor: ReadableArray?) {
+        if (maneuverAnchor != null) {
+            var newAnchor = mutableListOf<Double>()
 
-        updateSpeedLimitAnchor()
+            for (ii in 0 until maneuverAnchor.size()) {
+                newAnchor.add(maneuverAnchor.getDouble(ii))
+            }
+
+            updateManeuverAnchor(newAnchor.toTypedArray())
+        } else {
+            updateManeuverAnchor(null)
+        }
     }
     
     fun setFollowZoomLevel(followZoomLevel: Double) {

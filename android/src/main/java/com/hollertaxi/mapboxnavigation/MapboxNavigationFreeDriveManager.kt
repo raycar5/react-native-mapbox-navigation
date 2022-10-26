@@ -51,7 +51,8 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
             "onRouteProgressChange", MapBuilder.of("registrationName", "onRouteProgressChange"),
             "onRouteChange", MapBuilder.of("registrationName", "onRouteChange"),
             "onTrackingStateChange", MapBuilder.of("registrationName", "onTrackingStateChange"),
-            "onError", MapBuilder.of("registrationName", "onError")
+            "onError", MapBuilder.of("registrationName", "onError"),
+            "onManueverSizeChange", MapBuilder.of("registrationName", "onManueverSizeChange")
         )
     }
 
@@ -89,6 +90,11 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
     @ReactProp(name = "speedLimitAnchor")
     fun setSpeedLimitAnchor(view: MapboxNavigationFreeDriveView, speedLimitAnchor: ReadableArray?) {
         view.setSpeedLimitAnchor(speedLimitAnchor)
+    }
+
+    @ReactProp(name = "maneuverAnchor")
+    fun setManeuverAnchor(view: MapboxNavigationFreeDriveView, maneuverAnchor: ReadableArray?) {
+        view.setManeuverAnchor(maneuverAnchor)
     }
     
     @ReactProp(name = "followZoomLevel")

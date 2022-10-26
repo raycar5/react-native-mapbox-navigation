@@ -64,6 +64,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       }
     }
   }
+  @objc var manueverAnchor: [NSNumber] = []
   @objc var userPuckImage: UIImage?
   @objc var userPuckScale: NSNumber = 1.0
   @objc var originImage: UIImage?
