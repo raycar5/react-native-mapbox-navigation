@@ -292,7 +292,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
      * The [RouteShieldCallback] will be invoked with an appropriate result for Api call
      * [MapboxManeuverApi.getRoadShields]
      */
-    private val roadShieldCallback = RouteShieldCallback { shields -> binding.maneuverContainer.maneuverView.renderManeuverWith(shields) }
+    private val roadShieldCallback = RouteShieldCallback { shields -> binding.maneuverContainer.findViewById(R.id.maneuverView).renderManeuverWith(shields) }
 
     /**
      * Based on whether the synthesized audio file is available, the callback plays the file
@@ -445,8 +445,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 maneuvers.onValue { maneuverList ->
                     maneuverApi.getRoadShields(maneuverList, roadShieldCallback)
                 }
-                binding.maneuverContainer.maneuverView.visibility = View.VISIBLE
-                binding.maneuverContainer.maneuverView.renderManeuvers(maneuvers)
+                binding.maneuverContainer.findViewById(R.id.maneuverView).visibility = View.VISIBLE
+                binding.maneuverContainer.findViewById(R.id.maneuverView).renderManeuvers(maneuvers)
             }
         )  
     }
@@ -735,14 +735,14 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.maneuverAnchor = anchor
 
         if (anchor != null) {
-            (binding.maneuverContainer.maneuverView.layoutParams as ConstraintLayout.LayoutParams).apply {
+            (binding.maneuverContainer.findViewById(R.id.maneuverView).layoutParams as ConstraintLayout.LayoutParams).apply {
                 marginStart = if (anchor!!.size > 0) (anchor!!.get(0) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
                 topMargin = if (anchor!!.size > 1) (anchor!!.get(1) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
                 marginEnd = if (anchor!!.size > 2) (anchor!!.get(2) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
                 bottomMargin = if (anchor!!.size > 3) (anchor!!.get(3) * pixelDensity).toInt() else 0
             }
         } else {
-            (binding.maneuverContainer.maneuverView.layoutParams as ConstraintLayout.LayoutParams).apply {
+            (binding.maneuverContainer.findViewById(R.id.maneuverView).layoutParams as ConstraintLayout.LayoutParams).apply {
                 marginStart = (20 * pixelDensity).toInt()
                 topMargin = (20* pixelDensity).toInt()
                 marginStart = (20 * pixelDensity).toInt()
@@ -995,15 +995,15 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
 
         binding.mapView.gestures.addOnMapClickListener(mapClickListener)
 
-        //binding.maneuverContainer.maneuverView.updateUpcomingManeuversVisibility(View.GONE)
-        binding.maneuverContainer.maneuverView.updatePrimaryManeuverTextAppearance(R.style.PrimaryManeuverTextAppearance)
-        binding.maneuverContainer.maneuverView.updateSecondaryManeuverTextAppearance(R.style.SecondaryManeuverTextAppearance)
-        binding.maneuverContainer.maneuverView.updateSubManeuverTextAppearance(R.style.SubManeuverTextAppearance)
-        binding.maneuverContainer.maneuverView.updateStepDistanceTextAppearance(R.style.StepDistanceTextAppearance)
-        binding.maneuverContainer.maneuverView.updateUpcomingPrimaryManeuverTextAppearance(R.style.UpcomingPrimaryManeuverTextAppearance)
-        binding.maneuverContainer.maneuverView.updateUpcomingSecondaryManeuverTextAppearance(R.style.UpcomingSecondaryManeuverTextAppearance)
-        binding.maneuverContainer.maneuverView.updateUpcomingManeuverStepDistanceTextAppearance(R.style.UpcomingManeuverStepDistanceTextAppearance)
-        binding.maneuverContainer.maneuverView.addOnLayoutChangeListener { view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+        //binding.maneuverContainer.findViewById(R.id.maneuverView).updateUpcomingManeuversVisibility(View.GONE)
+        binding.maneuverContainer.findViewById(R.id.maneuverView).updatePrimaryManeuverTextAppearance(R.style.PrimaryManeuverTextAppearance)
+        binding.maneuverContainer.findViewById(R.id.maneuverView).updateSecondaryManeuverTextAppearance(R.style.SecondaryManeuverTextAppearance)
+        binding.maneuverContainer.findViewById(R.id.maneuverView).updateSubManeuverTextAppearance(R.style.SubManeuverTextAppearance)
+        binding.maneuverContainer.findViewById(R.id.maneuverView).updateStepDistanceTextAppearance(R.style.StepDistanceTextAppearance)
+        binding.maneuverContainer.findViewById(R.id.maneuverView).updateUpcomingPrimaryManeuverTextAppearance(R.style.UpcomingPrimaryManeuverTextAppearance)
+        binding.maneuverContainer.findViewById(R.id.maneuverView).updateUpcomingSecondaryManeuverTextAppearance(R.style.UpcomingSecondaryManeuverTextAppearance)
+        binding.maneuverContainer.findViewById(R.id.maneuverView).updateUpcomingManeuverStepDistanceTextAppearance(R.style.UpcomingManeuverStepDistanceTextAppearance)
+        binding.maneuverContainer.findViewById(R.id.maneuverView).addOnLayoutChangeListener { view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
             var hasChanged = false
 
             if (view.height != oldBottom - oldTop) {
@@ -1144,7 +1144,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
         viewportDataSource.clearRouteData()
         viewportDataSource.evaluate()
-        binding.maneuverContainer.maneuverView.visibility = View.GONE
+        binding.maneuverContainer.findViewById(R.id.maneuverView).visibility = View.GONE
     }
 
     private fun clearMap() {
