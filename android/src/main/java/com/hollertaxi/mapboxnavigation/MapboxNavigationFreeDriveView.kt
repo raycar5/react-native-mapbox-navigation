@@ -737,14 +737,14 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.maneuverAnchor = anchor
 
         if (anchor != null) {
-            (binding.maneuverContainer.findViewById<MapboxManeuverView>(R.id.maneuverView).layoutParams as ConstraintLayout.LayoutParams).apply {
+            (binding.maneuverContainer.findViewById<MapboxManeuverView>(R.id.maneuverView).layoutParams as FrameLayout.LayoutParams).apply {
                 marginStart = if (anchor!!.size > 0) (anchor!!.get(0) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
                 topMargin = if (anchor!!.size > 1) (anchor!!.get(1) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
                 marginEnd = if (anchor!!.size > 2) (anchor!!.get(2) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
                 bottomMargin = if (anchor!!.size > 3) (anchor!!.get(3) * pixelDensity).toInt() else 0
             }
         } else {
-            (binding.maneuverContainer.findViewById<MapboxManeuverView>(R.id.maneuverView).layoutParams as ConstraintLayout.LayoutParams).apply {
+            (binding.maneuverContainer.findViewById<MapboxManeuverView>(R.id.maneuverView).layoutParams as FrameLayout.LayoutParams).apply {
                 marginStart = (20 * pixelDensity).toInt()
                 topMargin = (20* pixelDensity).toInt()
                 marginStart = (20 * pixelDensity).toInt()
