@@ -112,6 +112,7 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 import com.facebook.react.uimanager.events.RCTEventEmitter
 
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, private val accessToken: String?) : FrameLayout(context.baseContext) {
     private companion object {
         private const val BUTTON_ANIMATION_DURATION = 1500L
@@ -749,7 +750,6 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         }
     }
 
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun addDebug() {
         // debugging
         val debugger = MapboxNavigationViewportDataSourceDebugger(
