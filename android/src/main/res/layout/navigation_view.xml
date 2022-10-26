@@ -27,6 +27,22 @@
         app:layout_constraintStart_toStartOf="parent"
         style="@style/MapboxCustomManeuverStyle" />
 
+    <com.mapbox.navigation.ui.status.view.MapboxStatusView
+        android:id="@+id/statusView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:elevation="0dp"
+        android:background="#303030"
+        app:statusViewProgressBarTint="#FFFFFF"
+        app:statusViewIconTint="#FFFFFF"
+        app:statusViewTextAppearance="@style/StatusViewTextAppearance"
+        app:statusViewShowAnimator="@animator/scale_in"
+        app:statusViewHideAnimator="@animator/scale_out"
+        app:layout_constraintTop_toBottomOf="@id/maneuverView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
         android:id="@+id/speedLimitView"
         android:layout_width="wrap_content"

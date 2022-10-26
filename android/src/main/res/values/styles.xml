@@ -46,4 +46,9 @@
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:textSize">16dp</item>
     </style>
+
+    <style name="StatusViewTextAppearance">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">16dp</item>
+    </style>
 </resources>

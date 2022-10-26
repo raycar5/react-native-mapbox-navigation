@@ -105,6 +105,9 @@ import com.mapbox.navigation.ui.shield.model.RouteShieldCallback
 import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi
 import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter
 import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
+import com.mapbox.navigation.ui.status.model.Status
+import com.mapbox.navigation.ui.status.model.StatusFactory.buildStatus
+import com.mapbox.navigation.ui.status.view.MapboxStatusView
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import com.facebook.react.uimanager.events.RCTEventEmitter
@@ -341,6 +344,12 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             updatedRoutes.add(routeProgress.navigationRoute) // only primary route should persist
             updatedRoutes.addAll(alternatives) // all old alternatives should be replaced by the new ones
             mapboxNavigation.setNavigationRoutes(updatedRoutes)
+
+            val status = StatusFactory.buildStatus(
+                message = "Alternative available", 
+                duration = 2000L
+            )
+            binding.statusView.render(status)
         }
 
         override fun onRouteAlternativesError(error: RouteAlternativesError) {
@@ -465,6 +474,12 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             // update the camera position to account for the new route
             viewportDataSource.onRouteChanged(routeUpdateResult.routes.first())
             viewportDataSource.evaluate()
+
+            val status = StatusFactory.buildStatus(
+                message = "Route updated",
+                duration = 2000L
+            )
+            binding.statusView.render(status)
         } else {
             // remove route line from the map
             mapboxMap.getStyle()?.let { style ->
@@ -663,8 +678,22 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         if (::voiceInstructionsPlayer.isInitialized) {
             if (mute) {
                 voiceInstructionsPlayer.volume(SpeechVolume(0f))
+
+                val status = StatusFactory.buildStatus(
+                    message = "Voice OFF", 
+                    duration = 2000L,
+                    icon = R.drawable.mapbox_ic_sound_off
+                )
+                binding.statusView.render(status)
             } else {
                 voiceInstructionsPlayer.volume(SpeechVolume(1f))
+
+                val status = StatusFactory.buildStatus(
+                    message = "Voice ON", 
+                    duration = 2000L,
+                    icon = R.drawable.mapbox_ic_sound_on
+                )
+                binding.statusView.render(status)
             }
         }
     }
