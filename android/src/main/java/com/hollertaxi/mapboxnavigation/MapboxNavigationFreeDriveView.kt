@@ -915,7 +915,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                     .alternativeRouteCasingColor(Color.parseColor(alternateRouteCasingColor))
                     .alternativeRouteClosureColor(Color.parseColor(routeClosureColor))
                     .alternativeRouteRestrictedRoadColor(Color.parseColor(restrictedRoadColor))
-                    .alternativeRouteUnknownCongestionColor(Color.parseColor(trafficUnknownColor))
+                    .alternativeRouteUnknownCongestionColor(Color.parseColor(alternateRouteColor))
                     .alternativeRouteLowCongestionColor(Color.parseColor(trafficLowColor))
                     .alternativeRouteModerateCongestionColor(Color.parseColor(trafficModerateColor))
                     .alternativeRouteHeavyCongestionColor(Color.parseColor(trafficHeavyColor))
