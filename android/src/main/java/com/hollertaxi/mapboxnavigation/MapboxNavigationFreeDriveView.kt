@@ -117,6 +117,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var followZoomLevel: Double = 16.0
     private var showSpeedLimit: Boolean = true
     private var speedLimitAnchor: Array<Double>? = null
+    private var maneuverAnchor: Array<Double>? = null
     private var userPuckImage: String? = null
     private var userPuckScale: Double = 1.0
     private var destinationImage: String? = null
