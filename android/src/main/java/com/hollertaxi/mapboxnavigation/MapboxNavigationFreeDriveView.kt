@@ -447,7 +447,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 maneuvers.onValue { maneuverList ->
                     maneuverApi.getRoadShields(maneuverList, roadShieldCallback)
                 }
-                binding.maneuverContainer.findViewById<MapboxManeuverView>(R.id.maneuverView).visibility = View.VISIBLE
+                binding.maneuverContainer.visibility = View.VISIBLE
                 binding.maneuverContainer.findViewById<MapboxManeuverView>(R.id.maneuverView).renderManeuvers(maneuvers)
             }
         )  
@@ -737,14 +737,14 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         this.maneuverAnchor = anchor
 
         if (anchor != null) {
-            (binding.maneuverContainer.findViewById<MapboxManeuverView>(R.id.maneuverView).layoutParams as FrameLayout.LayoutParams).apply {
+            (binding.maneuverContainer.layoutParams as ConstraintLayout.LayoutParams).apply {
                 marginStart = if (anchor!!.size > 0) (anchor!!.get(0) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
                 topMargin = if (anchor!!.size > 1) (anchor!!.get(1) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
                 marginEnd = if (anchor!!.size > 2) (anchor!!.get(2) * pixelDensity).toInt() else (20 * pixelDensity).toInt()
                 bottomMargin = if (anchor!!.size > 3) (anchor!!.get(3) * pixelDensity).toInt() else 0
             }
         } else {
-            (binding.maneuverContainer.findViewById<MapboxManeuverView>(R.id.maneuverView).layoutParams as FrameLayout.LayoutParams).apply {
+            (binding.maneuverContainer.layoutParams as ConstraintLayout.LayoutParams).apply {
                 marginStart = (20 * pixelDensity).toInt()
                 topMargin = (20* pixelDensity).toInt()
                 marginStart = (20 * pixelDensity).toInt()
@@ -1146,7 +1146,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
         viewportDataSource.clearRouteData()
         viewportDataSource.evaluate()
-        binding.maneuverContainer.findViewById<MapboxManeuverView>(R.id.maneuverView).visibility = View.GONE
+        binding.maneuverContainer.visibility = View.GONE
     }
 
     private fun clearMap() {
