@@ -51,4 +51,11 @@
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:textSize">14dp</item>
     </style>
+
+    <style name="MapboxCustomSpeedLimitStyle" parent="MapboxStyleSpeedLimit">
+        <item name="speedLimitTextColor">#FFFFFF</item>
+        <item name="speedLimitMutcdBorderColor">#FA0034</item>
+        <item name="speedLimitBackgroundColor">#3A3A3A</item>
+        <item name="speedLimitViennaBorderColor">#FFFFFF</item>
+    </style>
 </resources>
