@@ -13,16 +13,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
         
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/maneuverContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:cardCornerRadius="26dp"
+        app:strokeColor="#3A3A3A"
+        app:strokeWidth="5dp"
         android:visibility="gone"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:layout_marginTop="20dp"
-        android:background="@drawable/maneuver_bg"
+        android:background="#303030"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -33,7 +35,7 @@
             android:layout_height="wrap_content"
             style="@style/MapboxCustomManeuverStyle" />
 
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
     <com.mapbox.navigation.ui.status.view.MapboxStatusView
         android:id="@+id/statusView"
