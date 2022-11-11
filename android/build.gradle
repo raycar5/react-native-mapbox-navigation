@@ -101,6 +101,7 @@ android {
 //}
 
 dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     //noinspection GradleDynamicVersion
     implementation 'com.facebook.react:react-native:+'  // From node_modules
     implementation "com.mapbox.navigation:android:2.8.0"
@@ -109,16 +110,16 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
 }
 
-afterEvaluate { project ->
-    android.libraryVariants.all { variant ->
-        def name = variant.name.capitalize()
-        def javaCompileTask = variant.javaCompileProvider.get()
+//afterEvaluate { project ->
+    //android.libraryVariants.all { variant ->
+        //def name = variant.name.capitalize()
+        //def javaCompileTask = variant.javaCompileProvider.get()
 
-        task "jar${name}"(type: Jar, dependsOn: javaCompileTask) {
-            from javaCompileTask.destinationDir
-        }
-    }
-}
+        //task "jar${name}"(type: Jar, dependsOn: javaCompileTask) {
+            //from javaCompileTask.destinationDir
+        //}
+    //}
+//}
 
 //def configureReactNativePom(def pom) {
     //def packageJson = new groovy.json.JsonSlurper().parseText(file('../package.json').text)
