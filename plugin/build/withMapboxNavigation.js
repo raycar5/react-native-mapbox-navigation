@@ -14,7 +14,7 @@ let pkg = {
 try {
     pkg = require('@hollertaxi/react-native-mapbox-navigation/package.json');
 }
-catch (_a) {
+catch {
     // empty catch block
 }
 const { addMetaDataItemToMainApplication, getMainApplicationOrThrow } = config_plugins_1.AndroidConfig.Manifest;
@@ -238,16 +238,17 @@ const addMapboxMavenRepo = (projectBuildGradle) => {
     return (0, generateCode_1.mergeContents)({
         tag: `@hollertaxi/react-native-mapbox-navigation-v2-maven`,
         src: projectBuildGradle,
-        newSrc: `maven {
-      url 'https://api.mapbox.com/downloads/v2/releases/maven'
-      authentication { basic(BasicAuthentication) }
-      credentials {
-        username = 'mapbox'
-        password = project.properties['MAPBOX_DOWNLOADS_TOKEN'] ?: ""
-      }
-    }\n`,
-        anchor: anchor,
-        offset: offset,
+        newSrc: `
+        maven {
+          url 'https://api.mapbox.com/downloads/v2/releases/maven'
+          authentication { basic(BasicAuthentication) }
+          credentials {
+            username = 'mapbox'
+            password = project.properties['MAPBOX_DOWNLOADS_TOKEN'] ?: ""
+          }
+        }\n`,
+        anchor,
+        offset,
         comment: '//',
     }).contents;
 };

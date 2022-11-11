@@ -330,16 +330,17 @@ const addMapboxMavenRepo = (projectBuildGradle: string): string => {
   return mergeContents({
     tag: `@hollertaxi/react-native-mapbox-navigation-v2-maven`,
     src: projectBuildGradle,
-    newSrc: `maven {
-      url 'https://api.mapbox.com/downloads/v2/releases/maven'
-      authentication { basic(BasicAuthentication) }
-      credentials {
-        username = 'mapbox'
-        password = project.properties['MAPBOX_DOWNLOADS_TOKEN'] ?: ""
-      }
-    }\n`,
-    anchor: anchor,
-    offset: offset,
+    newSrc: `
+        maven {
+          url 'https://api.mapbox.com/downloads/v2/releases/maven'
+          authentication { basic(BasicAuthentication) }
+          credentials {
+            username = 'mapbox'
+            password = project.properties['MAPBOX_DOWNLOADS_TOKEN'] ?: ""
+          }
+        }\n`,
+    anchor,
+    offset,
     comment: '//',
   }).contents;
 };
