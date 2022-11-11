@@ -308,23 +308,24 @@ const addLibCppFilter = (appBuildGradle: string): string => {
 };
 
 const addMapboxMavenRepo = (projectBuildGradle: string): string => {
-  if (projectBuildGradle.includes('api.mapbox.com/downloads/v2/releases/maven'))
+  if (projectBuildGradle.includes('api.mapbox.com/downloads/v2/releases/maven')) {
     return projectBuildGradle;
+  }
 
-  /*
-  return projectBuildGradle.replace(
-    /repositories \s?{/,
-    `repositories {
-       maven {
-        url 'https://api.mapbox.com/downloads/v2/releases/maven'
-        authentication { basic(BasicAuthentication) }
-        credentials { 
-          username = 'mapbox'
-          password = project.properties['MAPBOX_DOWNLOADS_TOKEN'] ?: ""
-        }
-       }
-  `,
-  );*/
+  let offset = 0;
+  const anchor = new RegExp(`^\\s*allprojects\\s*{`, 'gm');
+  // hack to count offset
+  const allProjectSplit = projectBuildGradle.split(anchor);
+  if (allProjectSplit.length <= 1)
+    throw new Error('Could not find `allprojects` block');
+
+  const allProjectLines =
+    allProjectSplit[allProjectSplit.length - 1].split('\n');
+  const allProjectReposOffset = allProjectLines.findIndex((line) =>
+    line.includes('repositories'),
+  );
+  anchor.lastIndex = 0;
+  offset = allProjectReposOffset + 1;
 
   return mergeContents({
     tag: `@hollertaxi/react-native-mapbox-navigation-v2-maven`,
@@ -336,9 +337,9 @@ const addMapboxMavenRepo = (projectBuildGradle: string): string => {
         username = 'mapbox'
         password = project.properties['MAPBOX_DOWNLOADS_TOKEN'] ?: ""
       }
-    }`,
-    anchor: new RegExp(`^\\s*allprojects\\s*{`), // TODO repositories { is needed as well
-    offset: 2,
+    }\n`,
+    anchor: anchor,
+    offset: offset,
     comment: '//',
   }).contents;
 };
