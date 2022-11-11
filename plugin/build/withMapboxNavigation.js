@@ -231,7 +231,7 @@ const addMapboxMavenRepo = (projectBuildGradle) => {
     const allProjectSplit = projectBuildGradle.split(anchor);
     if (allProjectSplit.length <= 1)
         throw new Error('Could not find `allprojects` block');
-    const allProjectLines = allProjectSplit[allProjectSplit.length - 1].split('\n');
+    const allProjectLines = allProjectSplit[1].split('\n');
     const allProjectReposOffset = allProjectLines.findIndex((line) => line.includes('repositories'));
     anchor.lastIndex = 0;
     offset = allProjectReposOffset + 1;

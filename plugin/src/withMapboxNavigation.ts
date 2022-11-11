@@ -320,7 +320,7 @@ const addMapboxMavenRepo = (projectBuildGradle: string): string => {
     throw new Error('Could not find `allprojects` block');
 
   const allProjectLines =
-    allProjectSplit[allProjectSplit.length - 1].split('\n');
+    allProjectSplit[1].split('\n');
   const allProjectReposOffset = allProjectLines.findIndex((line) =>
     line.includes('repositories'),
   );
