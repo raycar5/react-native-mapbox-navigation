@@ -21,11 +21,13 @@
     <style name="SecondaryManeuverTextAppearance" parent="TextAppearance.AppCompat">
         <item name="android:textColor">#9B9B9B</item>
         <item name="android:textSize">16dp</item>
+        <item name="android:fontFamily">@font/josefinsans_regular</item>
     </style>
 
     <style name="SubManeuverTextAppearance" parent="TextAppearance.AppCompat">
         <item name="android:textColor">#9B9B9B</item>
         <item name="android:textSize">14dp</item>
+        <item name="android:fontFamily">@font/josefinsans_regular</item>
     </style>
 
     <style name="StepDistanceTextAppearance" parent="TextAppearance.AppCompat">
@@ -36,11 +38,13 @@
     <style name="UpcomingPrimaryManeuverTextAppearance" parent="TextAppearance.AppCompat">
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:textSize">20dp</item>
+        <item name="android:fontFamily">@font/josefinsans_regular</item>
     </style>
 
     <style name="UpcomingSecondaryManeuverTextAppearance" parent="TextAppearance.AppCompat">
         <item name="android:textColor">#9B9B9B</item>
         <item name="android:textSize">16dp</item>
+        <item name="android:fontFamily">@font/josefinsans_regular</item>
     </style>
 
     <style name="UpcomingManeuverStepDistanceTextAppearance" parent="TextAppearance.AppCompat">
@@ -51,6 +55,7 @@
     <style name="StatusViewTextAppearance">
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:textSize">14dp</item>
+        <item name="android:fontFamily">@font/josefinsans_regular</item>
     </style>
 
     <style name="MapboxCustomSpeedLimitStyle" parent="MapboxStyleSpeedLimit">
