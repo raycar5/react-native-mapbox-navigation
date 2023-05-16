@@ -760,7 +760,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
 
     private fun updateManeuverBackgroundColor(color: String) {
-        binding.maneuverContainer.setBackgroundColor(Color.parseColor(color))
+        binding.maneuverContainer.setCardBackgroundColor(Color.parseColor(color))
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)

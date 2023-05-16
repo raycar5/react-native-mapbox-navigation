@@ -272,7 +272,7 @@ const withAndroidProjectGradle = (config) => {
         return { modResults, ...config };
     });
 };
-const withAndroidMapboxStyles = (config, { RNMBNAVFontFamily, RNMBNAVPrimaryColour, RNMBNAVSecondaryColour, RNMBNAVPrimaryTextColour, RNMBNAVSecondaryTextColour }) => {
+const withAndroidMapboxStyles = (config, { RNMBNAVFontFamily, RNMBNAVPrimaryColour, RNMBNAVSecondaryColour, RNMBNAVPrimaryTextColour, RNMBNAVSecondaryTextColour, RNMBNAVTextSizeSmall, RNMBNAVTextSizeMedium, RNMBNAVTextSizeLarge, RNMBNAVTextSizeXLarge }) => {
     return config_plugins_1.withAndroidStyles(config, ({ modResults, ...config }) => {
         if (RNMBNAVFontFamily) {
             modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
@@ -398,10 +398,66 @@ const withAndroidMapboxStyles = (config, { RNMBNAVFontFamily, RNMBNAVPrimaryColo
                 value: RNMBNAVSecondaryTextColour
             });
         }
+        if (RNMBNAVTextSizeSmall) {
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'SubManeuverTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:textSize',
+                value: `${RNMBNAVTextSizeSmall}dp`
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'UpcomingManeuverStepDistanceTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:textSize',
+                value: `${RNMBNAVTextSizeSmall}dp`
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'StatusViewTextAppearance', parent: '' },
+                name: 'android:textSize',
+                value: `${RNMBNAVTextSizeSmall}dp`
+            });
+        }
+        if (RNMBNAVTextSizeMedium) {
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'SecondaryManeuverTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:textSize',
+                value: `${RNMBNAVTextSizeMedium}dp`
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'StepDistanceTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:textSize',
+                value: `${RNMBNAVTextSizeMedium}dp`
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'UpcomingSecondaryManeuverTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:textSize',
+                value: `${RNMBNAVTextSizeMedium}dp`
+            });
+        }
+        if (RNMBNAVTextSizeLarge) {
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'UpcomingPrimaryManeuverTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:textSize',
+                value: `${RNMBNAVTextSizeLarge}dp`
+            });
+        }
+        if (RNMBNAVTextSizeXLarge) {
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'PrimaryManeuverTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:textSize',
+                value: `${RNMBNAVTextSizeXLarge}dp`
+            });
+        }
         return { modResults, ...config };
     });
 };
-const withMapboxNavigationAndroid = (config, { RNMBNAVVersionAndroid, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMBNAVFontFamily, RNMBNAVPrimaryColour, RNMBNAVSecondaryColour, RNMBNAVPrimaryTextColour, RNMBNAVSecondaryTextColour }) => {
+const withMapboxNavigationAndroid = (config, { RNMBNAVVersionAndroid, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMBNAVFontFamily, RNMBNAVPrimaryColour, RNMBNAVSecondaryColour, RNMBNAVPrimaryTextColour, RNMBNAVSecondaryTextColour, RNMBNAVTextSizeSmall, RNMBNAVTextSizeMedium, RNMBNAVTextSizeLarge, RNMBNAVTextSizeXLarge }) => {
     config = withAndroidProperties(config, {
         RNMBNAVVersionAndroid,
         RNMBNAVDownloadToken,
@@ -409,10 +465,10 @@ const withMapboxNavigationAndroid = (config, { RNMBNAVVersionAndroid, RNMBNAVDow
     });
     config = withAndroidProjectGradle(config, { RNMBNAVVersionAndroid });
     config = withAndroidAppGradle(config, { RNMBNAVVersionAndroid });
-    config = withAndroidMapboxStyles(config, { RNMBNAVFontFamily, RNMBNAVPrimaryColour, RNMBNAVSecondaryColour, RNMBNAVPrimaryTextColour, RNMBNAVSecondaryTextColour });
+    config = withAndroidMapboxStyles(config, { RNMBNAVFontFamily, RNMBNAVPrimaryColour, RNMBNAVSecondaryColour, RNMBNAVPrimaryTextColour, RNMBNAVSecondaryTextColour, RNMBNAVTextSizeSmall, RNMBNAVTextSizeMedium, RNMBNAVTextSizeLarge, RNMBNAVTextSizeXLarge });
     return config;
 };
-const withMapboxNavigation = (config, { RNMBNAVVersionAndroid, RNMBNAVVersioniOS, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMBNAVFontFamily, RNMBNAVPrimaryColour, RNMBNAVSecondaryColour, RNMBNAVPrimaryTextColour, RNMBNAVSecondaryTextColour }) => {
+const withMapboxNavigation = (config, { RNMBNAVVersionAndroid, RNMBNAVVersioniOS, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMBNAVFontFamily, RNMBNAVPrimaryColour, RNMBNAVSecondaryColour, RNMBNAVPrimaryTextColour, RNMBNAVSecondaryTextColour, RNMBNAVTextSizeSmall, RNMBNAVTextSizeMedium, RNMBNAVTextSizeLarge, RNMBNAVTextSizeXLarge }) => {
     config = withExcludedSimulatorArchitectures(config);
     config = withMapboxNavigationAndroid(config, {
         RNMBNAVVersionAndroid,
@@ -422,7 +478,11 @@ const withMapboxNavigation = (config, { RNMBNAVVersionAndroid, RNMBNAVVersioniOS
         RNMBNAVPrimaryColour,
         RNMBNAVSecondaryColour,
         RNMBNAVPrimaryTextColour,
-        RNMBNAVSecondaryTextColour
+        RNMBNAVSecondaryTextColour,
+        RNMBNAVTextSizeSmall,
+        RNMBNAVTextSizeMedium,
+        RNMBNAVTextSizeLarge,
+        RNMBNAVTextSizeXLarge
     });
     return withCocoaPodsInstallerBlocks(config, {
         RNMBNAVVersioniOS,
@@ -432,7 +492,11 @@ const withMapboxNavigation = (config, { RNMBNAVVersionAndroid, RNMBNAVVersioniOS
         RNMBNAVPrimaryColour,
         RNMBNAVSecondaryColour,
         RNMBNAVPrimaryTextColour,
-        RNMBNAVSecondaryTextColour
+        RNMBNAVSecondaryTextColour,
+        RNMBNAVTextSizeSmall,
+        RNMBNAVTextSizeMedium,
+        RNMBNAVTextSizeLarge,
+        RNMBNAVTextSizeXLarge
     });
 };
 exports.default = config_plugins_1.createRunOncePlugin(withMapboxNavigation, pkg.name, pkg.version);

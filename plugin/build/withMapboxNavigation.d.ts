@@ -11,6 +11,10 @@ export declare type MapboxNavigationPlugProps = {
     RNMBNAVSecondaryColour?: string;
     RNMBNAVPrimaryTextColour?: string;
     RNMBNAVSecondaryTextColour?: string;
+    RNMBNAVTextSizeSmall?: number;
+    RNMBNAVTextSizeMedium?: number;
+    RNMBNAVTextSizeLarge?: number;
+    RNMBNAVTextSizeXLarge?: number;
 };
 export declare function applyCocoaPodsModifications(contents: string, { RNMBNAVVersioniOS, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion }: MapboxNavigationPlugProps): string;
 export declare function addConstantBlock(src: string, RNMBNAVVersion?: string, RNMBNAVDownloadToken?: string, RNMBNAVPublicToken?: string, RNMapboxMapsVersion?: string): string;
