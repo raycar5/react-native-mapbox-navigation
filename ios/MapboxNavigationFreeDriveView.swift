@@ -4,7 +4,21 @@ import MapboxDirections
 import MapboxMaps
 import Turf
 
-class MapboxNavigationFreeDriveView: UIViewController {
+// // adapted from https://pspdfkit.com/blog/2017/native-view-controllers-and-react-native/ and https://github.com/mslabenyak/react-native-mapbox-navigation/blob/master/ios/Mapbox/MapboxNavigationView.swift
+extension UIView {
+  var parentViewController: UIViewController? {
+    var parentResponder: UIResponder? = self
+    while parentResponder != nil {
+      parentResponder = parentResponder!.next
+      if let viewController = parentResponder as? UIViewController {
+        return viewController
+      }
+    }
+    return nil
+  }
+}
+
+class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, NavigationViewControllerDelegate {
   @objc var followZoomLevel: NSNumber = 16.0
   @objc var onLocationChange: RCTDirectEventBlock?
   @objc var onTrackingStateChange: RCTDirectEventBlock?
@@ -408,6 +422,7 @@ class MapboxNavigationFreeDriveView: UIViewController {
 
       removeSpeedLimitView()
                 
+      navigationViewController.navigationView.bottomBannerContainerView.dismiss(animated: false)
       navigationViewController.navigationView.topBannerContainerView.show(animated: true)
 
       self.present(navigationViewController, animated: true, completion: { [weak self] in
@@ -472,8 +487,42 @@ class MapboxNavigationFreeDriveView: UIViewController {
     navigationView?.navigationMapView?.removeWaypoints()
   }
 
-  override func viewDidLoad() {
-    super.viewDidLoad()
+  override init(frame: CGRect) {
+    self.embedded = false
+    self.embedding = false
+    super.init(frame: frame)
+  }
+  
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
+  override func layoutSubviews() {
+    super.layoutSubviews()
+    
+    if (navigationView == nil && !embedding && !embedded) {
+      embed()
+    } else {
+      navigationView?.frame = bounds
+    }
+  }
+  
+  override func removeFromSuperview() {
+    super.removeFromSuperview()
+    // cleanup and teardown any existing resources
+    NotificationCenter.default.removeObserver(self, name: .passiveLocationManagerDidUpdate, object: nil)
+    NotificationCenter.default.removeObserver(self, name: .navigationCameraStateDidChange, object: navigationView?.navigationMapView?.navigationCamera)
+    passiveLocationProvider.stopUpdatingLocation()
+    passiveLocationProvider.stopUpdatingHeading()
+    navigationViewController?.dismiss()
+    navigationView?.removeFromSuperview()
+    removeSpeedLimitView()
+  }
+
+  private func embed() {
+    guard let parentVC = parentViewController else {
+      return
+    }
 
     embedding = true
 
@@ -533,7 +582,9 @@ class MapboxNavigationFreeDriveView: UIViewController {
     navigationView.navigationMapView.mapView.location.overrideLocationProvider(with: locationProvider)
     passiveLocationProvider.startUpdatingLocation()
 
-    view.addSubview(navigationView)
+    parentVC.addChild(navigationView)
+    navigationView.frame = bounds
+    navigationView.didMove(toParentViewController: parentVC)
 
     NSLayoutConstraint.activate([
       navigationView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -569,16 +620,6 @@ class MapboxNavigationFreeDriveView: UIViewController {
     embedded = true
   }
 
-  deinit {
-    NotificationCenter.default.removeObserver(self, name: .passiveLocationManagerDidUpdate, object: nil)
-    NotificationCenter.default.removeObserver(self, name: .navigationCameraStateDidChange, object: navigationView?.navigationMapView?.navigationCamera)
-    passiveLocationProvider.stopUpdatingLocation()
-    passiveLocationProvider.stopUpdatingHeading()
-    navigationViewController?.dismiss()
-    navigationView?.removeFromSuperview()
-    removeSpeedLimitView()
-  }
-
   func addSpeedLimitView() {
     removeSpeedLimitView()
 
@@ -589,7 +630,7 @@ class MapboxNavigationFreeDriveView: UIViewController {
         speedLimitView.shouldShowUnknownSpeedLimit = true
         speedLimitView.translatesAutoresizingMaskIntoConstraints = false
       
-        view.addSubview(speedLimitView)
+        parentVC.view.addSubview(speedLimitView)
         
         speedLimitView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
         speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
