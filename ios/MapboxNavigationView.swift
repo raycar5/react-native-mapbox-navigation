@@ -4,18 +4,18 @@ import MapboxDirections
 import MapboxMaps
 
 // // adapted from https://pspdfkit.com/blog/2017/native-view-controllers-and-react-native/ and https://github.com/mslabenyak/react-native-mapbox-navigation/blob/master/ios/Mapbox/MapboxNavigationView.swift
-extension UIView {
-  var parentViewController: UIViewController? {
-    var parentResponder: UIResponder? = self
-    while parentResponder != nil {
-      parentResponder = parentResponder!.next
-      if let viewController = parentResponder as? UIViewController {
-        return viewController
-      }
-    }
-    return nil
-  }
-}
+//extension UIView {
+  //var parentViewController: UIViewController? {
+    //var parentResponder: UIResponder? = self
+    //while parentResponder != nil {
+      //parentResponder = parentResponder!.next
+      //if let viewController = parentResponder as? UIViewController {
+        //return viewController
+      //}
+    //}
+    //return nil
+  //}
+//}
 
 class MapboxNavigationView: UIView, NavigationMapViewDelegate, NavigationViewControllerDelegate {
   var navigationMapView: NavigationMapView!

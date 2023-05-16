@@ -417,7 +417,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
         for: IndexedRouteResponse(routeResponse: routeResponse, routeIndex: 0),
         navigationOptions: navigationOptions
       )
-      navigationViewController.delegate = self
+      navigationViewController.delegate = parentVC
       navigationViewController.transitioningDelegate = self
 
       instructionsCardCollection.navigationViewController = navigationViewController
@@ -584,14 +584,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationView.navigationMapView.mapView.location.overrideLocationProvider(with: locationProvider)
     passiveLocationProvider.startUpdatingLocation()
 
-    self.addSubview(navigationView)
-
-    NSLayoutConstraint.activate([
-      navigationView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-      navigationView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-      navigationView.topAnchor.constraint(equalTo: view.topAnchor),
-      navigationView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-    ])
+    parentVC.addChild(navigationView)
+    navigationView.frame = bounds
+    addSubview(navigationView)
+    navigationView.didMove(toParentViewController: parentVC)
 
     setLogoPadding()
     setAttributionPadding()
@@ -630,7 +626,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
         speedLimitView.shouldShowUnknownSpeedLimit = true
         speedLimitView.translatesAutoresizingMaskIntoConstraints = false
       
-        self.addSubview(speedLimitView)
+        parentVC.addChild(speedLimitView)
+        speedLimitView.frame = bounds
+        addSubview(speedLimitView)
+        speedLimitView.didMove(toParentViewController: parentVC)
         
         speedLimitView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
         speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
@@ -836,7 +835,7 @@ class DismissalTransition: NSObject, UIViewControllerAnimatedTransitioning {
   }
 }
 
-extension ViewController: UIViewControllerTransitioningDelegate {
+extension MapboxNavigationFreeDriveView: UIViewControllerTransitioningDelegate {
   public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
     return PresentationTransition()
   }
