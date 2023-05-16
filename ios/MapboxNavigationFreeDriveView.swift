@@ -1,3 +1,5 @@
+import UIKit
+import Foundation
 import MapboxCoreNavigation
 import MapboxNavigation
 import MapboxDirections
@@ -80,7 +82,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     didSet {
       if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil) {
         if (traversedRouteColor != nil) {
-          navigationView.navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor as String)
+          navigationView.navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor! as String)
         } else {
           navigationView.navigationMapView.traversedRouteColor = UIColor.clear
         }
@@ -368,7 +370,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     return newPadding
   }
 
-  func fetchRoutes(routeWaypoints: [Waypoint], routeWaypointNames: [String], onSuccess: (routes: [Route]) -> Void) {
+  func fetchRoutes(routeWaypoints: [Waypoint], routeWaypointNames: [String], onSuccess: (_ routes: [Route]) -> Void) {
     let options = NavigationRouteOptions(waypoints: routeWaypoints, profileIdentifier: .automobileAvoidingTraffic)
     options.includesAlternativeRoutes = true
 
@@ -425,7 +427,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       navigationViewController.navigationView.bottomBannerContainerView.dismiss(animated: false)
       navigationViewController.navigationView.topBannerContainerView.show(animated: true)
 
-      self.present(navigationViewController, animated: true, completion: { [weak self] in
+      parentVC.present(navigationViewController, animated: true, completion: { [weak self] in
         guard let self = self else { return }
 
         var puck2DConfiguration = Puck2DConfiguration()
@@ -536,7 +538,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationView.navigationMapView.routeAlternateCasingColor = UIColor(hex: alternateRouteCasingColor as String)
 
     if (traversedRouteColor != nil) {
-      navigationView.navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor as String)
+      navigationView.navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor! as String)
     } else {
       navigationView.navigationMapView.traversedRouteColor = UIColor.clear
     }
@@ -582,9 +584,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationView.navigationMapView.mapView.location.overrideLocationProvider(with: locationProvider)
     passiveLocationProvider.startUpdatingLocation()
 
-    parentVC.addChild(navigationView)
-    navigationView.frame = bounds
-    navigationView.didMove(toParentViewController: parentVC)
+    self.addSubview(navigationView)
 
     NSLayoutConstraint.activate([
       navigationView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -630,7 +630,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
         speedLimitView.shouldShowUnknownSpeedLimit = true
         speedLimitView.translatesAutoresizingMaskIntoConstraints = false
       
-        parentVC.view.addSubview(speedLimitView)
+        self.addSubview(speedLimitView)
         
         speedLimitView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
         speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
