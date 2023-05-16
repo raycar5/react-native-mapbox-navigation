@@ -678,6 +678,15 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         }
     }
 
+    private fun toggleDarkMode(isDarkMode: Boolean) {
+        this.darkMode = isDarkMode
+
+        mapboxMap.loadStyleUri(
+            if (isDarkMode) Style.DARK else Style.LIGHT
+        ) {
+        }
+    }
+
     private fun toggleMute(mute: Boolean) {
         this.mute = mute
 
@@ -1586,7 +1595,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
     
     fun setDarkMode(darkMode: Boolean) {
-        this.darkMode = darkMode
+        toggleDarkMode(darkMode)
     }
     
     fun setDebug(debug: Boolean) {
