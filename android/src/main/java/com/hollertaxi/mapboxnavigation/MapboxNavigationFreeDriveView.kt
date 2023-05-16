@@ -123,6 +123,8 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var showSpeedLimit: Boolean = true
     private var speedLimitAnchor: Array<Double>? = null
     private var maneuverAnchor: Array<Double>? = null
+    private var maneuverRadius: Int = 26
+    private var maneuverBackgroundColor: String = "#303030"
     private var userPuckImage: String? = null
     private var userPuckScale: Double = 1.0
     private var destinationImage: String? = null
@@ -751,6 +753,14 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 bottomMargin = 0
             }
         }
+    }
+
+    private fun updateManeuverRadius(radius: Int) {
+        binding.maneuverContainer.setRadius(radius.toFloat())
+    }
+
+    private fun updateManeuverBackgroundColor(color: String) {
+        binding.maneuverContainer.setBackgroundColor(Color.parseColor(color))
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -1400,6 +1410,16 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             updateManeuverAnchor(newAnchor.toTypedArray())
         } else {
             updateManeuverAnchor(null)
+        }
+    }
+
+    fun setManeuverRadius(maneuverRadius: Int) {
+        updateManeuverRadius(maneuverRadius)
+    }
+
+    fun setManeuverBackgroundColor(maneuverBackgroundColor: String?) {
+        if (maneuverBackgroundColor != null) {
+            updateManeuverBackgroundColor(maneuverBackgroundColor)
         }
     }
     

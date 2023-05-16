@@ -1,12 +1,18 @@
 import { ConfigPlugin, XcodeProject } from '@expo/config-plugins';
 declare type InstallerBlockName = 'pre' | 'post';
 export declare type MapboxNavigationPlugProps = {
-    RNMBNAVVersion?: string;
+    RNMBNAVVersionAndroid?: string;
+    RNMBNAVVersioniOS?: string;
     RNMBNAVDownloadToken?: string;
     RNMBNAVPublicToken?: string;
     RNMapboxMapsVersion?: string;
+    RNMBNAVFontFamily?: string;
+    RNMBNAVPrimaryColour?: string;
+    RNMBNAVSecondaryColour?: string;
+    RNMBNAVPrimaryTextColour?: string;
+    RNMBNAVSecondaryTextColour?: string;
 };
-export declare function applyCocoaPodsModifications(contents: string, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion }: MapboxNavigationPlugProps): string;
+export declare function applyCocoaPodsModifications(contents: string, { RNMBNAVVersioniOS, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion }: MapboxNavigationPlugProps): string;
 export declare function addConstantBlock(src: string, RNMBNAVVersion?: string, RNMBNAVDownloadToken?: string, RNMBNAVPublicToken?: string, RNMapboxMapsVersion?: string): string;
 export declare function addDisableOutputPathsBlock(src: string): string;
 export declare function addInstallerBlock(src: string, blockName: InstallerBlockName): string;

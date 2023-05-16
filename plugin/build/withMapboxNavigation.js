@@ -25,14 +25,14 @@ const { addMetaDataItemToMainApplication, getMainApplicationOrThrow } = config_p
  * @param config
  * @returns
  */
-const withCocoaPodsInstallerBlocks = (c, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion }) => {
-    return (0, config_plugins_1.withDangerousMod)(c, [
+const withCocoaPodsInstallerBlocks = (c, { RNMBNAVVersioniOS, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion }) => {
+    return config_plugins_1.withDangerousMod(c, [
         'ios',
         async (config) => {
             const file = path_1.default.join(config.modRequest.platformProjectRoot, 'Podfile');
             const contents = await fs_1.promises.readFile(file, 'utf8');
             await fs_1.promises.writeFile(file, applyCocoaPodsModifications(contents, {
-                RNMBNAVVersion,
+                RNMBNAVVersioniOS,
                 RNMBNAVDownloadToken,
                 RNMBNAVPublicToken,
                 RNMapboxMapsVersion
@@ -43,9 +43,9 @@ const withCocoaPodsInstallerBlocks = (c, { RNMBNAVVersion, RNMBNAVDownloadToken,
 };
 // Only the preinstaller block is required, the post installer block is
 // used for spm (swift package manager) which Expo doesn't currently support.
-function applyCocoaPodsModifications(contents, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion }) {
+function applyCocoaPodsModifications(contents, { RNMBNAVVersioniOS, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion }) {
     // Ensure installer blocks exist
-    let src = addConstantBlock(contents, RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion);
+    let src = addConstantBlock(contents, RNMBNAVVersioniOS, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion);
     src = addDisableOutputPathsBlock(src);
     src = addInstallerBlock(src, 'pre');
     src = addInstallerBlock(src, 'post');
@@ -56,7 +56,7 @@ function applyCocoaPodsModifications(contents, { RNMBNAVVersion, RNMBNAVDownload
 exports.applyCocoaPodsModifications = applyCocoaPodsModifications;
 function addConstantBlock(src, RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion) {
     const tag = `@hollertaxi/react-native-mapbox-navigation-rbmbnaversion`;
-    return (0, generateCode_1.mergeContents)({
+    return generateCode_1.mergeContents({
         tag,
         src,
         newSrc: [
@@ -74,7 +74,7 @@ function addConstantBlock(src, RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPubl
 exports.addConstantBlock = addConstantBlock;
 function addDisableOutputPathsBlock(src) {
     const tag = `@hollertaxi/react-native-mapbox-navigation-rbmbnatop`;
-    return (0, generateCode_1.mergeContents)({
+    return generateCode_1.mergeContents({
         tag,
         src,
         newSrc: ':disable_input_output_paths => true, \n',
@@ -96,14 +96,14 @@ function addInstallerBlock(src, blockName) {
             if (contents.match(matchBlock)) {
                 // This helps to still allow revisions, since we enabled the block previously.
                 // Only continue if the generated block exists...
-                const modified = (0, generateCode_1.removeGeneratedContents)(src, tag);
+                const modified = generateCode_1.removeGeneratedContents(src, tag);
                 if (!modified) {
                     return src;
                 }
             }
         }
     }
-    return (0, generateCode_1.mergeContents)({
+    return generateCode_1.mergeContents({
         tag,
         src,
         newSrc: [`  ${blockName}_install do |installer|`, '  end'].join('\n'),
@@ -115,7 +115,7 @@ function addInstallerBlock(src, blockName) {
 }
 exports.addInstallerBlock = addInstallerBlock;
 function addMapboxInstallerBlock(src, blockName) {
-    return (0, generateCode_1.mergeContents)({
+    return generateCode_1.mergeContents({
         tag: `@hollertaxi/react-native-mapbox-navigation-${blockName}_installer`,
         src,
         newSrc: `    $RNMBNAV.${blockName}_install(installer)`,
@@ -144,7 +144,7 @@ function setExcludedArchitectures(project) {
 }
 exports.setExcludedArchitectures = setExcludedArchitectures;
 const withExcludedSimulatorArchitectures = (c) => {
-    return (0, config_plugins_1.withXcodeProject)(c, (config) => {
+    return config_plugins_1.withXcodeProject(c, (config) => {
         config.modResults = setExcludedArchitectures(config.modResults);
         return config;
     });
@@ -152,7 +152,7 @@ const withExcludedSimulatorArchitectures = (c) => {
 const withAndroidPropertiesDownloadToken = (config, { RNMBNAVDownloadToken }) => {
     const key = 'MAPBOX_DOWNLOADS_TOKEN';
     if (RNMBNAVDownloadToken) {
-        return (0, config_plugins_1.withGradleProperties)(config, (config) => {
+        return config_plugins_1.withGradleProperties(config, (config) => {
             config.modResults = config.modResults.filter((item) => {
                 if (item.type === 'property' && item.key === key) {
                     return false;
@@ -185,7 +185,7 @@ const setMetaDataConfigAsync = async (config, androidManifest, key, value) => {
 const withAndroidPropertiesPublicToken = (config, { RNMBNAVPublicToken }) => {
     const key = 'MAPBOX_ACCESS_TOKEN';
     if (RNMBNAVPublicToken) {
-        return (0, config_plugins_1.withAndroidManifest)(config, async (config) => {
+        return config_plugins_1.withAndroidManifest(config, async (config) => {
             // Modifiers can be async, but try to keep them fast.
             config.modResults = await setMetaDataConfigAsync(config, config.modResults, key, RNMBNAVPublicToken);
             return config;
@@ -195,7 +195,7 @@ const withAndroidPropertiesPublicToken = (config, { RNMBNAVPublicToken }) => {
         return config;
     }
 };
-const withAndroidProperties = (config, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion }) => {
+const withAndroidProperties = (config, { RNMBNAVDownloadToken, RNMBNAVPublicToken }) => {
     config = withAndroidPropertiesDownloadToken(config, {
         RNMBNAVDownloadToken,
     });
@@ -207,7 +207,7 @@ const withAndroidProperties = (config, { RNMBNAVVersion, RNMBNAVDownloadToken, R
 const addLibCppFilter = (appBuildGradle) => {
     if (appBuildGradle.includes("pickFirst 'lib/x86/libc++_shared.so'"))
         return appBuildGradle;
-    return (0, generateCode_1.mergeContents)({
+    return generateCode_1.mergeContents({
         tag: `@hollertaxi/react-native-mapbox-navigation-libcpp`,
         src: appBuildGradle,
         newSrc: `packagingOptions {
@@ -235,7 +235,7 @@ const addMapboxMavenRepo = (projectBuildGradle) => {
     const allProjectReposOffset = allProjectLines.findIndex((line) => line.includes('repositories'));
     anchor.lastIndex = 0;
     offset = allProjectReposOffset + 1;
-    return (0, generateCode_1.mergeContents)({
+    return generateCode_1.mergeContents({
         tag: `@hollertaxi/react-native-mapbox-navigation-v2-maven`,
         src: projectBuildGradle,
         newSrc: `
@@ -253,7 +253,7 @@ const addMapboxMavenRepo = (projectBuildGradle) => {
     }).contents;
 };
 const withAndroidAppGradle = (config) => {
-    return (0, config_plugins_1.withAppBuildGradle)(config, ({ modResults, ...config }) => {
+    return config_plugins_1.withAppBuildGradle(config, ({ modResults, ...config }) => {
         if (modResults.language !== 'groovy') {
             config_plugins_1.WarningAggregator.addWarningAndroid('withMapboxNavigation', `Cannot automatically configure app build.gradle if it's not groovy`);
             return { modResults, ...config };
@@ -263,7 +263,7 @@ const withAndroidAppGradle = (config) => {
     });
 };
 const withAndroidProjectGradle = (config) => {
-    return (0, config_plugins_1.withProjectBuildGradle)(config, ({ modResults, ...config }) => {
+    return config_plugins_1.withProjectBuildGradle(config, ({ modResults, ...config }) => {
         if (modResults.language !== 'groovy') {
             config_plugins_1.WarningAggregator.addWarningAndroid('withMapboxNavigation', `Cannot automatically configure app build.gradle if it's not groovy`);
             return { modResults, ...config };
@@ -272,27 +272,167 @@ const withAndroidProjectGradle = (config) => {
         return { modResults, ...config };
     });
 };
-const withMapboxNavigationAndroid = (config, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion }) => {
+const withAndroidMapboxStyles = (config, { RNMBNAVFontFamily, RNMBNAVPrimaryColour, RNMBNAVSecondaryColour, RNMBNAVPrimaryTextColour, RNMBNAVSecondaryTextColour }) => {
+    return config_plugins_1.withAndroidStyles(config, ({ modResults, ...config }) => {
+        if (RNMBNAVFontFamily) {
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'PrimaryManeuverTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:fontFamily',
+                value: RNMBNAVFontFamily
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'SecondaryManeuverTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:fontFamily',
+                value: RNMBNAVFontFamily
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'SubManeuverTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:fontFamily',
+                value: RNMBNAVFontFamily
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'UpcomingPrimaryManeuverTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:fontFamily',
+                value: RNMBNAVFontFamily
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'UpcomingSecondaryManeuverTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:fontFamily',
+                value: RNMBNAVFontFamily
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'StatusViewTextAppearance', parent: '' },
+                name: 'android:fontFamily',
+                value: RNMBNAVFontFamily
+            });
+        }
+        if (RNMBNAVPrimaryColour) {
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'MapboxCustomManeuverTurnIconStyle', parent: 'MapboxStyleTurnIconManeuver' },
+                name: 'maneuverTurnIconShadowColor',
+                value: RNMBNAVPrimaryColour
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'MapboxCustomManeuverStyle', parent: 'MapboxStyleManeuverView' },
+                name: 'maneuverViewBackgroundColor',
+                value: RNMBNAVPrimaryColour
+            });
+        }
+        if (RNMBNAVSecondaryColour) {
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'MapboxCustomManeuverStyle', parent: 'MapboxStyleManeuverView' },
+                name: 'subManeuverViewBackgroundColor',
+                value: RNMBNAVSecondaryColour
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'MapboxCustomManeuverStyle', parent: 'MapboxStyleManeuverView' },
+                name: 'upcomingManeuverViewBackgroundColor',
+                value: RNMBNAVSecondaryColour
+            });
+        }
+        if (RNMBNAVPrimaryTextColour) {
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'MapboxCustomManeuverTurnIconStyle', parent: 'MapboxStyleTurnIconManeuver' },
+                name: 'maneuverTurnIconColor',
+                value: RNMBNAVPrimaryTextColour
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'PrimaryManeuverTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:textColor',
+                value: RNMBNAVPrimaryTextColour
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'UpcomingPrimaryManeuverTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:textColor',
+                value: RNMBNAVPrimaryTextColour
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'StatusViewTextAppearance', parent: '' },
+                name: 'android:textColor',
+                value: RNMBNAVPrimaryTextColour
+            });
+        }
+        if (RNMBNAVSecondaryTextColour) {
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'SecondaryManeuverTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:textColor',
+                value: RNMBNAVSecondaryTextColour
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'SubManeuverTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:textColor',
+                value: RNMBNAVSecondaryTextColour
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'StepDistanceTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:textColor',
+                value: RNMBNAVSecondaryTextColour
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'UpcomingSecondaryManeuverTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:textColor',
+                value: RNMBNAVSecondaryTextColour
+            });
+            modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
+                add: true,
+                parent: { name: 'UpcomingManeuverStepDistanceTextAppearance', parent: 'TextAppearance.AppCompat' },
+                name: 'android:textColor',
+                value: RNMBNAVSecondaryTextColour
+            });
+        }
+        return { modResults, ...config };
+    });
+};
+const withMapboxNavigationAndroid = (config, { RNMBNAVVersionAndroid, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMBNAVFontFamily, RNMBNAVPrimaryColour, RNMBNAVSecondaryColour, RNMBNAVPrimaryTextColour, RNMBNAVSecondaryTextColour }) => {
     config = withAndroidProperties(config, {
-        RNMBNAVVersion,
+        RNMBNAVVersionAndroid,
         RNMBNAVDownloadToken,
         RNMBNAVPublicToken
     });
-    config = withAndroidProjectGradle(config, { RNMBNAVVersion });
-    config = withAndroidAppGradle(config, { RNMBNAVVersion });
+    config = withAndroidProjectGradle(config, { RNMBNAVVersionAndroid });
+    config = withAndroidAppGradle(config, { RNMBNAVVersionAndroid });
+    config = withAndroidMapboxStyles(config, { RNMBNAVFontFamily, RNMBNAVPrimaryColour, RNMBNAVSecondaryColour, RNMBNAVPrimaryTextColour, RNMBNAVSecondaryTextColour });
     return config;
 };
-const withMapboxNavigation = (config, { RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken }) => {
+const withMapboxNavigation = (config, { RNMBNAVVersionAndroid, RNMBNAVVersioniOS, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMBNAVFontFamily, RNMBNAVPrimaryColour, RNMBNAVSecondaryColour, RNMBNAVPrimaryTextColour, RNMBNAVSecondaryTextColour }) => {
     config = withExcludedSimulatorArchitectures(config);
     config = withMapboxNavigationAndroid(config, {
-        RNMBNAVVersion,
+        RNMBNAVVersionAndroid,
         RNMBNAVDownloadToken,
-        RNMBNAVPublicToken
+        RNMBNAVPublicToken,
+        RNMBNAVFontFamily,
+        RNMBNAVPrimaryColour,
+        RNMBNAVSecondaryColour,
+        RNMBNAVPrimaryTextColour,
+        RNMBNAVSecondaryTextColour
     });
     return withCocoaPodsInstallerBlocks(config, {
-        RNMBNAVVersion,
+        RNMBNAVVersioniOS,
         RNMBNAVDownloadToken,
-        RNMBNAVPublicToken
+        RNMBNAVPublicToken,
+        RNMBNAVFontFamily,
+        RNMBNAVPrimaryColour,
+        RNMBNAVSecondaryColour,
+        RNMBNAVPrimaryTextColour,
+        RNMBNAVSecondaryTextColour
     });
 };
-exports.default = (0, config_plugins_1.createRunOncePlugin)(withMapboxNavigation, pkg.name, pkg.version);
+exports.default = config_plugins_1.createRunOncePlugin(withMapboxNavigation, pkg.name, pkg.version);

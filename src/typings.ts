@@ -71,6 +71,8 @@ export interface IMapboxNavigationFreeDriveProps {
   showSpeedLimit?: boolean;
   speedLimitAnchor?: Padding;
   maneuverAnchor?: Padding;
+  maneuverRadius?: number;
+  maneuverBackgroundColor?: string;
   followZoomLevel?: number;
   userPuckImage?: number;
   userPuckScale?: number;

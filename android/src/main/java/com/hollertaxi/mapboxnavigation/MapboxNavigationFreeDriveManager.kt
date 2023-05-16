@@ -96,6 +96,16 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
     fun setManeuverAnchor(view: MapboxNavigationFreeDriveView, maneuverAnchor: ReadableArray?) {
         view.setManeuverAnchor(maneuverAnchor)
     }
+
+    @ReactProp(name = "maneuverRadius")
+    fun setManeuverRadius(view: MapboxNavigationFreeDriveView, maneuverRadius: Int) {
+        view.setManeuverRadius(maneuverRadius)
+    }
+
+    @ReactProp(name = "maneuverBackgroundColor")
+    fun setManeuverBackgroundColor(view: MapboxNavigationFreeDriveView, maneuverBackgroundColor: String?) {
+        view.setManeuverBackgroundColor(maneuverBackgroundColor)
+    }
     
     @ReactProp(name = "followZoomLevel")
     fun setFollowZoomLevel(view: MapboxNavigationFreeDriveView, followZoomLevel: Double) {
