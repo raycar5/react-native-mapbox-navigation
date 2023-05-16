@@ -159,6 +159,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var darkMode: Boolean = false
     private var debug: Boolean = false
 
+    private var isMapStyleLoaded: Boolean = false
     private var currentOrigin: Point? = null
     private var currentDestination: Point? = null
     private var currentWaypoints: Array<Point>? = null
@@ -679,12 +680,14 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     }
 
     private fun toggleDarkMode(isDarkMode: Boolean) {
-        this.darkMode = isDarkMode
-
-        mapboxMap.loadStyleUri(
-            if (isDarkMode) Style.DARK else Style.LIGHT
-        ) {
+        if (isMapStyleLoaded && isDarkMode != this.darkMode) {
+            binding.mapView.getMapboxMap().loadStyleUri(
+                if (isDarkMode) Style.DARK else Style.LIGHT
+            ) {
+            }
         }
+
+        this.darkMode = isDarkMode
     }
 
     private fun toggleMute(mute: Boolean) {
@@ -901,6 +904,7 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
         mapboxMap.loadStyleUri(
             if (this.darkMode) Style.DARK else Style.LIGHT
         ) {
+            isMapStyleLoaded = true
         }
 
         // speed limit
