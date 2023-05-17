@@ -188,7 +188,6 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   var pointAnnotationManager: PointAnnotationManager?
   var passiveLocationManager: PassiveLocationManager!
   var passiveLocationProvider: PassiveLocationProvider!
-  var speedLimitView: SpeedLimitView!
   var embedded: Bool
   var embedding: Bool
   var isMapStyleLoaded: Bool = false
@@ -348,9 +347,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       let roadName = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.roadNameKey] as? String
     else { return }
     
-    speedLimitView?.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
-    speedLimitView?.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
-    speedLimitView?.currentSpeed = location.speed
+    navigationView.speedLimitView.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
+    navigationView.speedLimitView.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
+    navigationView.speedLimitView.currentSpeed = location.speed
 
     onLocationChange?(["longitude": location.coordinate.longitude, "latitude": location.coordinate.latitude, "roadName": roadName])
   }
@@ -459,11 +458,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
         case .failure(let error):
           self?.sendErrorToReact(error: error.localizedDescription)
         case .success(let response):
-          guard let routeResponse = response, let routes = response.routes, let route = response.routes?.first, let strongSelf = self else {
+          guard let routes = response.routes, let route = response.routes?.first, let strongSelf = self else {
             return
           }
 
-          self?.currentRouteResponse = routeResponse
+          self?.currentRouteResponse = response
 
           onSuccess(routes)
         }
@@ -557,8 +556,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationView.navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
 
     navigationView.topBannerContainerView.hide(animated: true)
-
-    addSpeedLimitView()
+    navigationView.speedLimitView.shouldShowUnknownSpeedLimit = true
+    navigationView.speedLimitView.translatesAutoresizingMaskIntoConstraints = false
 
     NotificationCenter.default.removeObserver(self, name: .routeControllerProgressDidChange, object: nil)
     NotificationCenter.default.removeObserver(self, name: .routeControllerDidReroute, object: nil)
@@ -685,14 +684,14 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationView.bottomBannerContainerView.hide(animated: false)
     navigationView.topBannerContainerView.show(animated: true)
 
-    setLogoPadding()
-    setAttributionPadding()
-
-    if (speedLimitView == nil && showSpeedLimit) {
+    if (showSpeedLimit == true) {
       addSpeedLimitView()
-    } else if (speedLimitView != nil && showSpeedLimit == false) {
+    } else {
       removeSpeedLimitView()
     }
+
+    setLogoPadding()
+    setAttributionPadding()
 
     passiveLocationManager = PassiveLocationManager()
     passiveLocationProvider = PassiveLocationProvider(locationManager: passiveLocationManager)
@@ -719,28 +718,18 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   func addSpeedLimitView() {
-    removeSpeedLimitView()
-
     if (navigationView != nil) {
-      if (showSpeedLimit) {
-        speedLimitView = SpeedLimitView()
-
-        speedLimitView.shouldShowUnknownSpeedLimit = true
-        speedLimitView.translatesAutoresizingMaskIntoConstraints = false
+      navigationView.speedLimitView.isAlwaysHidden = false
       
-        self.addSubview(speedLimitView)
-        
-        speedLimitView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
-        speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
-        speedLimitView.heightAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(3) ? CGFloat(speedLimitAnchor[3].floatValue) : 50).isActive = true
-        speedLimitView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: speedLimitAnchor.indices.contains(1) ? CGFloat(speedLimitAnchor[1].floatValue) : 10).isActive = true
-      }
+      navigationView.speedLimitView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
+      navigationView.speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
+      navigationView.speedLimitView.heightAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(3) ? CGFloat(speedLimitAnchor[3].floatValue) : 50).isActive = true
+      navigationView.speedLimitView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: speedLimitAnchor.indices.contains(1) ? CGFloat(speedLimitAnchor[1].floatValue) : 10).isActive = true
     }
   }
 
   func removeSpeedLimitView() {
-    speedLimitView.removeFromSuperview()
-    speedLimitView = nil
+    navigationView.speedLimitView.isAlwaysHidden = true
   }
 
   func setLogoPadding() {
