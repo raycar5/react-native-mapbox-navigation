@@ -23,6 +23,7 @@ extension UIView {
 class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, NavigationViewControllerDelegate {
   @objc var followZoomLevel: NSNumber = 16.0
   @objc var onLocationChange: RCTDirectEventBlock?
+  @objc var onError: RCTDirectEventBlock?
   @objc var onTrackingStateChange: RCTDirectEventBlock?
   @objc var onRouteChange: RCTDirectEventBlock?
   @objc var showSpeedLimit: Bool = true {
@@ -184,15 +185,14 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
   var navigationService: NavigationService!
   var navigationView: NavigationView!
+  var pointAnnotationManager: PointAnnotationManager?
   var passiveLocationManager: PassiveLocationManager!
   var passiveLocationProvider: PassiveLocationProvider!
+  var instructionsCardCollection = InstructionsCardViewController!
   var speedLimitView: SpeedLimitView!
   var embedded: Bool
   var embedding: Bool
   var isMapStyleLoaded: Bool = false
-  var currentOrigin: [NSNumber] = []
-  var currentDestination: [NSNumber] = []
-  var currentWaypoints: [[NSNumber]] = []
   var currentLegIndex: NSNumber = -1
   var currentActiveRoutes: [Route]? = nil
   var currentPreviewRoutes: [Route]? = nil
@@ -200,14 +200,15 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   var waypointStyles: [[String: Any]] = []
 
   @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, cameraType: NSString, padding: [NSNumber])  {
-    currentOrigin = origin
-    currentDestination = destination
-    currentWaypoints = waypoints
+    if (embedded == false || embedding == true) {
+      return
+    }
+
     currentLegIndex = legIndex
     waypointStyles = (styles as? [[String: Any]]) ?? []
 
     var routeWaypoints = [Waypoint]()
-    var routeWaypointNames = []
+    var routeWaypointNames = [String]
 
     if (origin != nil && origin.isEmpty == false) {
       let originWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: origin[1] as! CLLocationDegrees, longitude: origin[0] as! CLLocationDegrees))
@@ -234,99 +235,108 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
 
     if (routeWaypoints.isEmpty == false) {
-      fetchRoutes(routeWaypoints, routeWaypointNames, onSuccess: {(routes: [Route]) -> Void in
-        self.moveToOverview(padding)
-        self.previewRoutes(routes)
+      fetchRoutes(routeWaypoints: routeWaypoints, routeWaypointNames: routeWaypointNames, onSuccess: {(routes: [Route]) -> Void in
+        self.moveToOverview(padding: padding)
+        self.previewRoutes(routes: routes)
         self.onRouteChange?(["distance": routes?.first?.distance, "expectedTravelTime": routes?.first?.expectedTravelTime, "typicalTravelTime": routes?.first?.typicalTravelTime])
       })
     }
   }
 
   @objc func clearRoute() {
-    clearRouteAndStopActiveGuidance()
+    if (embedded == true && embedding == false) {
+      clearRouteAndStopActiveGuidance()
+    }
   }
 
   @objc func follow(padding: [NSNumber]) {
-    navigationView?.navigationMapView?.navigationCamera?.viewportDataSource?.followingMobileCamera.padding = getPadding(padding)
-    navigationView?.navigationMapView?.navigationCamera?.follow()
+    if (embedded == true && embedding == false) {
+      navigationView?.navigationMapView.navigationCamera.viewportDataSource.followingMobileCamera.padding = getPadding(padding)
+      navigationView?.navigationMapView.navigationCamera.follow()
+    }
   }
 
   @objc func moveToOverview(padding: [NSNumber]) {
-    navigationView?.navigationMapView?.navigationCamera?.viewportDataSource?.overviewMobileCamera.padding = getPadding(padding)
-    navigationView?.navigationMapView?.navigationCamera?.moveToOverview()
+    if (embedded == true && embedding == false) {
+      navigationView?.navigationMapView.navigationCamera.viewportDataSource.overviewMobileCamera.padding = getPadding(padding)
+      navigationView?.navigationMapView.navigationCamera.moveToOverview()
+    }
   }
 
   @objc func fitCamera(padding: [NSNumber]) {
-    navigationView?.navigationMapView?.navigationCamera?.viewportDataSource?.overviewMobileCamera.padding = getPadding(padding)
-    navigationView?.navigationMapView?.navigationCamera?.moveToOverview()
+    if (embedded == true && embedding == false) {
+      navigationView?.navigationMapView.navigationCamera?.viewportDataSource.overviewMobileCamera.padding = getPadding(padding)
+      navigationView?.navigationMapView.navigationCamera?.moveToOverview()
+    }
   }
 
   @objc func startNavigation(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, cameraType: NSString, padding: [NSNumber])  {
+    if (embedded == false || embedding == true) {
+      return
+    }
+    
     if (currentActiveRoutes != nil) {
-      startActiveGuidance(false)
+      startActiveGuidance(updateCamera: false)
 
       if (cameraType != nil && cameraType == "overview") {
-        moveToOverview(padding)
+        moveToOverview(padding: padding)
       } else {
-        follow(padding)
+        follow(padding: padding)
       }
     } else {
-      try {
-        currentOrigin = origin
-        currentDestination = destination
-        currentWaypoints = waypoints
-        currentLegIndex = legIndex
-        waypointStyles = (styles as? [[String: Any]]) ?? []
+      currentLegIndex = legIndex
+      waypointStyles = (styles as? [[String: Any]]) ?? []
 
-        var routeWaypoints = [Waypoint]()
-        var routeWaypointNames = []
+      var routeWaypoints = [Waypoint]()
+      var routeWaypointNames = [String]
 
-        if (origin != nil && origin.isEmpty == false) {
-          let originWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: origin[1] as! CLLocationDegrees, longitude: origin[0] as! CLLocationDegrees))
-          routeWaypoints.append(originWaypoint)
-        }
-
-        if (waypoints != nil && waypoints.isEmpty == false) {
-          for waypoint in waypoints {
-            if (waypoint != nil && waypoint.isEmpty == false) {
-              routeWaypoints.append(Waypoint(coordinate: CLLocationCoordinate2D(latitude: waypoint[1] as! CLLocationDegrees, longitude: waypoint[0] as! CLLocationDegrees)))
-            }
-          }
-        }
-
-        if (destination != nil && destination.isEmpty == false) {
-          let destinationWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: destination[1] as! CLLocationDegrees, longitude: destination[0] as! CLLocationDegrees))
-          routeWaypoints.append(destinationWaypoint)
-        }
-
-        if (waypointStyles.isEmpty == false) {
-          for waypointStyle in waypointStyles {
-            routeWaypointNames.append((waypointStyle["name"]! as? NSString) ?? waypointColor)
-          }
-        }
-
-        fetchRoutes(routeWaypoints, routeWaypointNames, onSuccess: {(routes: [Route]) -> Void in
-            self.currentActiveRoutes = routes
-            self.onRouteChange?(["distance": routes?.first?.distance, "expectedTravelTime": routes?.first?.expectedTravelTime, "typicalTravelTime": routes?.first?.typicalTravelTime])
-
-            self.startActiveGuidance(false)
-            self.follow(padding)
-        })
-      } catch (ex: Exception) {
-          sendErrorToReact(ex.toString())
+      if (origin != nil && origin.isEmpty == false) {
+        let originWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: origin[1] as! CLLocationDegrees, longitude: origin[0] as! CLLocationDegrees))
+        routeWaypoints.append(originWaypoint)
       }
+
+      if (waypoints != nil && waypoints.isEmpty == false) {
+        for waypoint in waypoints {
+          if (waypoint != nil && waypoint.isEmpty == false) {
+            routeWaypoints.append(Waypoint(coordinate: CLLocationCoordinate2D(latitude: waypoint[1] as! CLLocationDegrees, longitude: waypoint[0] as! CLLocationDegrees)))
+          }
+        }
+      }
+
+      if (destination != nil && destination.isEmpty == false) {
+        let destinationWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: destination[1] as! CLLocationDegrees, longitude: destination[0] as! CLLocationDegrees))
+        routeWaypoints.append(destinationWaypoint)
+      }
+
+      if (waypointStyles.isEmpty == false) {
+        for waypointStyle in waypointStyles {
+          routeWaypointNames.append((waypointStyle["name"]! as? NSString) ?? waypointColor)
+        }
+      }
+
+      fetchRoutes(routeWaypoints: routeWaypoints, routeWaypointNames: routeWaypointNames, onSuccess: {(routes: [Route]) -> Void in
+          self.currentActiveRoutes = routes
+          self.onRouteChange?(["distance": routes?.first?.distance, "expectedTravelTime": routes?.first?.expectedTravelTime, "typicalTravelTime": routes?.first?.typicalTravelTime])
+
+          self.startActiveGuidance(updateCamera: false)
+          self.follow(padding: padding)
+      })
     }
   }
 
   @objc func pauseNavigation() {
-    clearActiveGuidance()
-    clearMap()
+    if (embedded == true && embedding == false) {
+      clearActiveGuidance()
+      clearMap()
 
-    navigationView?.navigationMapView?.navigationCamera?.follow()
+      navigationView?.navigationMapView.navigationCamera.follow()
+    }
   }
 
   @objc func stopNavigation() {
-    clearRouteAndStopActiveGuidance()
+    if (embedded == true && embedding == false) {
+      clearRouteAndStopActiveGuidance()
+    }
   }
   
   @objc func didUpdatePassiveLocation(_ notification: Notification) {
@@ -338,6 +348,69 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     speedLimitView?.currentSpeed = location?.speed
 
     onLocationChange?(["longitude": location?.coordinate.longitude, "latitude": location?.coordinate.latitude, "roadName": roadName])
+  }
+
+  @objc func progressDidChange(_ notification: Notification) {
+    let location = notification.userInfo?[RouteController.NotificationUserInfoKey.locationKey] as? CLLocation
+    let routeProgress = notification.userInfo?[RouteController.NotificationUserInfoKey.routeProgressKey] as? RouteProgress
+
+    // Add maneuver arrow
+    if (routeProgress.currentLegProgress.followOnStep != nil) {
+      navigationView?.navigationMapView.addArrow(route: routeProgress.route, legIndex: routeProgress.legIndex, stepIndex: routeProgress.currentLegProgress.stepIndex + 1)
+    } else {
+      navigationView?.navigationMapView.removeArrow()
+    }
+        
+    if (routeProgress.legIndex != currentLegIndex) {
+      navigationMapView.showWaypoints(on: routeProgress.route, legIndex: routeProgress.legIndex)
+    }
+        
+    // Update the top banner with progress updates
+    instructionsCardCollection?.updateDistance(for: routeProgress.currentLegProgress.currentStepProgress)
+    instructionsCardCollection?.isHidden = false
+        
+    // Update `UserCourseView` to be placed on the most recent location.
+    navigationView?.navigationMapView.moveUserLocation(to: location, animated: true)
+        
+    // Update the main route line during active navigation when `NavigationMapView.routeLineTracksTraversal` set to `true`
+    // and route progress change, by calling `NavigationMapView.updateRouteLine(routeProgress:coordinate:shouldRedraw:)`
+    // without redrawing the main route.
+    navigationView?.navigationMapView.updateRouteLine(routeProgress: routeProgress, coordinate: location.coordinate, shouldRedraw: routeProgress.legIndex != currentLegIndex)
+    currentLegIndex = routeProgress.legIndex
+  }
+  
+  @objc func updateInstructionsBanner(notification: Notification) {
+    guard let routeProgress = notification.userInfo?[RouteController.NotificationUserInfoKey.routeProgressKey] as? RouteProgress else {
+      assertionFailure("RouteProgress should be available.")
+    
+      return
+    }
+        
+    instructionsCardCollection?.update(for: routeProgress.currentLegProgress.currentStepProgress.currentVisualInstruction)
+  }
+  
+  @objc func rerouted(_ notification: Notification) {
+    navigationView?.navigationMapView.removeWaypoints()
+        
+    // Update the main route line during active navigation when `NavigationMapView.routeLineTracksTraversal` set to `true`
+    // and rerouting happens, by calling `NavigationMapView.updateRouteLine(routeProgress:coordinate:shouldRedraw:)`
+    // with `shouldRedraw` as `true`.
+    navigationView?.navigationMapView.updateRouteLine(
+      routeProgress: navigationService.routeProgress,
+      coordinate: navigationService.router.location?.coordinate,
+      shouldRedraw: true
+    )
+  }
+    
+  @objc func refresh(_ notification: Notification) {
+    // Update the main route line during active navigation when `NavigationMapView.routeLineTracksTraversal` set to `true`
+    // and route refresh happens, by calling `NavigationMapView.updateRouteLine(routeProgress:coordinate:shouldRedraw:)`
+    // with `shouldRedraw` as `true`.
+    navigationMapView.updateRouteLine(
+      routeProgress: navigationService.routeProgress,
+      coordinate: navigationService.router.location?.coordinate,
+      shouldRedraw: true
+    )
   }
 
   @objc func navigationCameraStateDidChange(_ notification: Notification) {
@@ -377,7 +450,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     Directions.shared.calculate(options) { [weak self] (session, result) in
       switch result {
         case .failure(let error):
-          sendErrorToReact(error.localizedDescription)
+          self.sendErrorToReact(error.localizedDescription)
         case .success(let response):
           guard let routeResponse = response, let routes = response.routes, let route = response.routes?.first, let strongSelf = self else {
             return
@@ -395,8 +468,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     currentPreviewRoutes = routes
 
-    navigationView?.navigationMapView?.showcase(routes)
-    //navigationView?.navigationMapView?.showRouteDurations(along: routes)
+    navigationView?.navigationMapView.showcase(routes)
+    //navigationView?.navigationMapView.showRouteDurations(along: routes)
   }
 
   func startActiveGuidance(updateCamera: Bool) {
@@ -404,45 +477,48 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     var routes = currentActiveRoutes
 
     if (routes != nil) {
-      let navigationService = MapboxNavigationService(
-        indexedRouteResponse: IndexedRouteResponse(routeResponse: routeResponse, routeIndex: 0),
-        credentials: NavigationSettings.shared.directions.credentials
+      let locationManager = NavigationLocationManager()
+      navigationService = MapboxNavigationService(
+        indexedRouteResponse: IndexedRouteResponse(routeResponse: currentRouteResponse, routeIndex: 0),
+        credentials: NavigationSettings.shared.directions.credentials,
+        locationManager: locationManager
       )
-
-      let instructionsCardCollection = InstructionsCardViewController()
-                
-      let navigationOptions = NavigationOptions(navigationService: navigationService, topBanner: instructionsCardCollection)
-                
-      let navigationViewController = NavigationViewController(
-        for: IndexedRouteResponse(routeResponse: routeResponse, routeIndex: 0),
-        navigationOptions: navigationOptions
-      )
-      navigationViewController.delegate = parentVC
-      navigationViewController.transitioningDelegate = self
-
-      instructionsCardCollection.navigationViewController = navigationViewController
 
       removeSpeedLimitView()
-                
-      navigationViewController.navigationView.bottomBannerContainerView.dismiss(animated: false)
-      navigationViewController.navigationView.topBannerContainerView.show(animated: true)
 
-      parentVC.present(navigationViewController, animated: true, completion: { [weak self] in
+      navigationService.start()
+
+      navigationView?.navigationMapView.mapView.mapboxMap.onNext(event: .styleLoaded, handler: { [weak self] _ in
         guard let self = self else { return }
+        
+        self.navigationView?.navigationMapView.routeLineTracksTraversal = true
 
-        var puck2DConfiguration = Puck2DConfiguration()
-        if (userPuckImage != nil) {
-          puck2DConfiguration.topImage = userPuckImage
-          puck2DConfiguration.scale = .constant(Double(exactly: userPuckScale)!)
+        if self.navigationView?.navigationMapView.mapView.mapboxMap.style.layerExists(withId: "road-intersection") {
+            self.navigationView?.navigationMapView.show([self.navigationService.route], layerPosition: .below("road-intersection") ,legIndex: 0)
+        } else {
+            self.navigationView?.navigationMapView.show([self.navigationService.route], legIndex: 0)
         }
-
-        navigationViewController.navigationMapView?.userLocationStyle = .puck2D(configuration: puck2DConfiguration)
       })
 
+      let navigationViewportDataSource = NavigationViewportDataSource(navigationView?.navigationMapView.mapView, viewportDataSourceType: .active)
+      navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
+
+      NotificationCenter.default.addObserver(self, selector: #selector(progressDidChange(_ :)), name: .routeControllerProgressDidChange, object: nil)
+      NotificationCenter.default.addObserver(self, selector: #selector(rerouted(_:)), name: .routeControllerDidReroute, object: nil)
+      NotificationCenter.default.addObserver(self, selector: #selector(refresh(_:)), name: .routeControllerDidRefreshRoute, object: nil)
+      NotificationCenter.default.addObserver(self, selector: #selector(updateInstructionsBanner(notification:)), name: .routeControllerDidPassVisualInstructionPoint, object: navigationService.router)
+
       NotificationCenter.default.removeObserver(self, name: .passiveLocationManagerDidUpdate, object: nil)
+      passiveLocationProvider.stopUpdatingLocation()
+      passiveLocationProvider.stopUpdatingHeading()
+
+      navigationView?.navigationMapView.mapView.mapboxMap.onNext(event: .styleLoaded) { [weak self] _ in
+        guard let self = self else { return }
+        self.pointAnnotationManager = self.navigationView?.navigationMapView.mapView.annotations.makePointAnnotationManager()
+      }
 
       if (updateCamera) {
-        navigationView?.navigationMapView?.navigationCamera?.follow()
+        navigationView?.navigationMapView.navigationCamera?.follow()
       }
     }
   }
@@ -451,42 +527,53 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     // clear
     currentActiveRoutes = nil
     currentPreviewRoutes = nil
+    currentRouteResponse = nil
+    currentLegIndex = -1
 
     clearActiveGuidance()
     clearMap()
 
-    moveToOverview()
+    moveToOverview([])
   }
 
   func clearActiveGuidance() {
     waypointStyles = []
 
-    navigationViewController.navigationView.topBannerContainerView.dismiss(animated: true)
-    navigationViewController.dismiss(animated: true) { [weak self] in 
-      guard let self = self else { return }
+    navigationService.stop()
 
-      let navigationMapView = self.viewController.navigationMapView
+    navigationService = nil
 
-      let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .passive)
+    let navigationViewportDataSource = NavigationViewportDataSource(navigationView?.navigationMapView.mapView, viewportDataSourceType: .passive)
 
-      navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
+    navigationView?.navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
 
-      NotificationCenter.default.addObserver(
-        self,
-        selector: #selector(didUpdatePassiveLocation),
-        name: .passiveLocationManagerDidUpdate,
-        object: nil
-      )
+    NotificationCenter.default.removeObserver(self, name: .routeControllerProgressDidChange, object: nil)
+    NotificationCenter.default.removeObserver(self, name: .routeControllerDidReroute, object: nil)
+    NotificationCenter.default.removeObserver(self, name: .routeControllerDidRefreshRoute, object: nil)
+    NotificationCenter.default.removeObserver(self, name: .routeControllerDidPassVisualInstructionPoint, object: nil)
 
-      showSpeedLimit()
-    }
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(didUpdatePassiveLocation),
+      name: .passiveLocationManagerDidUpdate,
+      object: nil
+    )
+
+    passiveLocationProvider.startUpdatingLocation()
+    passiveLocationProvider.startUpdatingHeading()
+
+    showSpeedLimit()
   }
 
   func clearMap() {
-    navigationView?.navigationMapView?.unhighlightBuildings()
-    navigationView?.navigationMapView?.removeRoutes()
-    navigationView?.navigationMapView?.removeRouteDurations()
-    navigationView?.navigationMapView?.removeWaypoints()
+    navigationView?.navigationMapView.unhighlightBuildings()
+    navigationView?.navigationMapView.removeRoutes()
+    navigationView?.navigationMapView.removeRouteDurations()
+    navigationView?.navigationMapView.removeWaypoints()
+  }
+
+  func sendErrorToReact(error: String) {
+    onError?(["message": error])
   }
 
   override init(frame: CGRect) {
@@ -513,10 +600,13 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     super.removeFromSuperview()
     // cleanup and teardown any existing resources
     NotificationCenter.default.removeObserver(self, name: .passiveLocationManagerDidUpdate, object: nil)
-    NotificationCenter.default.removeObserver(self, name: .navigationCameraStateDidChange, object: navigationView?.navigationMapView?.navigationCamera)
+    NotificationCenter.default.removeObserver(self, name: .navigationCameraStateDidChange, object: navigationView?.navigationMapView.navigationCamera)
+    NotificationCenter.default.removeObserver(self, name: .routeControllerProgressDidChange, object: nil)
+    NotificationCenter.default.removeObserver(self, name: .routeControllerDidReroute, object: nil)
+    NotificationCenter.default.removeObserver(self, name: .routeControllerDidRefreshRoute, object: nil)
+    NotificationCenter.default.removeObserver(self, name: .routeControllerDidPassVisualInstructionPoint, object: nil)
     passiveLocationProvider.stopUpdatingLocation()
     passiveLocationProvider.stopUpdatingHeading()
-    navigationViewController?.dismiss()
     navigationView?.removeFromSuperview()
     removeSpeedLimitView()
   }
@@ -528,7 +618,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     embedding = true
 
-    navigationView = NavigationView(frame: view.bounds)
+    navigationView = NavigationView(frame: bounds)
     navigationView.translatesAutoresizingMaskIntoConstraints = false
 
     navigationView.navigationMapView.showsCongestionForAlternativeRoutes = true
@@ -559,7 +649,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
 
     navigationView.navigationMapView.mapView.ornaments.options.compass.visibility = .hidden
-    navigationView.navigationMapView.mapView.ornaments.options.scalebar.visibility = .hidden
+    navigationView.navigationMapView.mapView.ornaments.options.scaleBar.visibility = .hidden
     navigationView.navigationMapView.mapView.gestures.options.pinchRotateEnabled = false
     navigationView.navigationMapView.mapView.gestures.options.pinchPanEnabled = false
     navigationView.navigationMapView.mapView.gestures.options.pitchEnabled = false
@@ -576,6 +666,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationViewportDataSource.overviewMobileCamera.padding = getPadding([])
 
     navigationView.navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
+
     navigationView.navigationMapView.navigationCamera.follow()
 
     passiveLocationManager = PassiveLocationManager()
@@ -584,10 +675,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationView.navigationMapView.mapView.location.overrideLocationProvider(with: locationProvider)
     passiveLocationProvider.startUpdatingLocation()
 
-    parentVC.addChild(navigationView)
-    navigationView.frame = bounds
-    addSubview(navigationView)
-    navigationView.didMove(toParentViewController: parentVC)
+    self.addSubview(navigationView)
 
     setLogoPadding()
     setAttributionPadding()
@@ -626,10 +714,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
         speedLimitView.shouldShowUnknownSpeedLimit = true
         speedLimitView.translatesAutoresizingMaskIntoConstraints = false
       
-        parentVC.addChild(speedLimitView)
-        speedLimitView.frame = bounds
-        addSubview(speedLimitView)
-        speedLimitView.didMove(toParentViewController: parentVC)
+        self.addSubview(speedLimitView)
         
         speedLimitView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
         speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
@@ -792,58 +877,6 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     return FeatureCollection(features: features)
   }
-}
-
-// Transition that is used for `NavigationViewController` presentation.
-class PresentationTransition: NSObject, UIViewControllerAnimatedTransitioning {
-  func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-    return 0.0
-  }
-    
-  func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-    guard let fromViewController = transitionContext.viewController(forKey: .from) as? ViewController,
-          let toViewController = transitionContext.viewController(forKey: .to) as? NavigationViewController else {
-            transitionContext.completeTransition(false)
-            return
-          }
-        
-    toViewController.navigationMapView = fromViewController.navigationView.navigationMapView
-        
-    transitionContext.containerView.addSubview(toViewController.view)
-    transitionContext.completeTransition(true)
-  }
-}
-
-// Transition that is used for `NavigationViewController` dismissal.
-class DismissalTransition: NSObject, UIViewControllerAnimatedTransitioning {
-  func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-    return 0.0
-  }
-    
-  func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-    guard let fromViewController = transitionContext.viewController(forKey: .from) as? NavigationViewController,
-          let navigationMapView = fromViewController.navigationMapView,
-          let toViewController = transitionContext.viewController(forKey: .to) as? ViewController else {
-            transitionContext.completeTransition(false)
-            return
-          }
-        
-    toViewController.navigationView.navigationMapView = navigationMapView
-        
-    transitionContext.containerView.addSubview(toViewController.view)
-    transitionContext.completeTransition(true)
-  }
-}
-
-extension MapboxNavigationFreeDriveView: UIViewControllerTransitioningDelegate {
-  public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-    return PresentationTransition()
-  }
-
-  public func animationController(forDismissed dismissed: UIViewController) -> 
-    UIViewControllerAnimatedTransitioning? {
-        return DismissalTransition()
-    }
 }
 
 extension UIColor {
