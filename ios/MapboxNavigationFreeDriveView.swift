@@ -59,7 +59,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var routeColor: NSString = "#56A8FB"
   @objc var routeCasingColor: NSString = "#2F7AC6" {
     didSet {
-      if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil) {
+      if (embedded == true && navigationView != nil) {
         navigationView.navigationMapView.routeCasingColor = UIColor(hex: routeCasingColor as String)
       }
     }
@@ -67,21 +67,21 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var routeClosureColor: NSString = "#000000"
   @objc var alternateRouteColor: NSString = "#8694A5" {
     didSet {
-      if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil) {
+      if (embedded == true && navigationView != nil) {
         navigationView.navigationMapView.routeAlternateColor = UIColor(hex: alternateRouteColor as String)
       }
     }
   }
   @objc var alternateRouteCasingColor: NSString = "#727E8D" {
     didSet {
-      if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil) {
+      if (embedded == true && navigationView != nil) {
         navigationView.navigationMapView.routeAlternateCasingColor = UIColor(hex: alternateRouteCasingColor as String)
       }
     }
   }
   @objc var traversedRouteColor: NSString? {
     didSet {
-      if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil) {
+      if (embedded == true && navigationView != nil) {
         if (traversedRouteColor != nil) {
           navigationView.navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor! as String)
         } else {
@@ -93,56 +93,56 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var traversedRouteCasingColor: NSString?
   @objc var trafficUnknownColor: NSString = "#56A8FB" {
     didSet {
-      if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil) {
+      if (embedded == true && navigationView != nil) {
         navigationView.navigationMapView.trafficUnknownColor = UIColor(hex: trafficUnknownColor as String)
       }
     }
   }
   @objc var trafficLowColor: NSString = "#56A8FB" {
     didSet {
-      if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil) {
+      if (embedded == true && navigationView != nil) {
         navigationView.navigationMapView.trafficLowColor = UIColor(hex: trafficLowColor as String)
       }
     }
   }
   @objc var trafficModerateColor: NSString = "#ff9500" {
     didSet {
-      if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil) {
+      if (embedded == true && navigationView != nil) {
         navigationView.navigationMapView.trafficModerateColor = UIColor(hex: trafficModerateColor as String)
       }
     }
   }
   @objc var trafficHeavyColor: NSString = "#ff4d4d" {
     didSet {
-      if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil) {
+      if (embedded == true && navigationView != nil) {
         navigationView.navigationMapView.trafficHeavyColor = UIColor(hex: trafficHeavyColor as String)
       }
     }
   }
   @objc var trafficSevereColor: NSString = "#8f2447" {
     didSet {
-      if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil) {
+      if (embedded == true && navigationView != nil) {
         navigationView.navigationMapView.trafficSevereColor = UIColor(hex: trafficSevereColor as String)
       }
     }
   }
   @objc var restrictedRoadColor: NSString = "#000000" {
     didSet {
-      if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil) {
+      if (embedded == true && navigationView != nil) {
         navigationView.navigationMapView.routeRestrictedAreaColor = UIColor(hex: restrictedRoadColor as String)
       }
     }
   }
   @objc var routeArrowColor: NSString = "#FFFFFF" {
     didSet {
-      if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil) {
+      if (embedded == true && navigationView != nil) {
         navigationView.navigationMapView.maneuverArrowColor = UIColor(hex: routeArrowColor as String)
       }
     }
   }
   @objc var routeArrowCasingColor: NSString = "#2D3F53" {
     didSet {
-      if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil) {
+      if (embedded == true && navigationView != nil) {
         navigationView.navigationMapView.maneuverArrowStrokeColor = UIColor(hex: routeArrowCasingColor as String)
       }
     }
@@ -172,7 +172,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var mute: Bool = false
   @objc var darkMode: Bool = false {
     didSet {
-      if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil) {
+      if (embedded == true && navigationView != nil) {
         if (darkMode) {
           navigationView.navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.dark)
         } else {
@@ -208,20 +208,20 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     var routeWaypoints: [Waypoint] = []
     var routeWaypointNames: [String] = []
 
-    if (origin != nil && origin.isEmpty == false) {
+    if (origin.isEmpty == false) {
       let originWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: origin[1] as! CLLocationDegrees, longitude: origin[0] as! CLLocationDegrees))
       routeWaypoints.append(originWaypoint)
     }
 
-    if (waypoints != nil && waypoints.isEmpty == false) {
+    if (waypoints.isEmpty == false) {
       for waypoint: [NSNumber] in waypoints {
-        if (waypoint != nil && waypoint.isEmpty == false) {
+        if (waypoint.isEmpty == false) {
           routeWaypoints.append(Waypoint(coordinate: CLLocationCoordinate2D(latitude: waypoint[1] as! CLLocationDegrees, longitude: waypoint[0] as! CLLocationDegrees)))
         }
       }
     }
 
-    if (destination != nil && destination.isEmpty == false) {
+    if (destination.isEmpty == false) {
       let destinationWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: destination[1] as! CLLocationDegrees, longitude: destination[0] as! CLLocationDegrees))
       routeWaypoints.append(destinationWaypoint)
     }
@@ -236,7 +236,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       fetchRoutes(routeWaypoints: routeWaypoints, routeWaypointNames: routeWaypointNames, onSuccess: {(routes: [Route]) -> Void in
         self.moveToOverview(padding: padding)
         self.previewRoutes(routes: routes)
-        self.onRouteChange?(["distance": routes.first?.distance, "expectedTravelTime": routes.first?.expectedTravelTime, "typicalTravelTime": routes.first?.typicalTravelTime])
+        self.onRouteChange?(["distance": routes.first?.distance ?? 0, "expectedTravelTime": routes.first?.expectedTravelTime ?? 0, "typicalTravelTime": routes.first?.typicalTravelTime ?? 0])
       })
     }
   }
@@ -282,7 +282,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     if (currentActiveRoutes != nil) {
       startActiveGuidance(updateCamera: false)
 
-      if (cameraType != nil && cameraType == "overview") {
+      if (cameraType == "overview") {
         moveToOverview(padding: padding)
       } else {
         follow(padding: padding)
@@ -293,20 +293,20 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       var routeWaypoints: [Waypoint] = []
       var routeWaypointNames: [String] = []
 
-      if (origin != nil && origin.isEmpty == false) {
+      if (origin.isEmpty == false) {
         let originWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: origin[1] as! CLLocationDegrees, longitude: origin[0] as! CLLocationDegrees))
         routeWaypoints.append(originWaypoint)
       }
 
-      if (waypoints != nil && waypoints.isEmpty == false) {
+      if (waypoints.isEmpty == false) {
         for waypoint: [NSNumber] in waypoints {
-          if (waypoint != nil && waypoint.isEmpty == false) {
+          if (waypoint.isEmpty == false) {
             routeWaypoints.append(Waypoint(coordinate: CLLocationCoordinate2D(latitude: waypoint[1] as! CLLocationDegrees, longitude: waypoint[0] as! CLLocationDegrees)))
           }
         }
       }
 
-      if (destination != nil && destination.isEmpty == false) {
+      if (destination.isEmpty == false) {
         let destinationWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: destination[1] as! CLLocationDegrees, longitude: destination[0] as! CLLocationDegrees))
         routeWaypoints.append(destinationWaypoint)
       }
@@ -319,7 +319,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
       fetchRoutes(routeWaypoints: routeWaypoints, routeWaypointNames: routeWaypointNames, onSuccess: {(routes: [Route]) -> Void in
           self.currentActiveRoutes = routes
-          self.onRouteChange?(["distance": routes.first?.distance, "expectedTravelTime": routes.first?.expectedTravelTime, "typicalTravelTime": routes.first?.typicalTravelTime])
+          self.onRouteChange?(["distance": routes.first?.distance ?? 0, "expectedTravelTime": routes.first?.expectedTravelTime ?? 0, "typicalTravelTime": routes.first?.typicalTravelTime ?? 0])
 
           self.startActiveGuidance(updateCamera: false)
           self.follow(padding: padding)
@@ -383,7 +383,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     // and route progress change, by calling `NavigationMapView.updateRouteLine(routeProgress:coordinate:shouldRedraw:)`
     // without redrawing the main route.
     navigationView.navigationMapView.updateRouteLine(routeProgress: routeProgress, coordinate: location.coordinate, shouldRedraw: routeProgress.legIndex != currentLegIndex)
-    currentLegIndex = routeProgress.legIndex ?? -1
+    currentLegIndex = routeProgress.legIndex
   }
   
   @objc func updateInstructionsBanner(notification: Notification) {
@@ -459,11 +459,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
         case .failure(let error):
           self?.sendErrorToReact(error: error.localizedDescription)
         case .success(let response):
-          guard let routes = response.routes, let route = response.routes?.first, let strongSelf = self else {
+          guard let routes = response.routes, let strongSelf = self else {
             return
           }
 
-          self?.currentRouteResponse = response
+          strongSelf.currentRouteResponse = response
 
           onSuccess(routes)
         }
@@ -481,12 +481,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
   func startActiveGuidance(updateCamera: Bool) {
     currentPreviewRoutes = nil
-    var routes = currentActiveRoutes
+    var response = currentRouteResponse
 
-    if (currentRouteResponse != nil && routes != nil) {
+    if (response != nil) {
       let locationManager = NavigationLocationManager()
       navigationService = MapboxNavigationService(
-        indexedRouteResponse: IndexedRouteResponse(routeResponse: currentRouteResponse, routeIndex: 0),
+        indexedRouteResponse: IndexedRouteResponse(routeResponse: response!, routeIndex: 0),
         credentials: NavigationSettings.shared.directions.credentials,
         locationSource: locationManager
       )
@@ -507,7 +507,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
         var layerExists = self.navigationView.navigationMapView.mapView.mapboxMap.style.layerExists(withId: "road-intersection")
 
-        if (layerExists != nil && layerExists == true) {
+        if (layerExists == true) {
           self.navigationView.navigationMapView.show([self.navigationService.route], layerPosition: .below("road-intersection"), legIndex: 0)
         } else {
           self.navigationView.navigationMapView.show([self.navigationService.route], legIndex: 0)
@@ -667,7 +667,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     navigationView.navigationMapView.mapView.ornaments.options.compass.visibility = .hidden
     navigationView.navigationMapView.mapView.ornaments.options.scaleBar.visibility = .hidden
-    navigationView.navigationMapView.mapView.gestures.options.pinchRotateEnabled = false
+    navigationView.navigationMapView.mapView.gestures.options.rotateEnabled = false
     navigationView.navigationMapView.mapView.gestures.options.pinchPanEnabled = false
     navigationView.navigationMapView.mapView.gestures.options.pitchEnabled = false
 
@@ -740,7 +740,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   func setLogoPadding() {
-    if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil && navigationView.navigationMapView.mapView != nil) {
+    if (embedded == true && embedding == false) {
       //navigationView.navigationMapView.mapView.ornaments.options.logo.visibility = logoVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
       navigationView.navigationMapView.mapView.ornaments.options.logo.margins = CGPoint(
         x: logoPadding.indices.contains(0) ? CGFloat(logoPadding[0].floatValue) : 8.0, 
@@ -749,7 +749,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   func setAttributionPadding() {
-    if (embedded == true && navigationView != nil && navigationView.navigationMapView != nil && navigationView.navigationMapView.mapView != nil) {
+    if (embedded == true  && embedding == false) {
       //navigationView.navigationMapView.mapView.ornaments.options.attributionButton.visibility = attributionVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
       navigationView.navigationMapView.mapView.ornaments.options.attributionButton.margins = CGPoint(
         x: attributionPadding.indices.contains(0) ? CGFloat(attributionPadding[0].floatValue) : 8.0, 
