@@ -490,7 +490,6 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
         credentials: NavigationSettings.shared.directions.credentials,
         locationSource: locationManager
       )
-      navigationService.delegate = self
 
       let credentials = navigationService.credentials
       voiceController = RouteVoiceController(
