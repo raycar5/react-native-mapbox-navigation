@@ -2,7 +2,7 @@ require "json"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
-rnMapboxNavigationTargetsToChangeToDynamic = ['MapboxMobileEvents', 'Turf', 'MapboxCoreMaps', 'MapboxCommon']
+rnMapboxNavigationTargetsToChangeToDynamic = ['MapboxMobileEvents', 'Turf', 'MapboxMaps', 'MapboxCoreMaps', 'MapboxCommon', 'MapboxNavigation', 'MapboxCoreNavigation', 'MapboxSpeech', 'Solar-dev']
 
 rnMapboxNavigationDefaultVersion = '~> 2.9.0'
 
@@ -63,7 +63,7 @@ Pod::Spec.new do |s|
   s.version      = package["version"]
   s.summary      = "React Native Component for Mapbox Navigation"
   s.homepage     = "https://github.com/Holler-Services/react-native-mapbox-navigation.git"
-  s.license    = { :type => "MIT", :file => "LICENSE" }
+  s.license      = { :type => "MIT", :file => "LICENSE" }
   s.authors      = { "Holler Taxi" => "support@hollertaxi.com.com" }
   s.platforms    = { :ios => "12.0" }
   s.source       = { :git => "https://github.com/Holler-Services/react-native-mapbox-navigation.git", :tag => "#{s.version}" }
