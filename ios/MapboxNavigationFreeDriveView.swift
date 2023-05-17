@@ -185,6 +185,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
   var navigationService: NavigationService!
   var navigationView: NavigationView!
+  var voiceController: RouteVoiceController!
   var pointAnnotationManager: PointAnnotationManager?
   var passiveLocationManager: PassiveLocationManager!
   var passiveLocationProvider: PassiveLocationProvider!
@@ -449,7 +450,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     return newPadding
   }
 
-  func fetchRoutes(routeWaypoints: [Waypoint], routeWaypointNames: [String], onSuccess: (_ routes: [Route]) -> Void) {
+  func fetchRoutes(routeWaypoints: [Waypoint], routeWaypointNames: [String], onSuccess: @escaping (_ routes: [Route]) -> Void) {
     let options = NavigationRouteOptions(waypoints: routeWaypoints, profileIdentifier: .automobileAvoidingTraffic)
     options.includesAlternativeRoutes = true
 
@@ -482,15 +483,21 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     currentPreviewRoutes = nil
     var routes = currentActiveRoutes
 
-    if (routes != nil) {
+    if (currentRouteResponse != nil && routes != nil) {
       let locationManager = NavigationLocationManager()
       navigationService = MapboxNavigationService(
-        indexedRouteResponse: IndexedRouteResponse(routeResponse: currentRouteResponse!, routeIndex: 0),
+        indexedRouteResponse: IndexedRouteResponse(routeResponse: currentRouteResponse, routeIndex: 0),
         credentials: NavigationSettings.shared.directions.credentials,
         locationSource: locationManager
       )
+      navigationService.delegate = self
 
-      removeSpeedLimitView()
+      let credentials = navigationService.credentials
+      voiceController = RouteVoiceController(
+        navigationService: navigationService,
+        accessToken: credentials.accessToken,
+        host: credentials.host.absoluteString
+      )
 
       navigationService.start()
 
@@ -631,6 +638,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationView = NavigationView(frame: bounds)
     navigationView.translatesAutoresizingMaskIntoConstraints = false
 
+    navigationView.navigationMapView.routeLineTracksTraversal = true
     navigationView.navigationMapView.showsCongestionForAlternativeRoutes = true
     navigationView.navigationMapView.showsRestrictedAreasOnRoute = true
     navigationView.navigationMapView.routeCasingColor = UIColor(hex: routeCasingColor as String)
