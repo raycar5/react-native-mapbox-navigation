@@ -2,7 +2,7 @@ require "json"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
-rnMapboxNavigationTargetsToChangeToDynamic = ['MapboxNavigation', 'MapboxCoreNavigation', 'MapboxSpeech', 'MapboxMobileEvents', 'Turf', 'MapboxMaps', 'MapboxCoreMaps', 'MapboxCommon']
+rnMapboxNavigationTargetsToChangeToDynamic = ['MapboxMobileEvents', 'Turf', 'MapboxCoreMaps', 'MapboxCommon']
 
 rnMapboxNavigationDefaultVersion = '~> 2.9.0'
 
