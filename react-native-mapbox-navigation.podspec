@@ -8,17 +8,19 @@ rnMapboxNavigationDefaultVersion = '~> 2.9.0'
 
 $RNMBNAVVersion = rnMapboxNavigationDefaultVersion unless $RNMBNAVVersion
 
-MapboxNavigationVersion = $RNMBNAVVersion || rnMapboxNavigationDefaultVersion
+MapboxNavVersion = $RNMBNAVVersion || rnMapboxNavigationDefaultVersion
 
 $RNMBNAV = Object.new
 
+$rnMapboxNavigationTargetsToChangeToDynamic = rnMapboxNavigationTargetsToChangeToDynamic
+
 def $RNMBNAV.post_install(installer)
   installer.pod_targets.each do |pod|
-    if rnMapboxNavigationTargetsToChangeToDynamic.include?(pod.name)
+    if $rnMapboxNavigationTargetsToChangeToDynamic.include?(pod.name)
       if pod.send(:build_type) != Pod::BuildType.dynamic_framework
         pod.instance_variable_set(:@build_type,Pod::BuildType.dynamic_framework)
-        puts "* Changed #{pod.name} to `#{pod.send(:build_type)}`"
-        fail "Unable to change build_type" unless mobile_events_target.send(:build_type) == Pod::BuildType.dynamic_framework
+        puts "* [RNMapboxNav] Changed #{pod.name} to `#{pod.send(:build_type)}`"
+        fail "* [RNMapboxNav] Unable to change build_type" unless mobile_events_target.send(:build_type) == Pod::BuildType.dynamic_framework
       end
     end
   end
@@ -26,10 +28,10 @@ end
 
 def $RNMBNAV.pre_install(installer)
   installer.aggregate_targets.each do |target|
-    target.pod_targets.select { |p| rnMapboxNavigationTargetsToChangeToDynamic.include?(p.name) }.each do |mobile_events_target|
+    target.pod_targets.select { |p| $rnMapboxNavigationTargetsToChangeToDynamic.include?(p.name) }.each do |mobile_events_target|
       mobile_events_target.instance_variable_set(:@build_type,Pod::BuildType.dynamic_framework)
-      puts "* Changed #{mobile_events_target.name} to #{mobile_events_target.send(:build_type)}"
-      fail "Unable to change build_type" unless mobile_events_target.send(:build_type) == Pod::BuildType.dynamic_framework
+      puts "* [RNMapboxNav] Changed #{mobile_events_target.name} to #{mobile_events_target.send(:build_type)}"
+      fail "* [RNMapboxNav] Unable to change build_type" unless mobile_events_target.send(:build_type) == Pod::BuildType.dynamic_framework
     end
   end
 end
@@ -71,7 +73,7 @@ Pod::Spec.new do |s|
 
   s.dependency "React-Core"
   s.dependency "React"
-  s.dependency "MapboxNavigation", MapboxNavigationVersion
+  s.dependency "MapboxNavigation", MapboxNavVersion
   s.dependency "Turf"
 end
 
