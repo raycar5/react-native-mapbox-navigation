@@ -188,7 +188,6 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   var pointAnnotationManager: PointAnnotationManager?
   var passiveLocationManager: PassiveLocationManager!
   var passiveLocationProvider: PassiveLocationProvider!
-  var instructionsCardCollection = InstructionsCardViewController!
   var speedLimitView: SpeedLimitView!
   var embedded: Bool
   var embedding: Bool
@@ -366,8 +365,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
         
     // Update the top banner with progress updates
-    instructionsCardCollection?.updateDistance(for: routeProgress.currentLegProgress.currentStepProgress)
-    instructionsCardCollection?.isHidden = false
+    //instructionsCardCollection?.updateDistance(for: routeProgress.currentLegProgress.currentStepProgress)
+    //instructionsCardCollection?.isHidden = false
         
     // Update `UserCourseView` to be placed on the most recent location.
     navigationView?.navigationMapView.moveUserLocation(to: location, animated: true)
@@ -386,7 +385,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       return
     }
         
-    instructionsCardCollection?.update(for: routeProgress.currentLegProgress.currentStepProgress.currentVisualInstruction)
+    //instructionsCardCollection?.update(for: routeProgress.currentLegProgress.currentStepProgress.currentVisualInstruction)
   }
   
   @objc func rerouted(_ notification: Notification) {
@@ -488,6 +487,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
       navigationService.start()
 
+      if let firstInstruction = navigationService.routeProgress.currentLegProgress.currentStepProgress.currentVisualInstruction {
+        navigationService(navigationService, didPassVisualInstructionPoint: firstInstruction, routeProgress: navigationService.routeProgress)
+      }
+
       navigationView?.navigationMapView.mapView.mapboxMap.onNext(event: .styleLoaded, handler: { [weak self] _ in
         guard let self = self else { return }
         
@@ -547,6 +550,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     navigationView?.navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
 
+    navigationView?.topBannerContainerView.hide(animated: true)
+
+    showSpeedLimit()
+
     NotificationCenter.default.removeObserver(self, name: .routeControllerProgressDidChange, object: nil)
     NotificationCenter.default.removeObserver(self, name: .routeControllerDidReroute, object: nil)
     NotificationCenter.default.removeObserver(self, name: .routeControllerDidRefreshRoute, object: nil)
@@ -561,8 +568,6 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     passiveLocationProvider.startUpdatingLocation()
     passiveLocationProvider.startUpdatingHeading()
-
-    showSpeedLimit()
   }
 
   func clearMap() {
@@ -669,13 +674,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     navigationView.navigationMapView.navigationCamera.follow()
 
-    passiveLocationManager = PassiveLocationManager()
-    passiveLocationProvider = PassiveLocationProvider(locationManager: passiveLocationManager)
-    let locationProvider: LocationProvider = passiveLocationProvider
-    navigationView.navigationMapView.mapView.location.overrideLocationProvider(with: locationProvider)
-    passiveLocationProvider.startUpdatingLocation()
-
     self.addSubview(navigationView)
+
+    navigationView.bottomBannerContainerView.isHidden = true
+    navigationView.topBannerContainerView.isHidden = true
+
+    navigationView.topBannerContainerView.show(animated: true)
 
     setLogoPadding()
     setAttributionPadding()
@@ -685,6 +689,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     } else if (speedLimitView != nil && showSpeedLimit == false) {
       removeSpeedLimitView()
     }
+
+    passiveLocationManager = PassiveLocationManager()
+    passiveLocationProvider = PassiveLocationProvider(locationManager: passiveLocationManager)
+    let locationProvider: LocationProvider = passiveLocationProvider
+    navigationView.navigationMapView.mapView.location.overrideLocationProvider(with: locationProvider)
+    passiveLocationProvider.startUpdatingLocation()
 
     NotificationCenter.default.addObserver(
       self,
