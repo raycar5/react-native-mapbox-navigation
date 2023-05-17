@@ -249,22 +249,28 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
   @objc func follow(padding: [NSNumber]) {
     if (embedded == true && embedding == false) {
-      navigationView.navigationMapView.navigationCamera.viewportDataSource.followingMobileCamera.padding = getPadding(padding)
-      navigationView.navigationMapView.navigationCamera.follow()
+      if let navigationViewportDataSource = navigationView.navigationMapView.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
+        navigationViewportDataSource.followingMobileCamera.padding = getPadding(padding)
+        navigationView.navigationMapView.navigationCamera.follow()
+      }
     }
   }
 
   @objc func moveToOverview(padding: [NSNumber]) {
     if (embedded == true && embedding == false) {
-      navigationView.navigationMapView.navigationCamera.viewportDataSource.overviewMobileCamera.padding = getPadding(padding)
-      navigationView.navigationMapView.navigationCamera.moveToOverview()
+      if let navigationViewportDataSource = navigationView.navigationMapView.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
+        navigationViewportDataSource.overviewMobileCamera.padding = getPadding(padding)
+        navigationView.navigationMapView.navigationCamera.moveToOverview()
+      }
     }
   }
 
   @objc func fitCamera(padding: [NSNumber]) {
     if (embedded == true && embedding == false) {
-      navigationView.navigationMapView.navigationCamera.viewportDataSource.overviewMobileCamera.padding = getPadding(padding)
-      navigationView.navigationMapView.navigationCamera.moveToOverview()
+      if let navigationViewportDataSource = navigationView.navigationMapView.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
+        navigationViewportDataSource.overviewMobileCamera.padding = getPadding(padding)
+        navigationView.navigationMapView.navigationCamera.moveToOverview()
+      }
     }
   }
 
