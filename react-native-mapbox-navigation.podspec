@@ -12,7 +12,7 @@ MapboxNavVersion = $RNMBNAVVersion || rnMapboxNavigationDefaultVersion
 
 $RNMBNAV = Object.new
 
-$rnMapboxNavigationTargetsToChangeToDynamic = rnMapboxNavigationTargetsToChangeToDynamic
+$rnMapboxNavigationTargetsToChangeToDynamic = rnMapboxNavigationTargetsToChangeToDynamic unless $rnMapboxNavigationTargetsToChangeToDynamic
 
 def $RNMBNAV.post_install(installer)
   installer.pod_targets.each do |pod|

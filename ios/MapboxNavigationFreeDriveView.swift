@@ -30,9 +30,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     didSet {
       if (embedded == true && oldValue != showSpeedLimit) {
         if (showSpeedLimit) {
-          addSpeedLimitView()
+          showSpeedLimitView()
         } else {
-          removeSpeedLimitView()
+          hideSpeedLimitView()
         }
       }
     }
@@ -41,9 +41,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     didSet {
       if (embedded == true && oldValue.count != speedLimitAnchor.count || oldValue != speedLimitAnchor) {
         if (showSpeedLimit) {
-          addSpeedLimitView()
+          showSpeedLimitView()
         } else {
-          removeSpeedLimitView()
+          hideSpeedLimitView()
         }
       }
     }
@@ -59,33 +59,33 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var routeColor: NSString = "#56A8FB"
   @objc var routeCasingColor: NSString = "#2F7AC6" {
     didSet {
-      if (embedded == true && navigationView != nil) {
-        navigationView.navigationMapView.routeCasingColor = UIColor(hex: routeCasingColor as String)
+      if (embedded == true) {
+        navigationMapView.routeCasingColor = UIColor(hex: routeCasingColor as String)
       }
     }
   }
   @objc var routeClosureColor: NSString = "#000000"
   @objc var alternateRouteColor: NSString = "#8694A5" {
     didSet {
-      if (embedded == true && navigationView != nil) {
-        navigationView.navigationMapView.routeAlternateColor = UIColor(hex: alternateRouteColor as String)
+      if (embedded == true) {
+        navigationMapView.routeAlternateColor = UIColor(hex: alternateRouteColor as String)
       }
     }
   }
   @objc var alternateRouteCasingColor: NSString = "#727E8D" {
     didSet {
-      if (embedded == true && navigationView != nil) {
-        navigationView.navigationMapView.routeAlternateCasingColor = UIColor(hex: alternateRouteCasingColor as String)
+      if (embedded == true) {
+        navigationMapView.routeAlternateCasingColor = UIColor(hex: alternateRouteCasingColor as String)
       }
     }
   }
   @objc var traversedRouteColor: NSString? {
     didSet {
-      if (embedded == true && navigationView != nil) {
+      if (embedded == true) {
         if (traversedRouteColor != nil) {
-          navigationView.navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor! as String)
+          navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor! as String)
         } else {
-          navigationView.navigationMapView.traversedRouteColor = UIColor.clear
+          navigationMapView.traversedRouteColor = UIColor.clear
         }
       }
     }
@@ -93,57 +93,57 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var traversedRouteCasingColor: NSString?
   @objc var trafficUnknownColor: NSString = "#56A8FB" {
     didSet {
-      if (embedded == true && navigationView != nil) {
-        navigationView.navigationMapView.trafficUnknownColor = UIColor(hex: trafficUnknownColor as String)
+      if (embedded == true) {
+        navigationMapView.trafficUnknownColor = UIColor(hex: trafficUnknownColor as String)
       }
     }
   }
   @objc var trafficLowColor: NSString = "#56A8FB" {
     didSet {
-      if (embedded == true && navigationView != nil) {
-        navigationView.navigationMapView.trafficLowColor = UIColor(hex: trafficLowColor as String)
+      if (embedded == true) {
+        navigationMapView.trafficLowColor = UIColor(hex: trafficLowColor as String)
       }
     }
   }
   @objc var trafficModerateColor: NSString = "#ff9500" {
     didSet {
-      if (embedded == true && navigationView != nil) {
-        navigationView.navigationMapView.trafficModerateColor = UIColor(hex: trafficModerateColor as String)
+      if (embedded == true) {
+        navigationMapView.trafficModerateColor = UIColor(hex: trafficModerateColor as String)
       }
     }
   }
   @objc var trafficHeavyColor: NSString = "#ff4d4d" {
     didSet {
-      if (embedded == true && navigationView != nil) {
-        navigationView.navigationMapView.trafficHeavyColor = UIColor(hex: trafficHeavyColor as String)
+      if (embedded == true) {
+        navigationMapView.trafficHeavyColor = UIColor(hex: trafficHeavyColor as String)
       }
     }
   }
   @objc var trafficSevereColor: NSString = "#8f2447" {
     didSet {
-      if (embedded == true && navigationView != nil) {
-        navigationView.navigationMapView.trafficSevereColor = UIColor(hex: trafficSevereColor as String)
+      if (embedded == true) {
+        navigationMapView.trafficSevereColor = UIColor(hex: trafficSevereColor as String)
       }
     }
   }
   @objc var restrictedRoadColor: NSString = "#000000" {
     didSet {
-      if (embedded == true && navigationView != nil) {
-        navigationView.navigationMapView.routeRestrictedAreaColor = UIColor(hex: restrictedRoadColor as String)
+      if (embedded == true) {
+        navigationMapView.routeRestrictedAreaColor = UIColor(hex: restrictedRoadColor as String)
       }
     }
   }
   @objc var routeArrowColor: NSString = "#FFFFFF" {
     didSet {
-      if (embedded == true && navigationView != nil) {
-        navigationView.navigationMapView.maneuverArrowColor = UIColor(hex: routeArrowColor as String)
+      if (embedded == true) {
+        navigationMapView.maneuverArrowColor = UIColor(hex: routeArrowColor as String)
       }
     }
   }
   @objc var routeArrowCasingColor: NSString = "#2D3F53" {
     didSet {
-      if (embedded == true && navigationView != nil) {
-        navigationView.navigationMapView.maneuverArrowStrokeColor = UIColor(hex: routeArrowCasingColor as String)
+      if (embedded == true) {
+        navigationMapView.maneuverArrowStrokeColor = UIColor(hex: routeArrowCasingColor as String)
       }
     }
   }
@@ -172,11 +172,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var mute: Bool = false
   @objc var darkMode: Bool = false {
     didSet {
-      if (embedded == true && navigationView != nil) {
+      if (embedded == true) {
         if (darkMode) {
-          //navigationView.navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.dark)
+          navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.dark)
         } else {
-          //navigationView.navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
+          navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
         }
       }
     }
@@ -184,7 +184,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var debug: Bool = false
 
   var navigationService: NavigationService!
-  var navigationView: NavigationView!
+  var navigationMapView: NavigationMapView!
+  var speedLimitView: SpeedLimitView!
+  var instructionsCardContainerView: InstructionsCardContainerView!
   var voiceController: RouteVoiceController!
   var pointAnnotationManager: PointAnnotationManager?
   var passiveLocationManager: PassiveLocationManager!
@@ -242,34 +244,34 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   @objc func clearRoute() {
-    if (embedded == true && embedding == false) {
+    if (embedded == true) {
       clearRouteAndStopActiveGuidance()
     }
   }
 
   @objc func follow(padding: [NSNumber]) {
-    if (embedded == true && embedding == false) {
-      if let navigationViewportDataSource = navigationView.navigationMapView.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
+    if (embedded == true) {
+      if let navigationViewportDataSource = navigationMapView.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
         navigationViewportDataSource.followingMobileCamera.padding = getPadding(padding)
-        navigationView.navigationMapView.navigationCamera.follow()
+        navigationMapView.navigationCamera.follow()
       }
     }
   }
 
   @objc func moveToOverview(padding: [NSNumber]) {
-    if (embedded == true && embedding == false) {
-      if let navigationViewportDataSource = navigationView.navigationMapView.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
+    if (embedded == true) {
+      if let navigationViewportDataSource = navigationMapView.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
         navigationViewportDataSource.overviewMobileCamera.padding = getPadding(padding)
-        navigationView.navigationMapView.navigationCamera.moveToOverview()
+        navigationMapView.navigationCamera.moveToOverview()
       }
     }
   }
 
   @objc func fitCamera(padding: [NSNumber]) {
-    if (embedded == true && embedding == false) {
-      if let navigationViewportDataSource = navigationView.navigationMapView.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
+    if (embedded == true) {
+      if let navigationViewportDataSource = navigationMapView.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
         navigationViewportDataSource.overviewMobileCamera.padding = getPadding(padding)
-        navigationView.navigationMapView.navigationCamera.moveToOverview()
+        navigationMapView.navigationCamera.moveToOverview()
       }
     }
   }
@@ -328,16 +330,16 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   @objc func pauseNavigation() {
-    if (embedded == true && embedding == false) {
+    if (embedded == true) {
       clearActiveGuidance()
       clearMap()
 
-      navigationView.navigationMapView.navigationCamera.follow()
+      navigationMapView.navigationCamera.follow()
     }
   }
 
   @objc func stopNavigation() {
-    if (embedded == true && embedding == false) {
+    if (embedded == true) {
       clearRouteAndStopActiveGuidance()
     }
   }
@@ -348,9 +350,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       let roadName = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.roadNameKey] as? String
     else { return }
     
-    navigationView.speedLimitView.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
-    navigationView.speedLimitView.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
-    navigationView.speedLimitView.currentSpeed = location.speed
+    speedLimitView.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
+    speedLimitView.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
+    speedLimitView.currentSpeed = location.speed
 
     onLocationChange?(["longitude": location.coordinate.longitude, "latitude": location.coordinate.latitude, "roadName": roadName])
   }
@@ -361,28 +363,34 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       let location = notification.userInfo?[RouteController.NotificationUserInfoKey.locationKey] as? CLLocation
     else { return }
 
+    speedLimitView.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
+    speedLimitView.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
+    speedLimitView.currentSpeed = location.speed
+
     // Add maneuver arrow
     if (routeProgress.currentLegProgress.followOnStep != nil) {
-      navigationView.navigationMapView.addArrow(route: routeProgress.route, legIndex: routeProgress.legIndex, stepIndex: routeProgress.currentLegProgress.stepIndex + 1)
+      navigationMapView.addArrow(route: routeProgress.route, legIndex: routeProgress.legIndex, stepIndex: routeProgress.currentLegProgress.stepIndex + 1)
     } else {
-      navigationView.navigationMapView.removeArrow()
+      navigationMapView.removeArrow()
     }
         
     if (routeProgress.legIndex != currentLegIndex) {
-      navigationView.navigationMapView.showWaypoints(on: routeProgress.route, legIndex: routeProgress.legIndex)
+      navigationMapView.showWaypoints(on: routeProgress.route, legIndex: routeProgress.legIndex)
     }
         
     // Update the top banner with progress updates
-    //instructionsCardCollection?.updateDistance(for: routeProgress.currentLegProgress.currentStepProgress)
-    //instructionsCardCollection?.isHidden = false
+    let distance = routeProgress.currentLegProgress.currentStepProgress?.distanceRemainin
+    let normalizedDistance = max(distance, 0)
+    instructionsCardContainerView.updateInstructionCard(distance: normalizedDistance, isCurrentCardStep: true)
+    instructionsCardContainerView.isHidden = false
         
     // Update `UserCourseView` to be placed on the most recent location.
-    navigationView.navigationMapView.moveUserLocation(to: location, animated: true)
+    navigationMapView.moveUserLocation(to: location, animated: true)
         
     // Update the main route line during active navigation when `NavigationMapView.routeLineTracksTraversal` set to `true`
     // and route progress change, by calling `NavigationMapView.updateRouteLine(routeProgress:coordinate:shouldRedraw:)`
     // without redrawing the main route.
-    navigationView.navigationMapView.updateRouteLine(routeProgress: routeProgress, coordinate: location.coordinate, shouldRedraw: routeProgress.legIndex != currentLegIndex)
+    navigationMapView.updateRouteLine(routeProgress: routeProgress, coordinate: location.coordinate, shouldRedraw: routeProgress.legIndex != currentLegIndex)
     currentLegIndex = routeProgress.legIndex
   }
   
@@ -393,16 +401,17 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       return
     }
         
-    //instructionsCardCollection?.update(for: routeProgress.currentLegProgress.currentStepProgress.currentVisualInstruction)
+    instructionsCardContainerView.updateInstruction(for: routeProgress.currentLegProgress.currentStepProgress.currentVisualInstruction)
+    instructionsCardContainerView.isHidden = false
   }
   
   @objc func rerouted(_ notification: Notification) {
-    navigationView.navigationMapView.removeWaypoints()
+    navigationMapView.removeWaypoints()
         
     // Update the main route line during active navigation when `NavigationMapView.routeLineTracksTraversal` set to `true`
     // and rerouting happens, by calling `NavigationMapView.updateRouteLine(routeProgress:coordinate:shouldRedraw:)`
     // with `shouldRedraw` as `true`.
-    navigationView.navigationMapView.updateRouteLine(
+    navigationMapView.updateRouteLine(
       routeProgress: navigationService.routeProgress,
       coordinate: navigationService.router.location?.coordinate,
       shouldRedraw: true
@@ -413,7 +422,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     // Update the main route line during active navigation when `NavigationMapView.routeLineTracksTraversal` set to `true`
     // and route refresh happens, by calling `NavigationMapView.updateRouteLine(routeProgress:coordinate:shouldRedraw:)`
     // with `shouldRedraw` as `true`.
-    navigationView.navigationMapView.updateRouteLine(
+    navigationMapView.updateRouteLine(
       routeProgress: navigationService.routeProgress,
       coordinate: navigationService.router.location?.coordinate,
       shouldRedraw: true
@@ -423,7 +432,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc func navigationCameraStateDidChange(_ notification: Notification) {
     let navigationCameraState = notification.userInfo?[NavigationCamera.NotificationUserInfoKey.state] as? NavigationCameraState
     
-    var stateStr = "idle"
+    var stateStr: String = "idle"
 
     if (navigationCameraState != nil) {
       if (navigationCameraState == NavigationCameraState.transitionToFollowing) {
@@ -475,8 +484,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     currentPreviewRoutes = routes
 
-    navigationView.navigationMapView.showcase(routes)
-    //navigationView.navigationMapView.showRouteDurations(along: routes)
+    navigationMapView.showcase(routes)
+    //navigationMapView.showRouteDurations(along: routes)
   }
 
   func startActiveGuidance(updateCamera: Bool) {
@@ -500,22 +509,22 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
       navigationService.start()
 
-      navigationView.navigationMapView.mapView.mapboxMap.onNext(event: .styleLoaded, handler: { [weak self] _ in
+      navigationMapView.mapView.mapboxMap.onNext(event: .styleLoaded, handler: { [weak self] _ in
         guard let self = self else { return }
         
-        self.navigationView.navigationMapView.routeLineTracksTraversal = true
+        self.navigationMapView.routeLineTracksTraversal = true
 
-        var layerExists = self.navigationView.navigationMapView.mapView.mapboxMap.style.layerExists(withId: "road-intersection")
+        var layerExists = self.navigationMapView.mapView.mapboxMap.style.layerExists(withId: "road-intersection")
 
         if (layerExists == true) {
-          self.navigationView.navigationMapView.show([self.navigationService.route], layerPosition: .below("road-intersection"), legIndex: 0)
+          self.navigationMapView.show([self.navigationService.route], layerPosition: .below("road-intersection"), legIndex: 0)
         } else {
-          self.navigationView.navigationMapView.show([self.navigationService.route], legIndex: 0)
+          self.navigationMapView.show([self.navigationService.route], legIndex: 0)
         }
       })
 
-      let navigationViewportDataSource = NavigationViewportDataSource(navigationView.navigationMapView.mapView, viewportDataSourceType: .active)
-      navigationView.navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
+      let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .active)
+      navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
 
       NotificationCenter.default.addObserver(self, selector: #selector(progressDidChange(_ :)), name: .routeControllerProgressDidChange, object: nil)
       NotificationCenter.default.addObserver(self, selector: #selector(rerouted(_:)), name: .routeControllerDidReroute, object: nil)
@@ -526,13 +535,13 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       passiveLocationProvider.stopUpdatingLocation()
       passiveLocationProvider.stopUpdatingHeading()
 
-      navigationView.navigationMapView.mapView.mapboxMap.onNext(event: .styleLoaded) { [weak self] _ in
+      navigationMapView.mapView.mapboxMap.onNext(event: .styleLoaded) { [weak self] _ in
         guard let self = self else { return }
-        self.pointAnnotationManager = self.navigationView.navigationMapView.mapView.annotations.makePointAnnotationManager()
+        self.pointAnnotationManager = self.navigationMapView.mapView.annotations.makePointAnnotationManager()
       }
 
       if (updateCamera) {
-        navigationView.navigationMapView.navigationCamera.follow()
+        navigationMapView.navigationCamera.follow()
       }
     }
   }
@@ -557,13 +566,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     navigationService = nil
 
-    let navigationViewportDataSource = NavigationViewportDataSource(navigationView.navigationMapView.mapView, viewportDataSourceType: .passive)
+    let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .passive)
 
-    navigationView.navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
+    navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
 
-    navigationView.topBannerContainerView.hide(animated: true)
-    navigationView.speedLimitView.shouldShowUnknownSpeedLimit = true
-    navigationView.speedLimitView.translatesAutoresizingMaskIntoConstraints = false
+    instructionsCardContainerView.isHidden = true
 
     NotificationCenter.default.removeObserver(self, name: .routeControllerProgressDidChange, object: nil)
     NotificationCenter.default.removeObserver(self, name: .routeControllerDidReroute, object: nil)
@@ -582,10 +589,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   func clearMap() {
-    navigationView.navigationMapView.unhighlightBuildings()
-    navigationView.navigationMapView.removeRoutes()
-    navigationView.navigationMapView.removeRouteDurations()
-    navigationView.navigationMapView.removeWaypoints()
+    navigationMapView.unhighlightBuildings()
+    navigationMapView.removeRoutes()
+    navigationMapView.removeRouteDurations()
+    navigationMapView.removeWaypoints()
   }
 
   func sendErrorToReact(error: String) {
@@ -605,10 +612,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   override func layoutSubviews() {
     super.layoutSubviews()
     
-    if (navigationView == nil && !embedding && !embedded) {
+    if (navigationMapView == nil && !embedding && !embedded) {
       embed()
     } else {
-      navigationView.frame = bounds
+      navigationMapView.frame = bounds
     }
   }
   
@@ -616,15 +623,15 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     super.removeFromSuperview()
     // cleanup and teardown any existing resources
     NotificationCenter.default.removeObserver(self, name: .passiveLocationManagerDidUpdate, object: nil)
-    NotificationCenter.default.removeObserver(self, name: .navigationCameraStateDidChange, object: navigationView.navigationMapView.navigationCamera)
+    NotificationCenter.default.removeObserver(self, name: .navigationCameraStateDidChange, object: navigationMapView.navigationCamera)
     NotificationCenter.default.removeObserver(self, name: .routeControllerProgressDidChange, object: nil)
     NotificationCenter.default.removeObserver(self, name: .routeControllerDidReroute, object: nil)
     NotificationCenter.default.removeObserver(self, name: .routeControllerDidRefreshRoute, object: nil)
     NotificationCenter.default.removeObserver(self, name: .routeControllerDidPassVisualInstructionPoint, object: nil)
     passiveLocationProvider.stopUpdatingLocation()
     passiveLocationProvider.stopUpdatingHeading()
-    navigationView.removeFromSuperview()
-    removeSpeedLimitView()
+    navigationMapView.removeFromSuperview()
+    speedLimitView.removeFromSuperview()
   }
 
   private func embed() {
@@ -634,68 +641,79 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     embedding = true
 
-    navigationView = NavigationView(frame: bounds)
-    //navigationView.translatesAutoresizingMaskIntoConstraints = false
+    navigationMapView = NavigationMapView(frame: bounds)
+    navigationMapView.translatesAutoresizingMaskIntoConstraints = false
 
-    navigationView.navigationMapView.routeLineTracksTraversal = true
-    navigationView.navigationMapView.showsCongestionForAlternativeRoutes = true
-    navigationView.navigationMapView.showsRestrictedAreasOnRoute = true
-    navigationView.navigationMapView.routeCasingColor = UIColor(hex: routeCasingColor as String)
-    navigationView.navigationMapView.routeAlternateColor = UIColor(hex: alternateRouteColor as String)
-    navigationView.navigationMapView.routeAlternateCasingColor = UIColor(hex: alternateRouteCasingColor as String)
+    navigationMapView.routeLineTracksTraversal = true
+    navigationMapView.showsCongestionForAlternativeRoutes = true
+    navigationMapView.showsRestrictedAreasOnRoute = true
+    navigationMapView.routeCasingColor = UIColor(hex: routeCasingColor as String)
+    navigationMapView.routeAlternateColor = UIColor(hex: alternateRouteColor as String)
+    navigationMapView.routeAlternateCasingColor = UIColor(hex: alternateRouteCasingColor as String)
 
     if (traversedRouteColor != nil) {
-      navigationView.navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor! as String)
+      navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor! as String)
     } else {
-      navigationView.navigationMapView.traversedRouteColor = UIColor.clear
+      navigationMapView.traversedRouteColor = UIColor.clear
     }
 
-    navigationView.navigationMapView.trafficUnknownColor = UIColor(hex: trafficUnknownColor as String)
-    navigationView.navigationMapView.trafficLowColor = UIColor(hex: trafficLowColor as String)
-    navigationView.navigationMapView.trafficModerateColor = UIColor(hex: trafficModerateColor as String)
-    navigationView.navigationMapView.trafficHeavyColor = UIColor(hex: trafficHeavyColor as String)
-    navigationView.navigationMapView.trafficSevereColor = UIColor(hex: trafficSevereColor as String)
-    navigationView.navigationMapView.routeRestrictedAreaColor = UIColor(hex: restrictedRoadColor as String)
-    navigationView.navigationMapView.maneuverArrowColor = UIColor(hex: routeArrowColor as String)
-    navigationView.navigationMapView.maneuverArrowStrokeColor = UIColor(hex: routeArrowCasingColor as String)
+    navigationMapView.trafficUnknownColor = UIColor(hex: trafficUnknownColor as String)
+    navigationMapView.trafficLowColor = UIColor(hex: trafficLowColor as String)
+    navigationMapView.trafficModerateColor = UIColor(hex: trafficModerateColor as String)
+    navigationMapView.trafficHeavyColor = UIColor(hex: trafficHeavyColor as String)
+    navigationMapView.trafficSevereColor = UIColor(hex: trafficSevereColor as String)
+    navigationMapView.routeRestrictedAreaColor = UIColor(hex: restrictedRoadColor as String)
+    navigationMapView.maneuverArrowColor = UIColor(hex: routeArrowColor as String)
+    navigationMapView.maneuverArrowStrokeColor = UIColor(hex: routeArrowCasingColor as String)
 
     if (darkMode) {
-      //navigationView.navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.dark)
+      navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.dark)
     } else {
-      //navigationView.navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
+      navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
     }
 
-    navigationView.navigationMapView.mapView.ornaments.options.compass.visibility = .hidden
-    navigationView.navigationMapView.mapView.ornaments.options.scaleBar.visibility = .hidden
-    navigationView.navigationMapView.mapView.gestures.options.rotateEnabled = false
-    navigationView.navigationMapView.mapView.gestures.options.pinchPanEnabled = false
-    navigationView.navigationMapView.mapView.gestures.options.pitchEnabled = false
+    navigationMapView.mapView.ornaments.options.compass.visibility = .hidden
+    navigationMapView.mapView.ornaments.options.scaleBar.visibility = .hidden
+    navigationMapView.mapView.gestures.options.rotateEnabled = false
+    navigationMapView.mapView.gestures.options.pinchPanEnabled = false
+    navigationMapView.mapView.gestures.options.pitchEnabled = false
 
     var puck2DConfiguration = Puck2DConfiguration()
     if (userPuckImage != nil) {
       puck2DConfiguration.topImage = userPuckImage
       puck2DConfiguration.scale = .constant(Double(exactly: userPuckScale)!)
     }
-    navigationView.navigationMapView.userLocationStyle = UserLocationStyle.puck2D(configuration: puck2DConfiguration)
+    navigationMapView.userLocationStyle = UserLocationStyle.puck2D(configuration: puck2DConfiguration)
 
-    let navigationViewportDataSource = NavigationViewportDataSource(navigationView.navigationMapView.mapView!, viewportDataSourceType: .raw)
+    let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .raw)
     navigationViewportDataSource.followingMobileCamera.padding = getPadding([])
     navigationViewportDataSource.overviewMobileCamera.padding = getPadding([])
 
-    navigationView.navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
+    navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
 
-    navigationView.navigationMapView.navigationCamera.follow()
+    navigationMapView.navigationCamera.follow()
 
-    self.addSubview(navigationView)
+    self.addSubview(navigationMapView)
 
-    navigationView.bottomBannerContainerView.hide(animated: false)
-    navigationView.topBannerContainerView.show(animated: true)
+    speedLimitView = SpeedLimitView(frame: bounds)
+
+    speedLimitView.shouldShowUnknownSpeedLimit = true
+    speedLimitView.translatesAutoresizingMaskIntoConstraints = false
 
     if (showSpeedLimit == true) {
-      addSpeedLimitView()
+      showSpeedLimitView()
     } else {
-      removeSpeedLimitView()
+      hideSpeedLimitView()
     }
+
+    self.addSubview(speedLimitView)
+
+    instructionsCardContainerView = InstructionsCardContainerView(frame: bounds)
+    
+    instructionsCardContainerView.translatesAutoresizingMaskIntoConstraints = false
+    instructionsCardContainerView.isHidden = false
+
+    self.addSubview(instructionsCardContainerView)
 
     setLogoPadding()
     setAttributionPadding()
@@ -704,8 +722,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     passiveLocationProvider = PassiveLocationProvider(locationManager: passiveLocationManager)
     let locationProvider: LocationProvider = passiveLocationProvider
 
-    navigationView.navigationMapView.mapView.location.overrideLocationProvider(with: locationProvider)
-
+    navigationMapView.mapView.location.overrideLocationProvider(with: locationProvider)
+    
     passiveLocationProvider.startUpdatingLocation()
 
     NotificationCenter.default.addObserver(
@@ -719,32 +737,30 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       self,
       selector: #selector(navigationCameraStateDidChange),
       name: .navigationCameraStateDidChange,
-      object: navigationView.navigationMapView.navigationCamera
+      object: navigationMapView.navigationCamera
     )
 
     embedding = false
     embedded = true
   }
 
-  func addSpeedLimitView() {
-    if (navigationView != nil) {
-      navigationView.speedLimitView.isAlwaysHidden = false
+  func showSpeedLimitView() {
+    speedLimitView.isAlwaysHidden = false
       
-      navigationView.speedLimitView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
-      navigationView.speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
-      navigationView.speedLimitView.heightAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(3) ? CGFloat(speedLimitAnchor[3].floatValue) : 50).isActive = true
-      navigationView.speedLimitView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: speedLimitAnchor.indices.contains(1) ? CGFloat(speedLimitAnchor[1].floatValue) : 10).isActive = true
-    }
+    speedLimitView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
+    speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
+    speedLimitView.heightAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(3) ? CGFloat(speedLimitAnchor[3].floatValue) : 50).isActive = true
+    speedLimitView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: speedLimitAnchor.indices.contains(1) ? CGFloat(speedLimitAnchor[1].floatValue) : 10).isActive = true
   }
 
-  func removeSpeedLimitView() {
-    navigationView.speedLimitView.isAlwaysHidden = true
+  func hideSpeedLimitView() {
+    speedLimitView.isAlwaysHidden = true
   }
 
   func setLogoPadding() {
     if (embedded == true && embedding == false) {
-      //navigationView.navigationMapView.mapView.ornaments.options.logo.visibility = logoVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
-      navigationView.navigationMapView.mapView.ornaments.options.logo.margins = CGPoint(
+      //navigationMapView.mapView.ornaments.options.logo.visibility = logoVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
+      navigationMapView.mapView.ornaments.options.logo.margins = CGPoint(
         x: logoPadding.indices.contains(0) ? CGFloat(logoPadding[0].floatValue) : 8.0, 
         y: logoPadding.indices.contains(1) ? CGFloat(logoPadding[1].floatValue) : 8.0)
     }
@@ -752,8 +768,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
   func setAttributionPadding() {
     if (embedded == true  && embedding == false) {
-      //navigationView.navigationMapView.mapView.ornaments.options.attributionButton.visibility = attributionVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
-      navigationView.navigationMapView.mapView.ornaments.options.attributionButton.margins = CGPoint(
+      //navigationMapView.mapView.ornaments.options.attributionButton.visibility = attributionVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
+      navigationMapView.mapView.ornaments.options.attributionButton.margins = CGPoint(
         x: attributionPadding.indices.contains(0) ? CGFloat(attributionPadding[0].floatValue) : 8.0, 
         y: attributionPadding.indices.contains(1) ? CGFloat(attributionPadding[1].floatValue) : 8.0)
     }
@@ -893,8 +909,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
 extension UIColor {
   convenience init(hex: String) {
-    let hexString = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-    var int = UInt64()
+    let hexString: String = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+    var int: UInt64 = UInt64()
     Scanner(string: hexString).scanHexInt64(&int)
     let a, r, g, b: UInt64
     switch hexString.count {
