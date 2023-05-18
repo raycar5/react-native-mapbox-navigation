@@ -379,7 +379,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
         
     // Update the top banner with progress updates
-    let distance = routeProgress.currentLegProgress.currentStepProgress?.distanceRemainin
+    let distance = routeProgress.currentLegProgress.currentStepProgress.distanceRemaining
     let normalizedDistance = max(distance, 0)
     instructionsCardContainerView.updateInstructionCard(distance: normalizedDistance, isCurrentCardStep: true)
     instructionsCardContainerView.isHidden = false
@@ -401,8 +401,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       return
     }
         
-    instructionsCardContainerView.updateInstruction(for: routeProgress.currentLegProgress.currentStepProgress.currentVisualInstruction)
-    instructionsCardContainerView.isHidden = false
+    if let visualInstruction = routeProgress.currentLegProgress.currentStepProgress.currentVisualInstruction {
+      instructionsCardContainerView.updateInstruction(visualInstruction)
+      instructionsCardContainerView.isHidden = false
+    }
   }
   
   @objc func rerouted(_ notification: Notification) {
@@ -695,7 +697,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     self.addSubview(navigationMapView)
 
-    speedLimitView = SpeedLimitView(frame: bounds)
+    speedLimitView = SpeedLimitView()
 
     speedLimitView.shouldShowUnknownSpeedLimit = true
     speedLimitView.translatesAutoresizingMaskIntoConstraints = false
@@ -708,7 +710,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     self.addSubview(speedLimitView)
 
-    instructionsCardContainerView = InstructionsCardContainerView(frame: bounds)
+    instructionsCardContainerView = InstructionsCardContainerView()
     
     instructionsCardContainerView.translatesAutoresizingMaskIntoConstraints = false
     instructionsCardContainerView.isHidden = false
