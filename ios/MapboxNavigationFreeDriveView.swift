@@ -28,7 +28,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var onRouteChange: RCTDirectEventBlock?
   @objc var showSpeedLimit: Bool = true {
     didSet {
-      if (oldValue != showSpeedLimit) {
+      if (embedded == true && oldValue != showSpeedLimit) {
         if (showSpeedLimit) {
           addSpeedLimitView()
         } else {
@@ -39,7 +39,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
   @objc var speedLimitAnchor: [NSNumber] = [] {
     didSet {
-      if (oldValue.count != speedLimitAnchor.count || oldValue != speedLimitAnchor) {
+      if (embedded == true && oldValue.count != speedLimitAnchor.count || oldValue != speedLimitAnchor) {
         if (showSpeedLimit) {
           addSpeedLimitView()
         } else {
@@ -156,7 +156,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var logoVisible: Bool = true
   @objc var logoPadding: [NSNumber] = [] {
     didSet {
-      if (oldValue.count != logoPadding.count || oldValue != logoPadding) {
+      if (embedded == true && oldValue.count != logoPadding.count || oldValue != logoPadding) {
         setLogoPadding()
       }
     }
@@ -164,7 +164,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   @objc var attributionVisible: Bool = true
   @objc var attributionPadding: [NSNumber] = [] {
     didSet {
-      if (oldValue.count != attributionPadding.count || oldValue != attributionPadding) {
+      if (embedded == true && oldValue.count != attributionPadding.count || oldValue != attributionPadding) {
         setAttributionPadding()
       }
     }
@@ -174,9 +174,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     didSet {
       if (embedded == true && navigationView != nil) {
         if (darkMode) {
-          navigationView.navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.dark)
+          //navigationView.navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.dark)
         } else {
-          navigationView.navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
+          //navigationView.navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
         }
       }
     }
@@ -635,7 +635,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     embedding = true
 
     navigationView = NavigationView(frame: bounds)
-    navigationView.translatesAutoresizingMaskIntoConstraints = false
+    //navigationView.translatesAutoresizingMaskIntoConstraints = false
 
     navigationView.navigationMapView.routeLineTracksTraversal = true
     navigationView.navigationMapView.showsCongestionForAlternativeRoutes = true
@@ -660,9 +660,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     navigationView.navigationMapView.maneuverArrowStrokeColor = UIColor(hex: routeArrowCasingColor as String)
 
     if (darkMode) {
-      navigationView.navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.dark)
+      //navigationView.navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.dark)
     } else {
-      navigationView.navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
+      //navigationView.navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
     }
 
     navigationView.navigationMapView.mapView.ornaments.options.compass.visibility = .hidden
@@ -703,7 +703,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     passiveLocationManager = PassiveLocationManager()
     passiveLocationProvider = PassiveLocationProvider(locationManager: passiveLocationManager)
     let locationProvider: LocationProvider = passiveLocationProvider
+
     navigationView.navigationMapView.mapView.location.overrideLocationProvider(with: locationProvider)
+
     passiveLocationProvider.startUpdatingLocation()
 
     NotificationCenter.default.addObserver(
