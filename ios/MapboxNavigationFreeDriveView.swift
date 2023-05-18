@@ -750,14 +750,14 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     speedLimitView.isAlwaysHidden = false
     
     if (instructionsCardContainerView.isHidden) {
-      speedLimitView.topAnchor.constraint(equalTo: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
+      speedLimitView.topAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
     } else {
       speedLimitView.topAnchor.constraint(equalTo: instructionsCardContainerView.bottomAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
     }
 
     speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
     speedLimitView.heightAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(3) ? CGFloat(speedLimitAnchor[3].floatValue) : 50).isActive = true
-    speedLimitView.leadingAnchor.constraint(equalTo: speedLimitAnchor.indices.contains(1) ? CGFloat(speedLimitAnchor[1].floatValue) : 10).isActive = true
+    speedLimitView.leadingAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(1) ? CGFloat(speedLimitAnchor[1].floatValue) : 10).isActive = true
   }
 
   func hideSpeedLimitView() {
