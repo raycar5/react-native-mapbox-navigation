@@ -646,7 +646,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     navigationMapView = NavigationMapView(frame: bounds)
     navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     navigationMapView.delegate = self
-    navigationMapView.translatesAutoresizingMaskIntoConstraints = false
+    //navigationMapView.translatesAutoresizingMaskIntoConstraints = false
 
     //navigationMapView.routeLineTracksTraversal = true
     //navigationMapView.showsCongestionForAlternativeRoutes = true
@@ -699,18 +699,18 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
     addSubview(navigationMapView)
 
-    //speedLimitView = SpeedLimitView()
+    speedLimitView = SpeedLimitView()
 
-    //speedLimitView.shouldShowUnknownSpeedLimit = true
+    speedLimitView.shouldShowUnknownSpeedLimit = true
     //speedLimitView.translatesAutoresizingMaskIntoConstraints = false
 
-    //if (showSpeedLimit == true) {
-      //showSpeedLimitView()
-    //} else {
-      //hideSpeedLimitView()
-    //}
+    addSubview(speedLimitView)
 
-    //addSubview(speedLimitView)
+    if (showSpeedLimit == true) {
+      showSpeedLimitView()
+    } else {
+      hideSpeedLimitView()
+    }
 
     //instructionsCardContainerView = InstructionsCardContainerView()
     
