@@ -740,20 +740,20 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     setLogoPadding()
     setAttributionPadding()
 
-    passiveLocationManager = PassiveLocationManager()
-    passiveLocationProvider = PassiveLocationProvider(locationManager: passiveLocationManager)
-    let locationProvider: LocationProvider = passiveLocationProvider
+    //passiveLocationManager = PassiveLocationManager()
+    //passiveLocationProvider = PassiveLocationProvider(locationManager: passiveLocationManager)
+    //let locationProvider: LocationProvider = passiveLocationProvider
 
-    navigationMapView.mapView.location.overrideLocationProvider(with: locationProvider)
+    //navigationMapView.mapView.location.overrideLocationProvider(with: locationProvider)
     
-    passiveLocationProvider.startUpdatingLocation()
+    //passiveLocationProvider.startUpdatingLocation()
 
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(didUpdatePassiveLocation),
-      name: .passiveLocationManagerDidUpdate,
-      object: nil
-    )
+    //NotificationCenter.default.addObserver(
+      //self,
+      //selector: #selector(didUpdatePassiveLocation),
+      //name: .passiveLocationManagerDidUpdate,
+      //object: nil
+    //)
 
     NotificationCenter.default.addObserver(
       self,
