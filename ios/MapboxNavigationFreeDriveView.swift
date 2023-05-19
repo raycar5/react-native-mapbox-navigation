@@ -767,20 +767,26 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   }
 
   func setLogoPadding() {
-    if (embedded == true && embedding == false) {
-      navigationMapView.mapView.ornaments.options.logo.visibility = logoVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
+    if (logoVisible) {
       navigationMapView.mapView.ornaments.options.logo.margins = CGPoint(
         x: logoPadding.indices.contains(0) ? CGFloat(logoPadding[0].floatValue) : 8.0, 
-        y: logoPadding.indices.contains(1) ? CGFloat(logoPadding[1].floatValue) : 8.0)
+        y: logoPadding.indices.contains(1) ? CGFloat(logoPadding[1].floatValue) : 8.0
+      )
+      navigationMapView.mapView.ornaments.logoView.isHidden = true
+    } else {
+      navigationMapView.mapView.ornaments.logoView.isHidden = false
     }
   }
 
   func setAttributionPadding() {
-    if (embedded == true  && embedding == false) {
-      navigationMapView.mapView.ornaments.options.attributionButton.visibility = attributionVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
+    if (attributionVisible) {
       navigationMapView.mapView.ornaments.options.attributionButton.margins = CGPoint(
         x: attributionPadding.indices.contains(0) ? CGFloat(attributionPadding[0].floatValue) : 8.0, 
-        y: attributionPadding.indices.contains(1) ? CGFloat(attributionPadding[1].floatValue) : 8.0)
+        y: attributionPadding.indices.contains(1) ? CGFloat(attributionPadding[1].floatValue) : 8.0
+      )
+      navigationMapView.mapView.ornaments.attributionButton.isHidden = true
+    } else {
+      navigationMapView.mapView.ornaments.attributionButton.isHidden = true
     }
   }
 
