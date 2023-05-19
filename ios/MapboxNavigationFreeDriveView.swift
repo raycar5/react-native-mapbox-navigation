@@ -30,9 +30,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     didSet {
       if (embedded == true && oldValue != showSpeedLimit) {
         if (showSpeedLimit) {
-          showSpeedLimitView()
+          //showSpeedLimitView()
         } else {
-          hideSpeedLimitView()
+          //hideSpeedLimitView()
         }
       }
     }
@@ -41,9 +41,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     didSet {
       if (embedded == true && oldValue.count != speedLimitAnchor.count || oldValue != speedLimitAnchor) {
         if (showSpeedLimit) {
-          showSpeedLimitView()
+          //showSpeedLimitView()
         } else {
-          hideSpeedLimitView()
+          //hideSpeedLimitView()
         }
       }
     }
@@ -60,7 +60,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   @objc var routeCasingColor: NSString = "#2F7AC6" {
     didSet {
       if (embedded == true) {
-        navigationMapView.routeCasingColor = UIColor(hex: routeCasingColor as String)
+        //navigationMapView.routeCasingColor = UIColor(hex: routeCasingColor as String)
       }
     }
   }
@@ -68,14 +68,14 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   @objc var alternateRouteColor: NSString = "#8694A5" {
     didSet {
       if (embedded == true) {
-        navigationMapView.routeAlternateColor = UIColor(hex: alternateRouteColor as String)
+        //navigationMapView.routeAlternateColor = UIColor(hex: alternateRouteColor as String)
       }
     }
   }
   @objc var alternateRouteCasingColor: NSString = "#727E8D" {
     didSet {
       if (embedded == true) {
-        navigationMapView.routeAlternateCasingColor = UIColor(hex: alternateRouteCasingColor as String)
+        //navigationMapView.routeAlternateCasingColor = UIColor(hex: alternateRouteCasingColor as String)
       }
     }
   }
@@ -83,9 +83,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     didSet {
       if (embedded == true) {
         if (traversedRouteColor != nil) {
-          navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor! as String)
+          //navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor! as String)
         } else {
-          navigationMapView.traversedRouteColor = UIColor.clear
+          //navigationMapView.traversedRouteColor = UIColor.clear
         }
       }
     }
@@ -94,56 +94,56 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   @objc var trafficUnknownColor: NSString = "#56A8FB" {
     didSet {
       if (embedded == true) {
-        navigationMapView.trafficUnknownColor = UIColor(hex: trafficUnknownColor as String)
+        //navigationMapView.trafficUnknownColor = UIColor(hex: trafficUnknownColor as String)
       }
     }
   }
   @objc var trafficLowColor: NSString = "#56A8FB" {
     didSet {
       if (embedded == true) {
-        navigationMapView.trafficLowColor = UIColor(hex: trafficLowColor as String)
+        //navigationMapView.trafficLowColor = UIColor(hex: trafficLowColor as String)
       }
     }
   }
   @objc var trafficModerateColor: NSString = "#ff9500" {
     didSet {
       if (embedded == true) {
-        navigationMapView.trafficModerateColor = UIColor(hex: trafficModerateColor as String)
+        //navigationMapView.trafficModerateColor = UIColor(hex: trafficModerateColor as String)
       }
     }
   }
   @objc var trafficHeavyColor: NSString = "#ff4d4d" {
     didSet {
       if (embedded == true) {
-        navigationMapView.trafficHeavyColor = UIColor(hex: trafficHeavyColor as String)
+        //navigationMapView.trafficHeavyColor = UIColor(hex: trafficHeavyColor as String)
       }
     }
   }
   @objc var trafficSevereColor: NSString = "#8f2447" {
     didSet {
       if (embedded == true) {
-        navigationMapView.trafficSevereColor = UIColor(hex: trafficSevereColor as String)
+        //navigationMapView.trafficSevereColor = UIColor(hex: trafficSevereColor as String)
       }
     }
   }
   @objc var restrictedRoadColor: NSString = "#000000" {
     didSet {
       if (embedded == true) {
-        navigationMapView.routeRestrictedAreaColor = UIColor(hex: restrictedRoadColor as String)
+        //navigationMapView.routeRestrictedAreaColor = UIColor(hex: restrictedRoadColor as String)
       }
     }
   }
   @objc var routeArrowColor: NSString = "#FFFFFF" {
     didSet {
       if (embedded == true) {
-        navigationMapView.maneuverArrowColor = UIColor(hex: routeArrowColor as String)
+        //navigationMapView.maneuverArrowColor = UIColor(hex: routeArrowColor as String)
       }
     }
   }
   @objc var routeArrowCasingColor: NSString = "#2D3F53" {
     didSet {
       if (embedded == true) {
-        navigationMapView.maneuverArrowStrokeColor = UIColor(hex: routeArrowCasingColor as String)
+        //navigationMapView.maneuverArrowStrokeColor = UIColor(hex: routeArrowCasingColor as String)
       }
     }
   }
@@ -157,7 +157,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   @objc var logoPadding: [NSNumber] = [] {
     didSet {
       if (embedded == true && oldValue.count != logoPadding.count || oldValue != logoPadding) {
-        setLogoPadding()
+        //setLogoPadding()
       }
     }
   }
@@ -165,7 +165,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   @objc var attributionPadding: [NSNumber] = [] {
     didSet {
       if (embedded == true && oldValue.count != attributionPadding.count || oldValue != attributionPadding) {
-        setAttributionPadding()
+        //setAttributionPadding()
       }
     }
   }
@@ -174,9 +174,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     didSet {
       if (embedded == true) {
         if (darkMode) {
-          navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.dark)
+          //navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.dark)
         } else {
-          navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
+          //navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
         }
       }
     }
@@ -201,7 +201,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   var waypointStyles: [[String: Any]] = []
 
   @objc func showRoute(origin: [NSNumber], destination: [NSNumber], waypoints: [[NSNumber]], styles: [NSDictionary], legIndex: NSNumber, cameraType: NSString, padding: [NSNumber])  {
-    if (embedded == false || embedding == true) {
+    if (embedded == false) {
       return
     }
 
@@ -564,13 +564,13 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   func clearActiveGuidance() {
     waypointStyles = []
 
-    navigationService.stop()
+    //navigationService.stop()
 
-    navigationService = nil
+    //navigationService = nil
 
-    let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .passive)
+    //let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .passive)
 
-    navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
+    //navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
 
     //instructionsCardContainerView.isHidden = true
 
@@ -648,18 +648,18 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     navigationMapView.delegate = self
     navigationMapView.translatesAutoresizingMaskIntoConstraints = false
 
-    navigationMapView.routeLineTracksTraversal = true
-    navigationMapView.showsCongestionForAlternativeRoutes = true
-    navigationMapView.showsRestrictedAreasOnRoute = true
+    //navigationMapView.routeLineTracksTraversal = true
+    //navigationMapView.showsCongestionForAlternativeRoutes = true
+    //navigationMapView.showsRestrictedAreasOnRoute = true
     //navigationMapView.routeCasingColor = UIColor(hex: routeCasingColor as String)
     //navigationMapView.routeAlternateColor = UIColor(hex: alternateRouteColor as String)
     //navigationMapView.routeAlternateCasingColor = UIColor(hex: alternateRouteCasingColor as String)
 
-    if (traversedRouteColor != nil) {
+    //if (traversedRouteColor != nil) {
       //navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor! as String)
-    } else {
+    //} else {
       //navigationMapView.traversedRouteColor = UIColor.clear
-    }
+    //}
 
     //navigationMapView.trafficUnknownColor = UIColor(hex: trafficUnknownColor as String)
     //navigationMapView.trafficLowColor = UIColor(hex: trafficLowColor as String)
@@ -670,11 +670,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     //navigationMapView.maneuverArrowColor = UIColor(hex: routeArrowColor as String)
     //navigationMapView.maneuverArrowStrokeColor = UIColor(hex: routeArrowCasingColor as String)
 
-    if (darkMode) {
+    //if (darkMode) {
       //navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.dark)
-    } else {
+    //} else {
       //navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
-    }
+    //}
 
     //navigationMapView.mapView.ornaments.options.compass.visibility = .hidden
     //navigationMapView.mapView.ornaments.options.scaleBar.visibility = .hidden
@@ -682,12 +682,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     //navigationMapView.mapView.gestures.options.pinchPanEnabled = false
     //navigationMapView.mapView.gestures.options.pitchEnabled = false
 
-    var puck2DConfiguration = Puck2DConfiguration()
-    if (userPuckImage != nil) {
-      puck2DConfiguration.topImage = userPuckImage
-      puck2DConfiguration.scale = .constant(Double(exactly: userPuckScale)!)
-    }
-    navigationMapView.userLocationStyle = UserLocationStyle.puck2D(configuration: puck2DConfiguration)
+    //var puck2DConfiguration = Puck2DConfiguration()
+    //if (userPuckImage != nil) {
+      //puck2DConfiguration.topImage = userPuckImage
+      //puck2DConfiguration.scale = .constant(Double(exactly: userPuckScale)!)
+    //}
+    //navigationMapView.userLocationStyle = UserLocationStyle.puck2D(configuration: puck2DConfiguration)
 
     let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .raw)
     navigationViewportDataSource.followingMobileCamera.padding = getPadding([])
@@ -697,30 +697,30 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
     navigationMapView.navigationCamera.follow()
 
-    self.addSubview(navigationMapView)
+    addSubview(navigationMapView)
 
     //speedLimitView = SpeedLimitView()
 
     //speedLimitView.shouldShowUnknownSpeedLimit = true
     //speedLimitView.translatesAutoresizingMaskIntoConstraints = false
 
-    if (showSpeedLimit == true) {
+    //if (showSpeedLimit == true) {
       //showSpeedLimitView()
-    } else {
+    //} else {
       //hideSpeedLimitView()
-    }
+    //}
 
-    //self.addSubview(speedLimitView)
+    //addSubview(speedLimitView)
 
     //instructionsCardContainerView = InstructionsCardContainerView()
     
     //instructionsCardContainerView.translatesAutoresizingMaskIntoConstraints = false
     //instructionsCardContainerView.isHidden = false
 
-    //self.addSubview(instructionsCardContainerView)
+    //addSubview(instructionsCardContainerView)
 
-    setLogoPadding()
-    setAttributionPadding()
+    //setLogoPadding()
+    //setAttributionPadding()
 
     passiveLocationManager = PassiveLocationManager()
     passiveLocationProvider = PassiveLocationProvider(locationManager: passiveLocationManager)
@@ -749,26 +749,26 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   }
 
   func showSpeedLimitView() {
-    //speedLimitView.isAlwaysHidden = false
+    speedLimitView.isAlwaysHidden = false
     
     if (instructionsCardContainerView.isHidden) {
-      //speedLimitView.topAnchor.constraint(equalTo: self.topAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
+      speedLimitView.topAnchor.constraint(equalTo: self.topAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
     } else {
-      //speedLimitView.topAnchor.constraint(equalTo: instructionsCardContainerView.bottomAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
+      speedLimitView.topAnchor.constraint(equalTo: instructionsCardContainerView.bottomAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
     }
 
-    //speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
-    //speedLimitView.heightAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(3) ? CGFloat(speedLimitAnchor[3].floatValue) : 50).isActive = true
-    //speedLimitView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: speedLimitAnchor.indices.contains(1) ? CGFloat(speedLimitAnchor[1].floatValue) : 10).isActive = true
+    speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
+    speedLimitView.heightAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(3) ? CGFloat(speedLimitAnchor[3].floatValue) : 50).isActive = true
+    speedLimitView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: speedLimitAnchor.indices.contains(1) ? CGFloat(speedLimitAnchor[1].floatValue) : 10).isActive = true
   }
 
   func hideSpeedLimitView() {
-    //speedLimitView.isAlwaysHidden = true
+    speedLimitView.isAlwaysHidden = true
   }
 
   func setLogoPadding() {
     if (embedded == true && embedding == false) {
-      //navigationMapView.mapView.ornaments.options.logo.visibility = logoVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
+      navigationMapView.mapView.ornaments.options.logo.visibility = logoVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
       navigationMapView.mapView.ornaments.options.logo.margins = CGPoint(
         x: logoPadding.indices.contains(0) ? CGFloat(logoPadding[0].floatValue) : 8.0, 
         y: logoPadding.indices.contains(1) ? CGFloat(logoPadding[1].floatValue) : 8.0)
@@ -777,7 +777,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
   func setAttributionPadding() {
     if (embedded == true  && embedding == false) {
-      //navigationMapView.mapView.ornaments.options.attributionButton.visibility = attributionVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
+      navigationMapView.mapView.ornaments.options.attributionButton.visibility = attributionVisible ? OrnamentVisibility.visible : OrnamentVisibility.hidden
       navigationMapView.mapView.ornaments.options.attributionButton.margins = CGPoint(
         x: attributionPadding.indices.contains(0) ? CGFloat(attributionPadding[0].floatValue) : 8.0, 
         y: attributionPadding.indices.contains(1) ? CGFloat(attributionPadding[1].floatValue) : 8.0)
