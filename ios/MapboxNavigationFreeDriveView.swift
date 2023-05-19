@@ -993,10 +993,10 @@ class CustomDayStyle: DayStyle {
   private let primaryBackgroundColour = UIColor(hex: (Bundle.infoPlistValue(forKey: "RNMBNAVPrimaryBackgroundColour") as? String) ?? "#303030")
   private let secondaryBackgroundColour = UIColor(hex: (Bundle.infoPlistValue(forKey: "RNMBNAVSecondaryBackgroundColour") as? String) ?? "#707070")
   private let fontName = Bundle.infoPlistValue(forKey: "RNMBNAVFontFamily") as? String
-  private let fontSizeSmall = CGFloat(Float((Bundle.infoPlistValue(forKey: "RNMBNAVTextSizeSmall") as? String) ?? "14") ?? 14.0)
-  private let fontSizeMedium = CGFloat(Float((Bundle.infoPlistValue(forKey: "RNMBNAVTextSizeMedium") as? String) ?? "16") ?? 16.0)
-  private let fontSizeLarge = CGFloat(Float((Bundle.infoPlistValue(forKey: "RNMBNAVTextSizeLarge") as? String) ?? "20") ?? 20.0)
-  private let fontSizeXLarge = CGFloat(Float((Bundle.infoPlistValue(forKey: "RNMBNAVTextSizeXLarge") as? String) ?? "22") ?? 22.0)
+  private let fontSizeSmall = CGFloat(Float(truncating: (Bundle.infoPlistValue(forKey: "RNMBNAVTextSizeSmall") as? NSNumber) ?? 14))
+  private let fontSizeMedium = CGFloat(Float(truncating: (Bundle.infoPlistValue(forKey: "RNMBNAVTextSizeMedium") as? NSNumber) ?? 16))
+  private let fontSizeLarge = CGFloat(Float(truncating: (Bundle.infoPlistValue(forKey: "RNMBNAVTextSizeLarge") as? NSNumber) ?? 20))
+  private let fontSizeXLarge = CGFloat(Float(truncating: (Bundle.infoPlistValue(forKey: "RNMBNAVTextSizeXLarge") as? NSNumber) ?? 22))
   
   private var routeCasingColor: UIColor
   private var routeAlternateColor: UIColor
