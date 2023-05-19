@@ -20,7 +20,7 @@ extension UIView {
   }
 }
 
-class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, NavigationViewControllerDelegate {
+class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   @objc var followZoomLevel: NSNumber = 16.0
   @objc var onLocationChange: RCTDirectEventBlock?
   @objc var onError: RCTDirectEventBlock?
@@ -350,9 +350,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       let roadName = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.roadNameKey] as? String
     else { return }
     
-    speedLimitView.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
-    speedLimitView.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
-    speedLimitView.currentSpeed = location.speed
+    //speedLimitView.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
+    //speedLimitView.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
+    //speedLimitView.currentSpeed = location.speed
 
     onLocationChange?(["longitude": location.coordinate.longitude, "latitude": location.coordinate.latitude, "roadName": roadName])
   }
@@ -363,9 +363,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
       let location = notification.userInfo?[RouteController.NotificationUserInfoKey.locationKey] as? CLLocation
     else { return }
 
-    speedLimitView.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
-    speedLimitView.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
-    speedLimitView.currentSpeed = location.speed
+    //speedLimitView.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
+    //speedLimitView.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
+    //speedLimitView.currentSpeed = location.speed
 
     // Add maneuver arrow
     if (routeProgress.currentLegProgress.followOnStep != nil) {
@@ -381,8 +381,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     // Update the top banner with progress updates
     let distance = routeProgress.currentLegProgress.currentStepProgress.distanceRemaining
     let normalizedDistance = max(distance, 0)
-    instructionsCardContainerView.updateInstructionCard(distance: normalizedDistance, isCurrentCardStep: true)
-    instructionsCardContainerView.isHidden = false
+    //instructionsCardContainerView.updateInstructionCard(distance: normalizedDistance, isCurrentCardStep: true)
+    //instructionsCardContainerView.isHidden = false
         
     // Update `UserCourseView` to be placed on the most recent location.
     navigationMapView.moveUserLocation(to: location, animated: true)
@@ -402,8 +402,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     }
         
     if let visualInstruction = routeProgress.currentLegProgress.currentStepProgress.currentVisualInstruction {
-      instructionsCardContainerView.updateInstruction(visualInstruction)
-      instructionsCardContainerView.isHidden = false
+      //instructionsCardContainerView.updateInstruction(visualInstruction)
+      //instructionsCardContainerView.isHidden = false
     }
   }
   
@@ -572,7 +572,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
 
-    instructionsCardContainerView.isHidden = true
+    //instructionsCardContainerView.isHidden = true
 
     NotificationCenter.default.removeObserver(self, name: .routeControllerProgressDidChange, object: nil)
     NotificationCenter.default.removeObserver(self, name: .routeControllerDidReroute, object: nil)
@@ -614,7 +614,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   override func layoutSubviews() {
     super.layoutSubviews()
     
-    if (navigationMapView == nil && !embedding && !embedded) {
+    if (!embedding && !embedded) {
       embed()
     } else {
       navigationMapView.frame = bounds
@@ -633,7 +633,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     passiveLocationProvider.stopUpdatingLocation()
     passiveLocationProvider.stopUpdatingHeading()
     navigationMapView.removeFromSuperview()
-    speedLimitView.removeFromSuperview()
+    //speedLimitView.removeFromSuperview()
   }
 
   private func embed() {
@@ -644,41 +644,43 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
     embedding = true
 
     navigationMapView = NavigationMapView(frame: bounds)
+    navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+    navigationMapView.delegate = self
     navigationMapView.translatesAutoresizingMaskIntoConstraints = false
 
     navigationMapView.routeLineTracksTraversal = true
     navigationMapView.showsCongestionForAlternativeRoutes = true
     navigationMapView.showsRestrictedAreasOnRoute = true
-    navigationMapView.routeCasingColor = UIColor(hex: routeCasingColor as String)
-    navigationMapView.routeAlternateColor = UIColor(hex: alternateRouteColor as String)
-    navigationMapView.routeAlternateCasingColor = UIColor(hex: alternateRouteCasingColor as String)
+    //navigationMapView.routeCasingColor = UIColor(hex: routeCasingColor as String)
+    //navigationMapView.routeAlternateColor = UIColor(hex: alternateRouteColor as String)
+    //navigationMapView.routeAlternateCasingColor = UIColor(hex: alternateRouteCasingColor as String)
 
     if (traversedRouteColor != nil) {
-      navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor! as String)
+      //navigationMapView.traversedRouteColor = UIColor(hex: traversedRouteColor! as String)
     } else {
-      navigationMapView.traversedRouteColor = UIColor.clear
+      //navigationMapView.traversedRouteColor = UIColor.clear
     }
 
-    navigationMapView.trafficUnknownColor = UIColor(hex: trafficUnknownColor as String)
-    navigationMapView.trafficLowColor = UIColor(hex: trafficLowColor as String)
-    navigationMapView.trafficModerateColor = UIColor(hex: trafficModerateColor as String)
-    navigationMapView.trafficHeavyColor = UIColor(hex: trafficHeavyColor as String)
-    navigationMapView.trafficSevereColor = UIColor(hex: trafficSevereColor as String)
-    navigationMapView.routeRestrictedAreaColor = UIColor(hex: restrictedRoadColor as String)
-    navigationMapView.maneuverArrowColor = UIColor(hex: routeArrowColor as String)
-    navigationMapView.maneuverArrowStrokeColor = UIColor(hex: routeArrowCasingColor as String)
+    //navigationMapView.trafficUnknownColor = UIColor(hex: trafficUnknownColor as String)
+    //navigationMapView.trafficLowColor = UIColor(hex: trafficLowColor as String)
+    //navigationMapView.trafficModerateColor = UIColor(hex: trafficModerateColor as String)
+    //navigationMapView.trafficHeavyColor = UIColor(hex: trafficHeavyColor as String)
+    //navigationMapView.trafficSevereColor = UIColor(hex: trafficSevereColor as String)
+    //navigationMapView.routeRestrictedAreaColor = UIColor(hex: restrictedRoadColor as String)
+    //navigationMapView.maneuverArrowColor = UIColor(hex: routeArrowColor as String)
+    //navigationMapView.maneuverArrowStrokeColor = UIColor(hex: routeArrowCasingColor as String)
 
     if (darkMode) {
-      navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.dark)
+      //navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.dark)
     } else {
-      navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
+      //navigationMapView.mapView.mapboxMap.loadStyleURI(StyleURI.light)
     }
 
-    navigationMapView.mapView.ornaments.options.compass.visibility = .hidden
-    navigationMapView.mapView.ornaments.options.scaleBar.visibility = .hidden
-    navigationMapView.mapView.gestures.options.rotateEnabled = false
-    navigationMapView.mapView.gestures.options.pinchPanEnabled = false
-    navigationMapView.mapView.gestures.options.pitchEnabled = false
+    //navigationMapView.mapView.ornaments.options.compass.visibility = .hidden
+    //navigationMapView.mapView.ornaments.options.scaleBar.visibility = .hidden
+    //navigationMapView.mapView.gestures.options.rotateEnabled = false
+    //navigationMapView.mapView.gestures.options.pinchPanEnabled = false
+    //navigationMapView.mapView.gestures.options.pitchEnabled = false
 
     var puck2DConfiguration = Puck2DConfiguration()
     if (userPuckImage != nil) {
@@ -697,25 +699,25 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
 
     self.addSubview(navigationMapView)
 
-    speedLimitView = SpeedLimitView()
+    //speedLimitView = SpeedLimitView()
 
-    speedLimitView.shouldShowUnknownSpeedLimit = true
-    speedLimitView.translatesAutoresizingMaskIntoConstraints = false
+    //speedLimitView.shouldShowUnknownSpeedLimit = true
+    //speedLimitView.translatesAutoresizingMaskIntoConstraints = false
 
     if (showSpeedLimit == true) {
-      showSpeedLimitView()
+      //showSpeedLimitView()
     } else {
-      hideSpeedLimitView()
+      //hideSpeedLimitView()
     }
 
-    self.addSubview(speedLimitView)
+    //self.addSubview(speedLimitView)
 
-    instructionsCardContainerView = InstructionsCardContainerView()
+    //instructionsCardContainerView = InstructionsCardContainerView()
     
-    instructionsCardContainerView.translatesAutoresizingMaskIntoConstraints = false
-    instructionsCardContainerView.isHidden = false
+    //instructionsCardContainerView.translatesAutoresizingMaskIntoConstraints = false
+    //instructionsCardContainerView.isHidden = false
 
-    self.addSubview(instructionsCardContainerView)
+    //self.addSubview(instructionsCardContainerView)
 
     setLogoPadding()
     setAttributionPadding()
@@ -747,21 +749,21 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate, Navigati
   }
 
   func showSpeedLimitView() {
-    speedLimitView.isAlwaysHidden = false
+    //speedLimitView.isAlwaysHidden = false
     
     if (instructionsCardContainerView.isHidden) {
-      speedLimitView.topAnchor.constraint(equalTo: self.topAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
+      //speedLimitView.topAnchor.constraint(equalTo: self.topAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
     } else {
-      speedLimitView.topAnchor.constraint(equalTo: instructionsCardContainerView.bottomAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
+      //speedLimitView.topAnchor.constraint(equalTo: instructionsCardContainerView.bottomAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 10).isActive = true
     }
 
-    speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
-    speedLimitView.heightAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(3) ? CGFloat(speedLimitAnchor[3].floatValue) : 50).isActive = true
-    speedLimitView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: speedLimitAnchor.indices.contains(1) ? CGFloat(speedLimitAnchor[1].floatValue) : 10).isActive = true
+    //speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
+    //speedLimitView.heightAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(3) ? CGFloat(speedLimitAnchor[3].floatValue) : 50).isActive = true
+    //speedLimitView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: speedLimitAnchor.indices.contains(1) ? CGFloat(speedLimitAnchor[1].floatValue) : 10).isActive = true
   }
 
   func hideSpeedLimitView() {
-    speedLimitView.isAlwaysHidden = true
+    //speedLimitView.isAlwaysHidden = true
   }
 
   func setLogoPadding() {
