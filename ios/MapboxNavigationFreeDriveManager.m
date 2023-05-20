@@ -62,6 +62,7 @@ RCT_EXTERN_METHOD(
 
 RCT_EXTERN_METHOD(
   followViaManager: (nonnull NSNumber *)node
+  padding: (NSArray *)padding
 )
 
 RCT_EXTERN_METHOD(
