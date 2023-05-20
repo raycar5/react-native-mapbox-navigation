@@ -243,6 +243,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
     if (routeWaypoints.isEmpty == false) {
       fetchRoutes(routeWaypoints: routeWaypoints, routeWaypointNames: routeWaypointNames, onSuccess: {(routes: [Route]) -> Void in
+        //self.moveToOverview(padding: padding)
         self.previewRoutes(routes: routes, padding: self.getPadding(padding: padding, useDefault: false))
         self.onRouteChange?(["distance": routes.first?.distance ?? 0, "expectedTravelTime": routes.first?.expectedTravelTime ?? 0, "typicalTravelTime": routes.first?.typicalTravelTime ?? 0])
       })
@@ -449,7 +450,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   }
 
   func getPadding(padding: [NSNumber], useDefault: Bool) -> UIEdgeInsets? {
-    if (!padding.indices.contains(0) && !padding.indices.contains(1) && !padding.indices.contains(2) && padding.indices.contains(3) && !useDefault) {
+    if (padding.indices.count < 4 && !useDefault) {
       return nil
     }
     
@@ -487,7 +488,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
     currentPreviewRoutes = routes
     
-    let cameraOptions = CameraOptions(padding: padding)
+    let cameraOptions = CameraOptions(padding: padding ?? getPadding(padding: [], useDefault: true))
     
     navigationMapView?.showcase(routes, routesPresentationStyle: RoutesPresentationStyle.all(shouldFit: true, cameraOptions: cameraOptions))
     //navigationMapView?.showRouteDurations(along: routes)
@@ -839,27 +840,31 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   }
   
   func setToFollow(padding: UIEdgeInsets?) {
-    if let navigationViewportDataSource = navigationMapView?.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
-      navigationViewportDataSource.options.followingCameraOptions.paddingUpdatesAllowed = false
-      navigationViewportDataSource.followingMobileCamera.padding = padding ?? getPadding(padding: [], useDefault: false)
+    if (padding != nil) {
+      if let navigationViewportDataSource = navigationMapView?.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
+        navigationViewportDataSource.options.followingCameraOptions.paddingUpdatesAllowed = false
+        navigationViewportDataSource.followingMobileCamera.padding = padding
+      }
     }
       
     navigationMapView.navigationCamera.follow()
   }
   
   func setToOverview(padding: UIEdgeInsets?) {
-    if let navigationViewportDataSource = navigationMapView?.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
-      navigationViewportDataSource.options.overviewCameraOptions.paddingUpdatesAllowed = false
-      navigationViewportDataSource.overviewMobileCamera.padding = padding ?? getPadding(padding: [], useDefault: false)
+    if (padding != nil) {
+      if let navigationViewportDataSource = navigationMapView?.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
+        navigationViewportDataSource.options.overviewCameraOptions.paddingUpdatesAllowed = false
+        navigationViewportDataSource.overviewMobileCamera.padding = padding
+      }
     }
       
     navigationMapView.navigationCamera.moveToOverview()
   }
   
   func setInstructionsViewAnchor() {
-    instructionsCardContainerView?.topAnchor.constraint(equalTo: navigationMapView.topAnchor, constant: maneuverAnchor.indices.contains(0) ? CGFloat(maneuverAnchor[0].floatValue) : 20.0).isActive = true
+    instructionsCardContainerView?.topAnchor.constraint(equalTo: navigationMapView.topAnchor, constant: maneuverAnchor.indices.contains(1) ? CGFloat(maneuverAnchor[1].floatValue) : 20.0).isActive = true
     instructionsCardContainerView?.leadingAnchor.constraint(equalTo: navigationMapView.leadingAnchor, constant: maneuverAnchor.indices.contains(0) ? CGFloat(maneuverAnchor[0].floatValue) : 20.0).isActive = true
-    instructionsCardContainerView?.trailingAnchor.constraint(equalTo: navigationMapView.trailingAnchor, constant: maneuverAnchor.indices.contains(0) ? CGFloat(maneuverAnchor[0].floatValue) : -20.0).isActive = true
+    instructionsCardContainerView?.trailingAnchor.constraint(equalTo: navigationMapView.trailingAnchor, constant: -(maneuverAnchor.indices.contains(0) ? CGFloat(maneuverAnchor[0].floatValue) : 20.0)).isActive = true
   }
   
   func setSpeedLimitAnchor() {
