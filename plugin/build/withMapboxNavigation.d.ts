@@ -1,6 +1,6 @@
 import { ConfigPlugin, XcodeProject } from '@expo/config-plugins';
-declare type InstallerBlockName = 'pre' | 'post';
-export declare type MapboxNavigationPlugProps = {
+type InstallerBlockName = 'pre' | 'post';
+export type MapboxNavigationPlugProps = {
     RNMBNAVVersionAndroid?: string;
     RNMBNAVVersioniOS?: string;
     RNMBNAVDownloadToken?: string;

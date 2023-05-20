@@ -169,7 +169,13 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
       }
     }
   }
-  @objc var mute: Bool = false
+  @objc var mute: Bool = false {
+    didSet {
+      if (embedded == true) {
+        toggleMute(isMuted: mute)
+      }
+    }
+  }
   @objc var darkMode: Bool = false {
     didSet {
       if (embedded == true) {
@@ -237,8 +243,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
     if (routeWaypoints.isEmpty == false) {
       fetchRoutes(routeWaypoints: routeWaypoints, routeWaypointNames: routeWaypointNames, onSuccess: {(routes: [Route]) -> Void in
-        self.moveToOverview(padding: padding)
-        self.previewRoutes(routes: routes)
+        self.previewRoutes(routes: routes, padding: self.getPadding(padding: padding, useDefault: false))
         self.onRouteChange?(["distance": routes.first?.distance ?? 0, "expectedTravelTime": routes.first?.expectedTravelTime ?? 0, "typicalTravelTime": routes.first?.typicalTravelTime ?? 0])
       })
     }
@@ -252,28 +257,19 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
   @objc func follow(padding: [NSNumber]) {
     if (embedded == true) {
-      if let navigationViewportDataSource = navigationMapView?.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
-        navigationViewportDataSource.followingMobileCamera.padding = getPadding(padding)
-        navigationMapView.navigationCamera.follow()
-      }
+      setToFollow(padding: getPadding(padding: padding, useDefault: false))
     }
   }
 
   @objc func moveToOverview(padding: [NSNumber]) {
     if (embedded == true) {
-      if let navigationViewportDataSource = navigationMapView?.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
-        navigationViewportDataSource.overviewMobileCamera.padding = getPadding(padding)
-        navigationMapView.navigationCamera.moveToOverview()
-      }
+      setToOverview(padding: getPadding(padding: padding, useDefault: false))
     }
   }
 
   @objc func fitCamera(padding: [NSNumber]) {
     if (embedded == true) {
-      if let navigationViewportDataSource = navigationMapView?.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
-        navigationViewportDataSource.overviewMobileCamera.padding = getPadding(padding)
-        navigationMapView.navigationCamera.moveToOverview()
-      }
+      setToOverview(padding: getPadding(padding: padding, useDefault: false))
     }
   }
 
@@ -286,9 +282,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
       startActiveGuidance(updateCamera: false)
 
       if (cameraType == "overview") {
-        moveToOverview(padding: padding)
+        setToOverview(padding: getPadding(padding: padding, useDefault: false))
       } else {
-        follow(padding: padding)
+        setToFollow(padding: getPadding(padding: padding, useDefault: false))
       }
     } else {
       waypointStyles = (styles as? [[String: Any]]) ?? []
@@ -321,11 +317,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
       }
 
       fetchRoutes(routeWaypoints: routeWaypoints, routeWaypointNames: routeWaypointNames, onSuccess: {(routes: [Route]) -> Void in
-          self.currentActiveRoutes = routes
-          self.onRouteChange?(["distance": routes.first?.distance ?? 0, "expectedTravelTime": routes.first?.expectedTravelTime ?? 0, "typicalTravelTime": routes.first?.typicalTravelTime ?? 0])
+        self.currentActiveRoutes = routes
+        self.onRouteChange?(["distance": routes.first?.distance ?? 0, "expectedTravelTime": routes.first?.expectedTravelTime ?? 0, "typicalTravelTime": routes.first?.typicalTravelTime ?? 0])
 
-          self.startActiveGuidance(updateCamera: false)
-          self.follow(padding: padding)
+        self.startActiveGuidance(updateCamera: false)
+        self.setToFollow(padding: self.getPadding(padding: padding, useDefault: false))
       })
     }
   }
@@ -335,7 +331,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
       clearActiveGuidance()
       clearMap()
 
-      navigationMapView?.navigationCamera.follow()
+      setToFollow(padding: getPadding(padding: [], useDefault: false))
     }
   }
 
@@ -452,7 +448,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     onTrackingStateChange?(["state": stateStr])
   }
 
-  func getPadding(_ padding: [NSNumber]) -> UIEdgeInsets {
+  func getPadding(padding: [NSNumber], useDefault: Bool) -> UIEdgeInsets? {
+    if (!padding.indices.contains(0) && !padding.indices.contains(1) && !padding.indices.contains(2) && padding.indices.contains(3) && !useDefault) {
+      return nil
+    }
+    
     let newPadding = UIEdgeInsets(
       top: padding.indices.contains(0) ? CGFloat(padding[0].floatValue) : (mapPadding.indices.contains(0) ? CGFloat(mapPadding[0].floatValue) : 0),
       left: padding.indices.contains(1) ? CGFloat(padding[1].floatValue) : (mapPadding.indices.contains(1) ? CGFloat(mapPadding[1].floatValue) : 0),
@@ -482,12 +482,14 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
       }
   }
 
-  func previewRoutes(routes: [Route]) {
+  func previewRoutes(routes: [Route], padding: UIEdgeInsets?) {
     pauseNavigation()
 
     currentPreviewRoutes = routes
-
-    navigationMapView?.showcase(routes)
+    
+    let cameraOptions = CameraOptions(padding: padding)
+    
+    navigationMapView?.showcase(routes, routesPresentationStyle: RoutesPresentationStyle.all(shouldFit: true, cameraOptions: cameraOptions))
     //navigationMapView?.showRouteDurations(along: routes)
   }
 
@@ -509,6 +511,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
         accessToken: credentials.accessToken,
         host: credentials.host.absoluteString
       )
+      
+      toggleMute(isMuted: mute)
 
       navigationService.start()
 
@@ -544,7 +548,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
       }
 
       if (updateCamera) {
-        navigationMapView?.navigationCamera.follow()
+        setToFollow(padding: getPadding(padding: [], useDefault: false))
       }
     }
   }
@@ -596,6 +600,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     navigationMapView?.removeRoutes()
     navigationMapView?.removeRouteDurations()
     navigationMapView?.removeWaypoints()
+    navigationMapView?.removeArrow()
+    navigationMapView?.removeAlternativeRoutes()
+    navigationMapView?.removeContinuousAlternativesRoutes()
+    navigationMapView?.removeContinuousAlternativeRoutesDurations()
   }
 
   func sendErrorToReact(error: String) {
@@ -726,12 +734,14 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     navigationMapView.userLocationStyle = UserLocationStyle.puck2D(configuration: puck2DConfiguration)
 
     let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .raw)
-    navigationViewportDataSource.followingMobileCamera.padding = getPadding([])
-    navigationViewportDataSource.overviewMobileCamera.padding = getPadding([])
+    navigationViewportDataSource.options.followingCameraOptions.paddingUpdatesAllowed = false
+    navigationViewportDataSource.options.overviewCameraOptions.paddingUpdatesAllowed = false
+    navigationViewportDataSource.followingMobileCamera.padding = getPadding(padding: [], useDefault: true)
+    navigationViewportDataSource.overviewMobileCamera.padding = getPadding(padding: [], useDefault: true)
 
     navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
 
-    navigationMapView.navigationCamera.follow()
+    setToFollow(padding: getPadding(padding: [], useDefault: false))
 
     addSubview(navigationMapView)
 
@@ -828,6 +838,24 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     styleManager?.currentStyle?.apply()
   }
   
+  func setToFollow(padding: UIEdgeInsets?) {
+    if let navigationViewportDataSource = navigationMapView?.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
+      navigationViewportDataSource.options.followingCameraOptions.paddingUpdatesAllowed = false
+      navigationViewportDataSource.followingMobileCamera.padding = padding ?? getPadding(padding: [], useDefault: false)
+    }
+      
+    navigationMapView.navigationCamera.follow()
+  }
+  
+  func setToOverview(padding: UIEdgeInsets?) {
+    if let navigationViewportDataSource = navigationMapView?.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
+      navigationViewportDataSource.options.overviewCameraOptions.paddingUpdatesAllowed = false
+      navigationViewportDataSource.overviewMobileCamera.padding = padding ?? getPadding(padding: [], useDefault: false)
+    }
+      
+    navigationMapView.navigationCamera.moveToOverview()
+  }
+  
   func setInstructionsViewAnchor() {
     instructionsCardContainerView?.topAnchor.constraint(equalTo: navigationMapView.topAnchor, constant: maneuverAnchor.indices.contains(0) ? CGFloat(maneuverAnchor[0].floatValue) : 20.0).isActive = true
     instructionsCardContainerView?.leadingAnchor.constraint(equalTo: navigationMapView.leadingAnchor, constant: maneuverAnchor.indices.contains(0) ? CGFloat(maneuverAnchor[0].floatValue) : 20.0).isActive = true
@@ -873,6 +901,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     } else {
       navigationMapView?.mapView.ornaments.attributionButton.isHidden = true
     }
+  }
+  
+  func toggleMute(isMuted: Bool) {
+    voiceController?.speechSynthesizer.muted = isMuted
   }
 
   func navigationMapView(_ navigationMapView: NavigationMapView, didAdd finalDestinationAnnotation: PointAnnotation, pointAnnotationManager: PointAnnotationManager) {

@@ -26,7 +26,7 @@ const { addMetaDataItemToMainApplication, getMainApplicationOrThrow } = config_p
  * @returns
  */
 const withCocoaPodsInstallerBlocks = (c, { RNMBNAVVersioniOS, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion }) => {
-    return config_plugins_1.withDangerousMod(c, [
+    return (0, config_plugins_1.withDangerousMod)(c, [
         'ios',
         async (config) => {
             const file = path_1.default.join(config.modRequest.platformProjectRoot, 'Podfile');
@@ -56,7 +56,7 @@ function applyCocoaPodsModifications(contents, { RNMBNAVVersioniOS, RNMBNAVDownl
 exports.applyCocoaPodsModifications = applyCocoaPodsModifications;
 function addConstantBlock(src, RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPublicToken, RNMapboxMapsVersion) {
     const tag = `@hollertaxi/react-native-mapbox-navigation-rbmbnaversion`;
-    return generateCode_1.mergeContents({
+    return (0, generateCode_1.mergeContents)({
         tag,
         src,
         newSrc: [
@@ -74,7 +74,7 @@ function addConstantBlock(src, RNMBNAVVersion, RNMBNAVDownloadToken, RNMBNAVPubl
 exports.addConstantBlock = addConstantBlock;
 function addDisableOutputPathsBlock(src) {
     const tag = `@hollertaxi/react-native-mapbox-navigation-rbmbnatop`;
-    return generateCode_1.mergeContents({
+    return (0, generateCode_1.mergeContents)({
         tag,
         src,
         newSrc: ':disable_input_output_paths => true, \n',
@@ -96,14 +96,14 @@ function addInstallerBlock(src, blockName) {
             if (contents.match(matchBlock)) {
                 // This helps to still allow revisions, since we enabled the block previously.
                 // Only continue if the generated block exists...
-                const modified = generateCode_1.removeGeneratedContents(src, tag);
+                const modified = (0, generateCode_1.removeGeneratedContents)(src, tag);
                 if (!modified) {
                     return src;
                 }
             }
         }
     }
-    return generateCode_1.mergeContents({
+    return (0, generateCode_1.mergeContents)({
         tag,
         src,
         newSrc: [`  ${blockName}_install do |installer|`, '  end'].join('\n'),
@@ -115,7 +115,7 @@ function addInstallerBlock(src, blockName) {
 }
 exports.addInstallerBlock = addInstallerBlock;
 function addMapboxInstallerBlock(src, blockName) {
-    return generateCode_1.mergeContents({
+    return (0, generateCode_1.mergeContents)({
         tag: `@hollertaxi/react-native-mapbox-navigation-${blockName}_installer`,
         src,
         newSrc: `    $RNMBNAV.${blockName}_install(installer)`,
@@ -144,7 +144,7 @@ function setExcludedArchitectures(project) {
 }
 exports.setExcludedArchitectures = setExcludedArchitectures;
 const withExcludedSimulatorArchitectures = (c) => {
-    return config_plugins_1.withXcodeProject(c, (config) => {
+    return (0, config_plugins_1.withXcodeProject)(c, (config) => {
         config.modResults = setExcludedArchitectures(config.modResults);
         return config;
     });
@@ -152,7 +152,7 @@ const withExcludedSimulatorArchitectures = (c) => {
 const withAndroidPropertiesDownloadToken = (config, { RNMBNAVDownloadToken }) => {
     const key = 'MAPBOX_DOWNLOADS_TOKEN';
     if (RNMBNAVDownloadToken) {
-        return config_plugins_1.withGradleProperties(config, (config) => {
+        return (0, config_plugins_1.withGradleProperties)(config, (config) => {
             config.modResults = config.modResults.filter((item) => {
                 if (item.type === 'property' && item.key === key) {
                     return false;
@@ -185,7 +185,7 @@ const setMetaDataConfigAsync = async (config, androidManifest, key, value) => {
 const withAndroidPropertiesPublicToken = (config, { RNMBNAVPublicToken }) => {
     const key = 'MAPBOX_ACCESS_TOKEN';
     if (RNMBNAVPublicToken) {
-        return config_plugins_1.withAndroidManifest(config, async (config) => {
+        return (0, config_plugins_1.withAndroidManifest)(config, async (config) => {
             // Modifiers can be async, but try to keep them fast.
             config.modResults = await setMetaDataConfigAsync(config, config.modResults, key, RNMBNAVPublicToken);
             return config;
@@ -207,7 +207,7 @@ const withAndroidProperties = (config, { RNMBNAVDownloadToken, RNMBNAVPublicToke
 const addLibCppFilter = (appBuildGradle) => {
     if (appBuildGradle.includes("pickFirst 'lib/x86/libc++_shared.so'"))
         return appBuildGradle;
-    return generateCode_1.mergeContents({
+    return (0, generateCode_1.mergeContents)({
         tag: `@hollertaxi/react-native-mapbox-navigation-libcpp`,
         src: appBuildGradle,
         newSrc: `packagingOptions {
@@ -235,7 +235,7 @@ const addMapboxMavenRepo = (projectBuildGradle) => {
     const allProjectReposOffset = allProjectLines.findIndex((line) => line.includes('repositories'));
     anchor.lastIndex = 0;
     offset = allProjectReposOffset + 1;
-    return generateCode_1.mergeContents({
+    return (0, generateCode_1.mergeContents)({
         tag: `@hollertaxi/react-native-mapbox-navigation-v2-maven`,
         src: projectBuildGradle,
         newSrc: `
@@ -253,7 +253,7 @@ const addMapboxMavenRepo = (projectBuildGradle) => {
     }).contents;
 };
 const withAndroidAppGradle = (config) => {
-    return config_plugins_1.withAppBuildGradle(config, ({ modResults, ...config }) => {
+    return (0, config_plugins_1.withAppBuildGradle)(config, ({ modResults, ...config }) => {
         if (modResults.language !== 'groovy') {
             config_plugins_1.WarningAggregator.addWarningAndroid('withMapboxNavigation', `Cannot automatically configure app build.gradle if it's not groovy`);
             return { modResults, ...config };
@@ -263,7 +263,7 @@ const withAndroidAppGradle = (config) => {
     });
 };
 const withAndroidProjectGradle = (config) => {
-    return config_plugins_1.withProjectBuildGradle(config, ({ modResults, ...config }) => {
+    return (0, config_plugins_1.withProjectBuildGradle)(config, ({ modResults, ...config }) => {
         if (modResults.language !== 'groovy') {
             config_plugins_1.WarningAggregator.addWarningAndroid('withMapboxNavigation', `Cannot automatically configure app build.gradle if it's not groovy`);
             return { modResults, ...config };
@@ -273,7 +273,7 @@ const withAndroidProjectGradle = (config) => {
     });
 };
 const withAndroidMapboxStyles = (config, { RNMBNAVFontFamily, RNMBNAVPrimaryColour, RNMBNAVSecondaryColour, RNMBNAVPrimaryTextColour, RNMBNAVSecondaryTextColour, RNMBNAVTextSizeSmall, RNMBNAVTextSizeMedium, RNMBNAVTextSizeLarge, RNMBNAVTextSizeXLarge }) => {
-    return config_plugins_1.withAndroidStyles(config, ({ modResults, ...config }) => {
+    return (0, config_plugins_1.withAndroidStyles)(config, ({ modResults, ...config }) => {
         if (RNMBNAVFontFamily) {
             modResults = config_plugins_1.AndroidConfig.Styles.assignStylesValue(modResults, {
                 add: true,
@@ -499,4 +499,4 @@ const withMapboxNavigation = (config, { RNMBNAVVersionAndroid, RNMBNAVVersioniOS
         RNMBNAVTextSizeXLarge
     });
 };
-exports.default = config_plugins_1.createRunOncePlugin(withMapboxNavigation, pkg.name, pkg.version);
+exports.default = (0, config_plugins_1.createRunOncePlugin)(withMapboxNavigation, pkg.name, pkg.version);
