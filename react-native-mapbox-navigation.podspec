@@ -4,7 +4,7 @@ package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
 rnMapboxNavigationTargetsToChangeToDynamic = ['MapboxMobileEvents', 'Turf', 'MapboxMaps', 'MapboxCoreMaps', 'MapboxCommon', 'MapboxNavigation', 'MapboxCoreNavigation', 'MapboxSpeech', 'Solar-dev', 'MapboxNavigationNative', 'MapboxDirections', 'Polyline']
 
-rnMapboxNavigationDefaultVersion = '~> 2.9.0'
+rnMapboxNavigationDefaultVersion = '~> 2.12.0'
 
 $RNMBNAVVersion = rnMapboxNavigationDefaultVersion unless $RNMBNAVVersion
 
@@ -65,7 +65,7 @@ Pod::Spec.new do |s|
   s.homepage     = "https://github.com/Holler-Services/react-native-mapbox-navigation.git"
   s.license      = { :type => "MIT", :file => "LICENSE" }
   s.authors      = { "Holler Taxi" => "support@hollertaxi.com.com" }
-  s.platforms    = { :ios => "12.0" }
+  s.platforms    = { :ios => "13.0" }
   s.source       = { :git => "https://github.com/Holler-Services/react-native-mapbox-navigation.git", :tag => "#{s.version}" }
 
   s.source_files = "ios/**/*.{h,m,swift}"
