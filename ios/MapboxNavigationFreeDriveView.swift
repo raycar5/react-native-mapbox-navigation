@@ -27,6 +27,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   @objc var onError: RCTDirectEventBlock?
   @objc var onTrackingStateChange: RCTDirectEventBlock?
   @objc var onRouteChange: RCTDirectEventBlock?
+  @objc var onManeuverSizeChange: RCTDirectEventBlock?
   @objc var showSpeedLimit: Bool = true {
     didSet {
       if (embedded == true && oldValue != showSpeedLimit) {
@@ -41,23 +42,22 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   @objc var speedLimitAnchor: [NSNumber] = [] {
     didSet {
       if (embedded == true && oldValue.count != speedLimitAnchor.count || oldValue != speedLimitAnchor) {
-        if (showSpeedLimit) {
-          showSpeedLimitView()
-        } else {
-          hideSpeedLimitView()
-        }
+        setSpeedLimitAnchor()
       }
     }
   }
   @objc var maneuverAnchor: [NSNumber] = [] {
     didSet {
       if (embedded == true && oldValue.count != maneuverAnchor.count || oldValue != maneuverAnchor) {
-        instructionsCardContainerView?.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: maneuverAnchor.indices.contains(0) ? CGFloat(maneuverAnchor[0].floatValue) : 20).isActive = true
-        instructionsCardContainerView?.topAnchor.constraint(equalTo: self.topAnchor, constant: maneuverAnchor.indices.contains(1) ? CGFloat(maneuverAnchor[1].floatValue) : 20).isActive = true
+        setInstructionsViewAnchor()
       }
     }
   }
-  @objc var maneuverRadius: NSNumber = 26
+  @objc var maneuverRadius: NSNumber = 26 {
+    didSet {
+      applyStyles()
+    }
+  }
   @objc var maneuverBackgroundColor: NSString = "#303030"
   @objc var userPuckImage: UIImage?
   @objc var userPuckScale: NSNumber = 1.0
@@ -141,7 +141,13 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   @objc var waypointStrokeWidth: NSNumber = 2
   @objc var waypointStrokeOpacity: NSNumber = 1
   @objc var waypointStrokeColor: NSString = "#FFFFFF"
-  @objc var logoVisible: Bool = true
+  @objc var logoVisible: Bool = true {
+    didSet {
+      if (embedded == true) {
+        setLogoPadding()
+      }
+    }
+  }
   @objc var logoPadding: [NSNumber] = [] {
     didSet {
       if (embedded == true && oldValue.count != logoPadding.count || oldValue != logoPadding) {
@@ -149,7 +155,13 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
       }
     }
   }
-  @objc var attributionVisible: Bool = true
+  @objc var attributionVisible: Bool = true {
+    didSet {
+      if (embedded == true) {
+        setAttributionPadding()
+      }
+    }
+  }
   @objc var attributionPadding: [NSNumber] = [] {
     didSet {
       if (embedded == true && oldValue.count != attributionPadding.count || oldValue != attributionPadding) {
@@ -162,9 +174,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     didSet {
       if (embedded == true) {
         if (darkMode) {
-          styleManager.applyStyle(type: .night)
+          styleManager?.applyStyle(type: .night)
         } else {
-          styleManager.applyStyle(type: .day)
+          styleManager?.applyStyle(type: .day)
         }
       }
     }
@@ -240,7 +252,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
   @objc func follow(padding: [NSNumber]) {
     if (embedded == true) {
-      if let navigationViewportDataSource = navigationMapView.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
+      if let navigationViewportDataSource = navigationMapView?.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
         navigationViewportDataSource.followingMobileCamera.padding = getPadding(padding)
         navigationMapView.navigationCamera.follow()
       }
@@ -249,7 +261,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
   @objc func moveToOverview(padding: [NSNumber]) {
     if (embedded == true) {
-      if let navigationViewportDataSource = navigationMapView.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
+      if let navigationViewportDataSource = navigationMapView?.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
         navigationViewportDataSource.overviewMobileCamera.padding = getPadding(padding)
         navigationMapView.navigationCamera.moveToOverview()
       }
@@ -258,7 +270,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
   @objc func fitCamera(padding: [NSNumber]) {
     if (embedded == true) {
-      if let navigationViewportDataSource = navigationMapView.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
+      if let navigationViewportDataSource = navigationMapView?.navigationCamera.viewportDataSource as? NavigationViewportDataSource {
         navigationViewportDataSource.overviewMobileCamera.padding = getPadding(padding)
         navigationMapView.navigationCamera.moveToOverview()
       }
@@ -323,7 +335,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
       clearActiveGuidance()
       clearMap()
 
-      navigationMapView.navigationCamera.follow()
+      navigationMapView?.navigationCamera.follow()
     }
   }
 
@@ -358,13 +370,13 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
     // Add maneuver arrow
     if (routeProgress.currentLegProgress.followOnStep != nil) {
-      navigationMapView.addArrow(route: routeProgress.route, legIndex: routeProgress.legIndex, stepIndex: routeProgress.currentLegProgress.stepIndex + 1)
+      navigationMapView?.addArrow(route: routeProgress.route, legIndex: routeProgress.legIndex, stepIndex: routeProgress.currentLegProgress.stepIndex + 1)
     } else {
-      navigationMapView.removeArrow()
+      navigationMapView?.removeArrow()
     }
         
     if (routeProgress.legIndex != currentLegIndex) {
-      navigationMapView.showWaypoints(on: routeProgress.route, legIndex: routeProgress.legIndex)
+      navigationMapView?.showWaypoints(on: routeProgress.route, legIndex: routeProgress.legIndex)
     }
         
     // Update the top banner with progress updates
@@ -374,12 +386,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     instructionsCardContainerView?.isHidden = false
         
     // Update `UserCourseView` to be placed on the most recent location.
-    navigationMapView.moveUserLocation(to: location, animated: true)
+    navigationMapView?.moveUserLocation(to: location, animated: true)
         
     // Update the main route line during active navigation when `NavigationMapView.routeLineTracksTraversal` set to `true`
     // and route progress change, by calling `NavigationMapView.updateRouteLine(routeProgress:coordinate:shouldRedraw:)`
     // without redrawing the main route.
-    navigationMapView.updateRouteLine(routeProgress: routeProgress, coordinate: location.coordinate, shouldRedraw: routeProgress.legIndex != currentLegIndex)
+    navigationMapView?.updateRouteLine(routeProgress: routeProgress, coordinate: location.coordinate, shouldRedraw: routeProgress.legIndex != currentLegIndex)
     currentLegIndex = routeProgress.legIndex
   }
   
@@ -397,12 +409,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   }
   
   @objc func rerouted(_ notification: Notification) {
-    navigationMapView.removeWaypoints()
+    navigationMapView?.removeWaypoints()
         
     // Update the main route line during active navigation when `NavigationMapView.routeLineTracksTraversal` set to `true`
     // and rerouting happens, by calling `NavigationMapView.updateRouteLine(routeProgress:coordinate:shouldRedraw:)`
     // with `shouldRedraw` as `true`.
-    navigationMapView.updateRouteLine(
+    navigationMapView?.updateRouteLine(
       routeProgress: navigationService.routeProgress,
       coordinate: navigationService.router.location?.coordinate,
       shouldRedraw: true
@@ -413,7 +425,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     // Update the main route line during active navigation when `NavigationMapView.routeLineTracksTraversal` set to `true`
     // and route refresh happens, by calling `NavigationMapView.updateRouteLine(routeProgress:coordinate:shouldRedraw:)`
     // with `shouldRedraw` as `true`.
-    navigationMapView.updateRouteLine(
+    navigationMapView?.updateRouteLine(
       routeProgress: navigationService.routeProgress,
       coordinate: navigationService.router.location?.coordinate,
       shouldRedraw: true
@@ -475,13 +487,13 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
     currentPreviewRoutes = routes
 
-    navigationMapView.showcase(routes)
-    //navigationMapView.showRouteDurations(along: routes)
+    navigationMapView?.showcase(routes)
+    //navigationMapView?.showRouteDurations(along: routes)
   }
 
   func startActiveGuidance(updateCamera: Bool) {
     currentPreviewRoutes = nil
-    var response = currentRouteResponse
+    let response = currentRouteResponse
 
     if (response != nil) {
       let locationManager = NavigationLocationManager()
@@ -500,10 +512,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
       navigationService.start()
 
-      navigationMapView.mapView.mapboxMap.onNext(event: .styleLoaded, handler: { [weak self] _ in
+      navigationMapView?.mapView.mapboxMap.onNext(event: .styleLoaded, handler: { [weak self] _ in
         guard let self = self else { return }
         
-        self.navigationMapView.routeLineTracksTraversal = true
+        self.navigationMapView?.routeLineTracksTraversal = true
 
       let layerExists = self.navigationMapView.mapView.mapboxMap.style.layerExists(withId: "road-intersection")
           
@@ -515,7 +527,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
       })
 
       let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .active)
-      navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
+      navigationMapView?.navigationCamera.viewportDataSource = navigationViewportDataSource
 
       NotificationCenter.default.addObserver(self, selector: #selector(progressDidChange(_ :)), name: .routeControllerProgressDidChange, object: nil)
       NotificationCenter.default.addObserver(self, selector: #selector(rerouted(_:)), name: .routeControllerDidReroute, object: nil)
@@ -523,16 +535,16 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
       NotificationCenter.default.addObserver(self, selector: #selector(updateInstructionsBanner(notification:)), name: .routeControllerDidPassVisualInstructionPoint, object: navigationService.router)
 
       NotificationCenter.default.removeObserver(self, name: .passiveLocationManagerDidUpdate, object: nil)
-      passiveLocationProvider.stopUpdatingLocation()
-      passiveLocationProvider.stopUpdatingHeading()
+      passiveLocationProvider?.stopUpdatingLocation()
+      passiveLocationProvider?.stopUpdatingHeading()
 
-      navigationMapView.mapView.mapboxMap.onNext(event: .styleLoaded) { [weak self] _ in
+      navigationMapView?.mapView.mapboxMap.onNext(event: .styleLoaded) { [weak self] _ in
         guard let self = self else { return }
         self.pointAnnotationManager = self.navigationMapView.mapView.annotations.makePointAnnotationManager()
       }
 
       if (updateCamera) {
-        navigationMapView.navigationCamera.follow()
+        navigationMapView?.navigationCamera.follow()
       }
     }
   }
@@ -559,7 +571,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
     let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .passive)
 
-    navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
+    navigationMapView?.navigationCamera.viewportDataSource = navigationViewportDataSource
 
     instructionsCardContainerView?.isHidden = true
 
@@ -580,10 +592,10 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   }
 
   func clearMap() {
-    navigationMapView.unhighlightBuildings()
-    navigationMapView.removeRoutes()
-    navigationMapView.removeRouteDurations()
-    navigationMapView.removeWaypoints()
+    navigationMapView?.unhighlightBuildings()
+    navigationMapView?.removeRoutes()
+    navigationMapView?.removeRouteDurations()
+    navigationMapView?.removeWaypoints()
   }
 
   func sendErrorToReact(error: String) {
@@ -606,7 +618,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     if (!embedding && !embedded) {
       embed()
     } else {
-      navigationMapView.frame = bounds
+      navigationMapView?.frame = bounds
     }
   }
   
@@ -614,7 +626,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     super.removeFromSuperview()
     // cleanup and teardown any existing resources
     NotificationCenter.default.removeObserver(self, name: .passiveLocationManagerDidUpdate, object: nil)
-    NotificationCenter.default.removeObserver(self, name: .navigationCameraStateDidChange, object: navigationMapView.navigationCamera)
+    NotificationCenter.default.removeObserver(self, name: .navigationCameraStateDidChange, object: navigationMapView?.navigationCamera)
     NotificationCenter.default.removeObserver(self, name: .routeControllerProgressDidChange, object: nil)
     NotificationCenter.default.removeObserver(self, name: .routeControllerDidReroute, object: nil)
     NotificationCenter.default.removeObserver(self, name: .routeControllerDidRefreshRoute, object: nil)
@@ -673,7 +685,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
         trafficSevereColor: UIColor(hex: trafficSevereColor as String),
         routeRestrictedAreaColor: UIColor(hex: restrictedRoadColor as String),
         maneuverArrowColor: UIColor(hex: routeArrowColor as String),
-        maneuverArrowStrokeColor: UIColor(hex: routeArrowCasingColor as String)
+        maneuverArrowStrokeColor: UIColor(hex: routeArrowCasingColor as String),
+        instructionsCardRadius: CGFloat(maneuverRadius.floatValue)
       ),
       CustomNightStyle(
         routeCasingColor: UIColor(hex: routeCasingColor as String),
@@ -687,7 +700,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
         trafficSevereColor: UIColor(hex: trafficSevereColor as String),
         routeRestrictedAreaColor: UIColor(hex: restrictedRoadColor as String),
         maneuverArrowColor: UIColor(hex: routeArrowColor as String),
-        maneuverArrowStrokeColor: UIColor(hex: routeArrowCasingColor as String)
+        maneuverArrowStrokeColor: UIColor(hex: routeArrowCasingColor as String),
+        instructionsCardRadius: CGFloat(maneuverRadius.floatValue)
       )
     ]
     styleManager.automaticallyAdjustsStyleForTimeOfDay = false
@@ -725,13 +739,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     
     instructionsCardContainerView.translatesAutoresizingMaskIntoConstraints = false
     instructionsCardContainerView.isHidden = true
-    instructionsCardContainerView.layer.masksToBounds = true
 
     speedLimitView = SpeedLimitView()
 
     speedLimitView.shouldShowUnknownSpeedLimit = true
     speedLimitView.translatesAutoresizingMaskIntoConstraints = false
-        
+    
     if (showSpeedLimit == true) {
       showSpeedLimitView()
     } else {
@@ -742,18 +755,13 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     stackView.axis = .vertical
     stackView.distribution = .fill
     stackView.alignment = .leading
-    stackView.spacing = 10
+    stackView.spacing = 0
     stackView.translatesAutoresizingMaskIntoConstraints = false
       
     addSubview(stackView)
-      
-    stackView.topAnchor.constraint(equalTo: navigationMapView.topAnchor, constant: 0).isActive = true
-    stackView.leadingAnchor.constraint(equalTo: navigationMapView.leadingAnchor, constant: 0).isActive = true
-    stackView.widthAnchor.constraint(equalTo: navigationMapView.widthAnchor).isActive = true
-    instructionsCardContainerView.topAnchor.constraint(equalTo: navigationMapView.topAnchor, constant: maneuverAnchor.indices.contains(1) ? CGFloat(maneuverAnchor[1].floatValue) : 20).isActive = true
-    instructionsCardContainerView.leadingAnchor.constraint(equalTo: navigationMapView.leadingAnchor, constant: maneuverAnchor.indices.contains(0) ? CGFloat(maneuverAnchor[0].floatValue) : 20).isActive = true
-    instructionsCardContainerView.trailingAnchor.constraint(equalTo: navigationMapView.trailingAnchor, constant: maneuverAnchor.indices.contains(0) ? -CGFloat(maneuverAnchor[0].floatValue) : -20).isActive = true
-    speedLimitView.leadingAnchor.constraint(equalTo: stackView.leadingAnchor, constant: 10.0).isActive = true
+    
+    setSpeedLimitAnchor()
+    setInstructionsViewAnchor()
       
     setLogoPadding()
     setAttributionPadding()
@@ -784,7 +792,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   }
   
   func applyStyles() {
-    styleManager.styles = [
+    styleManager?.styles = [
       CustomDayStyle(
         routeCasingColor: UIColor(hex: routeCasingColor as String),
         routeAlternateColor: UIColor(hex: alternateRouteColor as String),
@@ -797,7 +805,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
         trafficSevereColor: UIColor(hex: trafficSevereColor as String),
         routeRestrictedAreaColor: UIColor(hex: restrictedRoadColor as String),
         maneuverArrowColor: UIColor(hex: routeArrowColor as String),
-        maneuverArrowStrokeColor: UIColor(hex: routeArrowCasingColor as String)
+        maneuverArrowStrokeColor: UIColor(hex: routeArrowCasingColor as String),
+        instructionsCardRadius: CGFloat(maneuverRadius.floatValue)
       ),
       CustomNightStyle(
         routeCasingColor: UIColor(hex: routeCasingColor as String),
@@ -811,47 +820,58 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
         trafficSevereColor: UIColor(hex: trafficSevereColor as String),
         routeRestrictedAreaColor: UIColor(hex: restrictedRoadColor as String),
         maneuverArrowColor: UIColor(hex: routeArrowColor as String),
-        maneuverArrowStrokeColor: UIColor(hex: routeArrowCasingColor as String)
+        maneuverArrowStrokeColor: UIColor(hex: routeArrowCasingColor as String),
+        instructionsCardRadius: CGFloat(maneuverRadius.floatValue)
       )
     ]
     
-    styleManager.currentStyle?.apply()
+    styleManager?.currentStyle?.apply()
+  }
+  
+  func setInstructionsViewAnchor() {
+    instructionsCardContainerView?.topAnchor.constraint(equalTo: navigationMapView.topAnchor, constant: maneuverAnchor.indices.contains(0) ? CGFloat(maneuverAnchor[0].floatValue) : 20.0).isActive = true
+    instructionsCardContainerView?.leadingAnchor.constraint(equalTo: navigationMapView.leadingAnchor, constant: maneuverAnchor.indices.contains(0) ? CGFloat(maneuverAnchor[0].floatValue) : 20.0).isActive = true
+    instructionsCardContainerView?.trailingAnchor.constraint(equalTo: navigationMapView.trailingAnchor, constant: maneuverAnchor.indices.contains(0) ? CGFloat(maneuverAnchor[0].floatValue) : -20.0).isActive = true
+  }
+  
+  func setSpeedLimitAnchor() {
+    speedLimitView?.topAnchor.constraint(equalTo: navigationMapView.topAnchor, constant: speedLimitAnchor.indices.contains(1) ? CGFloat(speedLimitAnchor[1].floatValue) : 10.0).isActive = true
+    speedLimitView?.leadingAnchor.constraint(equalTo: navigationMapView.leadingAnchor, constant: speedLimitAnchor.indices.contains(0) ? CGFloat(speedLimitAnchor[0].floatValue) : 20.0).isActive = true
+    speedLimitView?.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50.0).isActive = true
+    speedLimitView?.heightAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(3) ? CGFloat(speedLimitAnchor[3].floatValue) : 50.0).isActive = true
   }
 
   func showSpeedLimitView() {
-    speedLimitView.isAlwaysHidden = false
-    speedLimitView.isHidden = false
-
-    speedLimitView.widthAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(2) ? CGFloat(speedLimitAnchor[2].floatValue) : 50).isActive = true
-    speedLimitView.heightAnchor.constraint(equalToConstant: speedLimitAnchor.indices.contains(3) ? CGFloat(speedLimitAnchor[3].floatValue) : 50).isActive = true
+    speedLimitView?.isAlwaysHidden = false
+    speedLimitView?.isHidden = false
   }
 
   func hideSpeedLimitView() {
-    speedLimitView.isAlwaysHidden = true
-    speedLimitView.isHidden = true
+    speedLimitView?.isAlwaysHidden = true
+    speedLimitView?.isHidden = true
   }
 
   func setLogoPadding() {
     if (logoVisible) {
-      navigationMapView.mapView.ornaments.options.logo.margins = CGPoint(
+      navigationMapView?.mapView.ornaments.options.logo.margins = CGPoint(
         x: logoPadding.indices.contains(0) ? CGFloat(logoPadding[0].floatValue) : 8.0,
         y: logoPadding.indices.contains(1) ? CGFloat(logoPadding[1].floatValue) : 8.0
       )
-      navigationMapView.mapView.ornaments.logoView.isHidden = false
+      navigationMapView?.mapView.ornaments.logoView.isHidden = false
     } else {
-      navigationMapView.mapView.ornaments.logoView.isHidden = true
+      navigationMapView?.mapView.ornaments.logoView.isHidden = true
     }
   }
 
   func setAttributionPadding() {
     if (attributionVisible) {
-      navigationMapView.mapView.ornaments.options.attributionButton.margins = CGPoint(
+      navigationMapView?.mapView.ornaments.options.attributionButton.margins = CGPoint(
         x: attributionPadding.indices.contains(0) ? CGFloat(attributionPadding[0].floatValue) : 8.0,
         y: attributionPadding.indices.contains(1) ? CGFloat(attributionPadding[1].floatValue) : 8.0
       )
-      navigationMapView.mapView.ornaments.attributionButton.isHidden = false
+      navigationMapView?.mapView.ornaments.attributionButton.isHidden = false
     } else {
-      navigationMapView.mapView.ornaments.attributionButton.isHidden = true
+      navigationMapView?.mapView.ornaments.attributionButton.isHidden = true
     }
   }
 
@@ -1010,6 +1030,7 @@ class CustomDayStyle: DayStyle {
   private var routeRestrictedAreaColor: UIColor
   private var maneuverArrowColor: UIColor
   private var maneuverArrowStrokeColor: UIColor
+  private var instructionsCardRadius: CGFloat
   
   required init(
     routeCasingColor: UIColor,
@@ -1023,7 +1044,8 @@ class CustomDayStyle: DayStyle {
     trafficSevereColor: UIColor,
     routeRestrictedAreaColor: UIColor,
     maneuverArrowColor: UIColor,
-    maneuverArrowStrokeColor: UIColor
+    maneuverArrowStrokeColor: UIColor,
+    instructionsCardRadius: CGFloat
   ) {
     self.routeCasingColor = routeCasingColor
     self.routeAlternateColor = routeAlternateColor
@@ -1037,6 +1059,7 @@ class CustomDayStyle: DayStyle {
     self.routeRestrictedAreaColor = routeRestrictedAreaColor
     self.maneuverArrowColor = maneuverArrowColor
     self.maneuverArrowStrokeColor = maneuverArrowStrokeColor
+    self.instructionsCardRadius = instructionsCardRadius
     
     super.init()
     mapStyleURL = URL(string: StyleURI.light.rawValue)!
@@ -1075,7 +1098,8 @@ class CustomDayStyle: DayStyle {
     InstructionsCardContainerView.appearance(for: traitCollection).highlightedBackgroundColor = primaryBackgroundColour
     InstructionsCardContainerView.appearance(for: traitCollection).separatorColor = secondaryBackgroundColour
     InstructionsCardContainerView.appearance(for: traitCollection).highlightedSeparatorColor = secondaryBackgroundColour
-    InstructionsCardContainerView.appearance(for: traitCollection).cornerRadius = 26.0
+    InstructionsCardContainerView.appearance(for: traitCollection).cornerRadius = instructionsCardRadius
+    InstructionsCardContainerView.appearance(for: traitCollection).clipsToBounds = true
     
     LanesView.appearance(for: traitCollection).backgroundColor = secondaryBackgroundColour
     
@@ -1085,12 +1109,25 @@ class CustomDayStyle: DayStyle {
     LaneView.appearance(for: traitCollection).secondaryColorHighlighted = secondaryColour
     
     ManeuverView.appearance(for: traitCollection).backgroundColor = primaryBackgroundColour
+    ManeuverView.appearance(for: traitCollection).primaryColor = primaryColour
+    ManeuverView.appearance(for: traitCollection).primaryColorHighlighted = primaryColour
+    ManeuverView.appearance(for: traitCollection).secondaryColor = secondaryColour
+    ManeuverView.appearance(for: traitCollection).secondaryColorHighlighted = secondaryColour
     ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).tintColor = primaryColour
     ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).primaryColor = primaryColour
     ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).primaryColorHighlighted = primaryColour
     ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).secondaryColor = primaryColour
     ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).secondaryColorHighlighted = primaryColour
+    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).tintColor = primaryColour
+    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).primaryColor = primaryColour
+    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).primaryColorHighlighted = primaryColour
+    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).secondaryColor = primaryColour
+    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).secondaryColorHighlighted = primaryColour
     
+    DistanceLabel.appearance(for: traitCollection).font = fontSmall
+    DistanceLabel.appearance(for: traitCollection).normalFont = fontSmall
+    DistanceLabel.appearance(for: traitCollection).unitFont = fontSmall
+    DistanceLabel.appearance(for: traitCollection).valueFont = fontSmall
     DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).font = fontSmall
     DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).normalFont = fontSmall
     DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).unitFont = fontSmall
@@ -1103,10 +1140,14 @@ class CustomDayStyle: DayStyle {
     DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).valueTextColor = secondaryColour
     DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).valueTextColorHighlighted = secondaryColour
     
+    DistanceRemainingLabel.appearance(for: traitCollection).font = fontSmall
+    DistanceRemainingLabel.appearance(for: traitCollection).normalFont = fontSmall
+    DistanceRemainingLabel.appearance(for: traitCollection).textColor = secondaryColour
+    DistanceRemainingLabel.appearance(for: traitCollection).textColorHighlighted = secondaryColour
     DistanceRemainingLabel.appearance(for: traitCollection).normalTextColor = secondaryColour
     
-    UILabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColor = secondaryColour
-    
+    PrimaryLabel.appearance(for: traitCollection).font = fontXLarge
+    PrimaryLabel.appearance(for: traitCollection).normalFont = fontXLarge
     PrimaryLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColor = primaryColour
     PrimaryLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColorHighlighted = primaryColour
     PrimaryLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).normalTextColor = primaryColour
@@ -1120,12 +1161,18 @@ class CustomDayStyle: DayStyle {
     InstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColorHighlighted = primaryColour
     
     NextBannerView.appearance(for: traitCollection).backgroundColor = secondaryBackgroundColour
+    NextBannerView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardContainerView.self]).backgroundColor = secondaryBackgroundColour
     
     NextInstructionLabel.appearance(for: traitCollection).font = fontMedium
     NextInstructionLabel.appearance(for: traitCollection).normalFont = fontMedium
     NextInstructionLabel.appearance(for: traitCollection).textColor = primaryColour
     NextInstructionLabel.appearance(for: traitCollection).textColorHighlighted = primaryColour
     NextInstructionLabel.appearance(for: traitCollection).normalTextColor = primaryColour
+    NextInstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).font = fontMedium
+    NextInstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).normalFont = fontMedium
+    NextInstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).textColor = primaryColour
+    NextInstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).textColorHighlighted = primaryColour
+    NextInstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).normalTextColor = primaryColour
   }
 }
 
@@ -1142,7 +1189,8 @@ class CustomNightStyle: CustomDayStyle {
     trafficSevereColor: UIColor,
     routeRestrictedAreaColor: UIColor,
     maneuverArrowColor: UIColor,
-    maneuverArrowStrokeColor: UIColor
+    maneuverArrowStrokeColor: UIColor,
+    instructionsCardRadius: CGFloat
   ) {
     super.init(
       routeCasingColor: routeCasingColor,
@@ -1156,7 +1204,8 @@ class CustomNightStyle: CustomDayStyle {
       trafficSevereColor: trafficSevereColor,
       routeRestrictedAreaColor: routeRestrictedAreaColor,
       maneuverArrowColor: maneuverArrowColor,
-      maneuverArrowStrokeColor: maneuverArrowStrokeColor
+      maneuverArrowStrokeColor: maneuverArrowStrokeColor,
+      instructionsCardRadius: instructionsCardRadius
     )
     mapStyleURL = URL(string: StyleURI.dark.rawValue)!
     styleType = .night
@@ -1175,13 +1224,13 @@ class CustomNightStyle: CustomDayStyle {
 extension MapboxNavigationFreeDriveView: StyleManagerDelegate {
     
   public func location(for styleManager: MapboxNavigation.StyleManager) -> CLLocation? {
-    let passiveLocationProvider = navigationMapView.mapView.location.locationProvider as? PassiveLocationProvider
+    let passiveLocationProvider = navigationMapView?.mapView.location.locationProvider as? PassiveLocationProvider
     return passiveLocationProvider?.locationManager.location ?? CLLocationManager().location
   }
     
   public func styleManager(_ styleManager: MapboxNavigation.StyleManager, didApply style: MapboxNavigation.Style) {
-    if navigationMapView.mapView.mapboxMap.style.uri?.rawValue != style.mapStyleURL.absoluteString {
-      navigationMapView.mapView.mapboxMap.style.uri = StyleURI(url: style.mapStyleURL)
+    if navigationMapView?.mapView.mapboxMap.style.uri?.rawValue != style.mapStyleURL.absoluteString {
+      navigationMapView?.mapView.mapboxMap.style.uri = StyleURI(url: style.mapStyleURL)
     }
   }
 }
