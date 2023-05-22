@@ -97,5 +97,14 @@ export interface IMapboxNavigationFreeDriveProps {
     mute?: boolean;
     darkMode?: boolean;
     debug?: boolean;
+    fontFamily?: string;
+    primaryColour?: string;
+    secondaryColour?: string;
+    primaryTextColour?: string;
+    secondaryTextColour?: string;
+    textSizeSmall?: number;
+    textSizeMedium?: number;
+    textSizeLarge?: number;
+    textSizeXLarge?: number;
 }
 export {};

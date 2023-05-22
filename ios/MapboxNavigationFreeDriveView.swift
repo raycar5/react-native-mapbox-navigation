@@ -141,6 +141,51 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   @objc var waypointStrokeWidth: NSNumber = 2
   @objc var waypointStrokeOpacity: NSNumber = 1
   @objc var waypointStrokeColor: NSString = "#FFFFFF"
+  @objc var fontFamily: NSString?  {
+    didSet {
+      applyStyles()
+    }
+  }
+  @objc var primaryColour: NSString = "#303030" {
+    didSet {
+      applyStyles()
+    }
+  }
+  @objc var secondaryColour: NSString = "#707070" {
+    didSet {
+      applyStyles()
+    }
+  }
+  @objc var primaryTextColour: NSString = "#FFFFFF" {
+    didSet {
+      applyStyles()
+    }
+  }
+  @objc var secondaryTextColour: NSString = "#9B9B9B" {
+    didSet {
+      applyStyles()
+    }
+  }
+  @objc var textSizeSmall: NSNumber = 14 {
+    didSet {
+      applyStyles()
+    }
+  }
+  @objc var textSizeMedium: NSNumber = 16 {
+    didSet {
+      applyStyles()
+    }
+  }
+  @objc var textSizeLarge: NSNumber = 20 {
+    didSet {
+      applyStyles()
+    }
+  }
+  @objc var textSizeXLarge: NSNumber = 22 {
+    didSet {
+      applyStyles()
+    }
+  }
   @objc var logoVisible: Bool = true {
     didSet {
       if (embedded == true) {
@@ -243,7 +288,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
     if (routeWaypoints.isEmpty == false) {
       fetchRoutes(routeWaypoints: routeWaypoints, routeWaypointNames: routeWaypointNames, onSuccess: {(routes: [Route]) -> Void in
-        //self.moveToOverview(padding: padding)
+        self.moveToOverview(padding: padding)
         self.previewRoutes(routes: routes, padding: self.getPadding(padding: padding, useDefault: false))
         self.onRouteChange?(["distance": routes.first?.distance ?? 0, "expectedTravelTime": routes.first?.expectedTravelTime ?? 0, "typicalTravelTime": routes.first?.typicalTravelTime ?? 0])
       })
@@ -280,7 +325,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     }
     
     if (currentActiveRoutes != nil) {
-      startActiveGuidance(updateCamera: false)
+      startActiveGuidance(padding: getPadding(padding: padding, useDefault: false), updateCamera: false)
 
       if (cameraType == "overview") {
         setToOverview(padding: getPadding(padding: padding, useDefault: false))
@@ -321,7 +366,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
         self.currentActiveRoutes = routes
         self.onRouteChange?(["distance": routes.first?.distance ?? 0, "expectedTravelTime": routes.first?.expectedTravelTime ?? 0, "typicalTravelTime": routes.first?.typicalTravelTime ?? 0])
 
-        self.startActiveGuidance(updateCamera: false)
+        self.startActiveGuidance(padding: self.getPadding(padding: padding, useDefault: false), updateCamera: false)
         self.setToFollow(padding: self.getPadding(padding: padding, useDefault: false))
       })
     }
@@ -494,7 +539,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     //navigationMapView?.showRouteDurations(along: routes)
   }
 
-  func startActiveGuidance(updateCamera: Bool) {
+  func startActiveGuidance(padding: UIEdgeInsets?, updateCamera: Bool) {
     currentPreviewRoutes = nil
     let response = currentRouteResponse
 
@@ -532,6 +577,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
       })
 
       let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .active)
+      navigationViewportDataSource.options.followingCameraOptions.paddingUpdatesAllowed = false
+      navigationViewportDataSource.options.overviewCameraOptions.paddingUpdatesAllowed = false
+      navigationViewportDataSource.followingMobileCamera.padding = padding ?? getPadding(padding: [], useDefault: true)
+      navigationViewportDataSource.overviewMobileCamera.padding = padding ?? getPadding(padding: [], useDefault: true)
+      
       navigationMapView?.navigationCamera.viewportDataSource = navigationViewportDataSource
 
       NotificationCenter.default.addObserver(self, selector: #selector(progressDidChange(_ :)), name: .routeControllerProgressDidChange, object: nil)
@@ -549,7 +599,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
       }
 
       if (updateCamera) {
-        setToFollow(padding: getPadding(padding: [], useDefault: false))
+        setToFollow(padding: padding ?? getPadding(padding: [], useDefault: true))
       }
     }
   }
@@ -695,7 +745,16 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
         routeRestrictedAreaColor: UIColor(hex: restrictedRoadColor as String),
         maneuverArrowColor: UIColor(hex: routeArrowColor as String),
         maneuverArrowStrokeColor: UIColor(hex: routeArrowCasingColor as String),
-        instructionsCardRadius: CGFloat(maneuverRadius.floatValue)
+        instructionsCardRadius: CGFloat(maneuverRadius.floatValue),
+        fontFamilyName: fontFamily as String?,
+        primaryColour: UIColor(hex: primaryColour as String),
+        secondaryColour: UIColor(hex: secondaryColour as String),
+        primaryTextColour: UIColor(hex: primaryTextColour as String),
+        secondaryTextColour: UIColor(hex: secondaryTextColour as String),
+        textSizeSmall: CGFloat(textSizeSmall.floatValue),
+        textSizeMedium: CGFloat(textSizeMedium.floatValue),
+        textSizeLarge: CGFloat(textSizeLarge.floatValue),
+        textSizeXLarge: CGFloat(textSizeXLarge.floatValue)
       ),
       CustomNightStyle(
         routeCasingColor: UIColor(hex: routeCasingColor as String),
@@ -710,7 +769,16 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
         routeRestrictedAreaColor: UIColor(hex: restrictedRoadColor as String),
         maneuverArrowColor: UIColor(hex: routeArrowColor as String),
         maneuverArrowStrokeColor: UIColor(hex: routeArrowCasingColor as String),
-        instructionsCardRadius: CGFloat(maneuverRadius.floatValue)
+        instructionsCardRadius: CGFloat(maneuverRadius.floatValue),
+        fontFamilyName: fontFamily as String?,
+        primaryColour: UIColor(hex: primaryColour as String),
+        secondaryColour: UIColor(hex: secondaryColour as String),
+        primaryTextColour: UIColor(hex: primaryTextColour as String),
+        secondaryTextColour: UIColor(hex: secondaryTextColour as String),
+        textSizeSmall: CGFloat(textSizeSmall.floatValue),
+        textSizeMedium: CGFloat(textSizeMedium.floatValue),
+        textSizeLarge: CGFloat(textSizeLarge.floatValue),
+        textSizeXLarge: CGFloat(textSizeXLarge.floatValue)
       )
     ]
     styleManager.automaticallyAdjustsStyleForTimeOfDay = false
@@ -817,7 +885,16 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
         routeRestrictedAreaColor: UIColor(hex: restrictedRoadColor as String),
         maneuverArrowColor: UIColor(hex: routeArrowColor as String),
         maneuverArrowStrokeColor: UIColor(hex: routeArrowCasingColor as String),
-        instructionsCardRadius: CGFloat(maneuverRadius.floatValue)
+        instructionsCardRadius: CGFloat(maneuverRadius.floatValue),
+        fontFamilyName: fontFamily as String?,
+        primaryColour: UIColor(hex: primaryColour as String),
+        secondaryColour: UIColor(hex: secondaryColour as String),
+        primaryTextColour: UIColor(hex: primaryTextColour as String),
+        secondaryTextColour: UIColor(hex: secondaryTextColour as String),
+        textSizeSmall: CGFloat(textSizeSmall.floatValue),
+        textSizeMedium: CGFloat(textSizeMedium.floatValue),
+        textSizeLarge: CGFloat(textSizeLarge.floatValue),
+        textSizeXLarge: CGFloat(textSizeXLarge.floatValue)
       ),
       CustomNightStyle(
         routeCasingColor: UIColor(hex: routeCasingColor as String),
@@ -832,7 +909,16 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
         routeRestrictedAreaColor: UIColor(hex: restrictedRoadColor as String),
         maneuverArrowColor: UIColor(hex: routeArrowColor as String),
         maneuverArrowStrokeColor: UIColor(hex: routeArrowCasingColor as String),
-        instructionsCardRadius: CGFloat(maneuverRadius.floatValue)
+        instructionsCardRadius: CGFloat(maneuverRadius.floatValue),
+        fontFamilyName: fontFamily as String?,
+        primaryColour: UIColor(hex: primaryColour as String),
+        secondaryColour: UIColor(hex: secondaryColour as String),
+        primaryTextColour: UIColor(hex: primaryTextColour as String),
+        secondaryTextColour: UIColor(hex: secondaryTextColour as String),
+        textSizeSmall: CGFloat(textSizeSmall.floatValue),
+        textSizeMedium: CGFloat(textSizeMedium.floatValue),
+        textSizeLarge: CGFloat(textSizeLarge.floatValue),
+        textSizeXLarge: CGFloat(textSizeXLarge.floatValue)
       )
     ]
     
@@ -857,7 +943,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
         navigationViewportDataSource.overviewMobileCamera.padding = padding
       }
     }
-      
+    
     navigationMapView.navigationCamera.moveToOverview()
   }
   
@@ -1045,16 +1131,6 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 }
 
 class CustomDayStyle: DayStyle {
-  private let primaryColour = UIColor(hex: (Bundle.infoPlistValue(forKey: "RNMBNAVPrimaryColour") as? String) ?? "#FFFFFF")
-  private let secondaryColour = UIColor(hex: (Bundle.infoPlistValue(forKey: "RNMBNAVSecondaryColour") as? String) ?? "#9B9B9B")
-  private let primaryBackgroundColour = UIColor(hex: (Bundle.infoPlistValue(forKey: "RNMBNAVPrimaryBackgroundColour") as? String) ?? "#303030")
-  private let secondaryBackgroundColour = UIColor(hex: (Bundle.infoPlistValue(forKey: "RNMBNAVSecondaryBackgroundColour") as? String) ?? "#707070")
-  private let fontName = Bundle.infoPlistValue(forKey: "RNMBNAVFontFamily") as? String
-  private let fontSizeSmall = CGFloat(Float(truncating: (Bundle.infoPlistValue(forKey: "RNMBNAVTextSizeSmall") as? NSNumber) ?? 14))
-  private let fontSizeMedium = CGFloat(Float(truncating: (Bundle.infoPlistValue(forKey: "RNMBNAVTextSizeMedium") as? NSNumber) ?? 16))
-  private let fontSizeLarge = CGFloat(Float(truncating: (Bundle.infoPlistValue(forKey: "RNMBNAVTextSizeLarge") as? NSNumber) ?? 20))
-  private let fontSizeXLarge = CGFloat(Float(truncating: (Bundle.infoPlistValue(forKey: "RNMBNAVTextSizeXLarge") as? NSNumber) ?? 22))
-  
   private var routeCasingColor: UIColor
   private var routeAlternateColor: UIColor
   private var routeAlternateCasingColor: UIColor
@@ -1068,6 +1144,15 @@ class CustomDayStyle: DayStyle {
   private var maneuverArrowColor: UIColor
   private var maneuverArrowStrokeColor: UIColor
   private var instructionsCardRadius: CGFloat
+  private var fontFamilyName: String?
+  private var primaryColour: UIColor
+  private var secondaryColour: UIColor
+  private var primaryTextColour: UIColor
+  private var secondaryTextColour: UIColor
+  private var textSizeSmall: CGFloat
+  private var textSizeMedium: CGFloat
+  private var textSizeLarge: CGFloat
+  private var textSizeXLarge: CGFloat
   
   required init(
     routeCasingColor: UIColor,
@@ -1082,7 +1167,16 @@ class CustomDayStyle: DayStyle {
     routeRestrictedAreaColor: UIColor,
     maneuverArrowColor: UIColor,
     maneuverArrowStrokeColor: UIColor,
-    instructionsCardRadius: CGFloat
+    instructionsCardRadius: CGFloat,
+    fontFamilyName: String?,
+    primaryColour: UIColor,
+    secondaryColour: UIColor,
+    primaryTextColour: UIColor,
+    secondaryTextColour: UIColor,
+    textSizeSmall: CGFloat,
+    textSizeMedium: CGFloat,
+    textSizeLarge: CGFloat,
+    textSizeXLarge: CGFloat
   ) {
     self.routeCasingColor = routeCasingColor
     self.routeAlternateColor = routeAlternateColor
@@ -1097,6 +1191,15 @@ class CustomDayStyle: DayStyle {
     self.maneuverArrowColor = maneuverArrowColor
     self.maneuverArrowStrokeColor = maneuverArrowStrokeColor
     self.instructionsCardRadius = instructionsCardRadius
+    self.fontFamilyName = fontFamilyName
+    self.primaryColour = primaryColour
+    self.secondaryColour = secondaryColour
+    self.primaryTextColour = primaryTextColour
+    self.secondaryTextColour = secondaryTextColour
+    self.textSizeSmall = textSizeSmall
+    self.textSizeMedium = textSizeMedium
+    self.textSizeLarge = textSizeLarge
+    self.textSizeXLarge = textSizeXLarge
     
     super.init()
     mapStyleURL = URL(string: StyleURI.light.rawValue)!
@@ -1113,10 +1216,10 @@ class CustomDayStyle: DayStyle {
     
     let traitCollection = UIScreen.main.traitCollection
     
-    let fontSmall = fontName != nil ? (UIFont(name: fontName!, size: fontSizeSmall) ?? UIFont.systemFont(ofSize: fontSizeSmall)) : UIFont.systemFont(ofSize: fontSizeSmall)
-    let fontMedium = fontName != nil ? (UIFont(name: fontName!, size: fontSizeMedium) ?? UIFont.systemFont(ofSize: fontSizeMedium)) : UIFont.systemFont(ofSize: fontSizeMedium)
-    let fontLarge = fontName != nil ? (UIFont(name: fontName!, size: fontSizeLarge) ?? UIFont.systemFont(ofSize: fontSizeLarge)) : UIFont.systemFont(ofSize: fontSizeLarge)
-    let fontXLarge = fontName != nil ? (UIFont(name: fontName!, size: fontSizeXLarge) ?? UIFont.systemFont(ofSize: fontSizeXLarge)) : UIFont.systemFont(ofSize: fontSizeXLarge)
+    let fontSmall = fontFamilyName != nil ? (UIFont(name: fontFamilyName!, size: textSizeSmall) ?? UIFont.systemFont(ofSize: textSizeSmall)) : UIFont.systemFont(ofSize: textSizeSmall)
+    let fontMedium = fontFamilyName != nil ? (UIFont(name: fontFamilyName!, size: textSizeMedium) ?? UIFont.systemFont(ofSize: textSizeMedium)) : UIFont.systemFont(ofSize: textSizeMedium)
+    let fontLarge = fontFamilyName != nil ? (UIFont(name: fontFamilyName!, size: textSizeLarge) ?? UIFont.systemFont(ofSize: textSizeLarge)) : UIFont.systemFont(ofSize: textSizeLarge)
+    let fontXLarge = fontFamilyName != nil ? (UIFont(name: fontFamilyName!, size: textSizeXLarge) ?? UIFont.systemFont(ofSize: textSizeXLarge)) : UIFont.systemFont(ofSize: textSizeXLarge)
     
     NavigationMapView.appearance(for: traitCollection).routeCasingColor = routeCasingColor
     NavigationMapView.appearance(for: traitCollection).routeAlternateColor = routeAlternateColor
@@ -1131,35 +1234,35 @@ class CustomDayStyle: DayStyle {
     NavigationMapView.appearance(for: traitCollection).maneuverArrowColor = maneuverArrowColor
     NavigationMapView.appearance(for: traitCollection).maneuverArrowStrokeColor = maneuverArrowStrokeColor
     
-    InstructionsCardContainerView.appearance(for: traitCollection).customBackgroundColor = primaryBackgroundColour
-    InstructionsCardContainerView.appearance(for: traitCollection).highlightedBackgroundColor = primaryBackgroundColour
-    InstructionsCardContainerView.appearance(for: traitCollection).separatorColor = secondaryBackgroundColour
-    InstructionsCardContainerView.appearance(for: traitCollection).highlightedSeparatorColor = secondaryBackgroundColour
+    InstructionsCardContainerView.appearance(for: traitCollection).customBackgroundColor = primaryColour
+    InstructionsCardContainerView.appearance(for: traitCollection).highlightedBackgroundColor = primaryColour
+    InstructionsCardContainerView.appearance(for: traitCollection).separatorColor = secondaryColour
+    InstructionsCardContainerView.appearance(for: traitCollection).highlightedSeparatorColor = secondaryColour
     InstructionsCardContainerView.appearance(for: traitCollection).cornerRadius = instructionsCardRadius
     InstructionsCardContainerView.appearance(for: traitCollection).clipsToBounds = true
     
-    LanesView.appearance(for: traitCollection).backgroundColor = secondaryBackgroundColour
+    LanesView.appearance(for: traitCollection).backgroundColor = secondaryColour
     
-    LaneView.appearance(for: traitCollection).primaryColor = primaryColour
-    LaneView.appearance(for: traitCollection).primaryColorHighlighted = primaryColour
-    LaneView.appearance(for: traitCollection).secondaryColor = secondaryColour
-    LaneView.appearance(for: traitCollection).secondaryColorHighlighted = secondaryColour
+    LaneView.appearance(for: traitCollection).primaryColor = primaryTextColour
+    LaneView.appearance(for: traitCollection).primaryColorHighlighted = primaryTextColour
+    LaneView.appearance(for: traitCollection).secondaryColor = secondaryTextColour
+    LaneView.appearance(for: traitCollection).secondaryColorHighlighted = secondaryTextColour
     
-    ManeuverView.appearance(for: traitCollection).backgroundColor = primaryBackgroundColour
-    ManeuverView.appearance(for: traitCollection).primaryColor = primaryColour
-    ManeuverView.appearance(for: traitCollection).primaryColorHighlighted = primaryColour
-    ManeuverView.appearance(for: traitCollection).secondaryColor = secondaryColour
-    ManeuverView.appearance(for: traitCollection).secondaryColorHighlighted = secondaryColour
-    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).tintColor = primaryColour
-    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).primaryColor = primaryColour
-    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).primaryColorHighlighted = primaryColour
-    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).secondaryColor = primaryColour
-    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).secondaryColorHighlighted = primaryColour
-    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).tintColor = primaryColour
-    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).primaryColor = primaryColour
-    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).primaryColorHighlighted = primaryColour
-    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).secondaryColor = primaryColour
-    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).secondaryColorHighlighted = primaryColour
+    ManeuverView.appearance(for: traitCollection).backgroundColor = primaryTextColour
+    ManeuverView.appearance(for: traitCollection).primaryColor = primaryTextColour
+    ManeuverView.appearance(for: traitCollection).primaryColorHighlighted = primaryTextColour
+    ManeuverView.appearance(for: traitCollection).secondaryColor = secondaryTextColour
+    ManeuverView.appearance(for: traitCollection).secondaryColorHighlighted = secondaryTextColour
+    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).tintColor = primaryTextColour
+    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).primaryColor = primaryTextColour
+    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).primaryColorHighlighted = primaryTextColour
+    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).secondaryColor = primaryTextColour
+    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).secondaryColorHighlighted = primaryTextColour
+    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).tintColor = primaryTextColour
+    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).primaryColor = primaryTextColour
+    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).primaryColorHighlighted = primaryTextColour
+    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).secondaryColor = primaryTextColour
+    ManeuverView.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).secondaryColorHighlighted = primaryTextColour
     
     DistanceLabel.appearance(for: traitCollection).font = fontSmall
     DistanceLabel.appearance(for: traitCollection).normalFont = fontSmall
@@ -1169,47 +1272,47 @@ class CustomDayStyle: DayStyle {
     DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).normalFont = fontSmall
     DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).unitFont = fontSmall
     DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).valueFont = fontSmall
-    DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColor = secondaryColour
-    DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColorHighlighted = secondaryColour
-    DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).normalTextColor = secondaryColour
-    DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).unitTextColor = secondaryColour
-    DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).unitTextColorHighlighted = secondaryColour
-    DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).valueTextColor = secondaryColour
-    DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).valueTextColorHighlighted = secondaryColour
+    DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColor = secondaryTextColour
+    DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColorHighlighted = secondaryTextColour
+    DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).normalTextColor = secondaryTextColour
+    DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).unitTextColor = secondaryTextColour
+    DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).unitTextColorHighlighted = secondaryTextColour
+    DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).valueTextColor = secondaryTextColour
+    DistanceLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).valueTextColorHighlighted = secondaryTextColour
     
     DistanceRemainingLabel.appearance(for: traitCollection).font = fontSmall
     DistanceRemainingLabel.appearance(for: traitCollection).normalFont = fontSmall
-    DistanceRemainingLabel.appearance(for: traitCollection).textColor = secondaryColour
-    DistanceRemainingLabel.appearance(for: traitCollection).textColorHighlighted = secondaryColour
-    DistanceRemainingLabel.appearance(for: traitCollection).normalTextColor = secondaryColour
+    DistanceRemainingLabel.appearance(for: traitCollection).textColor = secondaryTextColour
+    DistanceRemainingLabel.appearance(for: traitCollection).textColorHighlighted = secondaryTextColour
+    DistanceRemainingLabel.appearance(for: traitCollection).normalTextColor = secondaryTextColour
     
     PrimaryLabel.appearance(for: traitCollection).font = fontXLarge
     PrimaryLabel.appearance(for: traitCollection).normalFont = fontXLarge
-    PrimaryLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColor = primaryColour
-    PrimaryLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColorHighlighted = primaryColour
-    PrimaryLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).normalTextColor = primaryColour
+    PrimaryLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColor = primaryTextColour
+    PrimaryLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColorHighlighted = primaryTextColour
+    PrimaryLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).normalTextColor = primaryTextColour
     PrimaryLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).font = fontXLarge
     PrimaryLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).normalFont = fontXLarge
     
     InstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).font = fontLarge
     InstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).normalFont = fontLarge
-    InstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).normalTextColor = primaryColour
-    InstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColor = primaryColour
-    InstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColorHighlighted = primaryColour
+    InstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).normalTextColor = primaryTextColour
+    InstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColor = primaryTextColour
+    InstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardView.self]).textColorHighlighted = primaryTextColour
     
-    NextBannerView.appearance(for: traitCollection).backgroundColor = secondaryBackgroundColour
-    NextBannerView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardContainerView.self]).backgroundColor = secondaryBackgroundColour
+    NextBannerView.appearance(for: traitCollection).backgroundColor = secondaryColour
+    NextBannerView.appearance(for: traitCollection, whenContainedInInstancesOf: [InstructionsCardContainerView.self]).backgroundColor = secondaryColour
     
     NextInstructionLabel.appearance(for: traitCollection).font = fontMedium
     NextInstructionLabel.appearance(for: traitCollection).normalFont = fontMedium
-    NextInstructionLabel.appearance(for: traitCollection).textColor = primaryColour
-    NextInstructionLabel.appearance(for: traitCollection).textColorHighlighted = primaryColour
-    NextInstructionLabel.appearance(for: traitCollection).normalTextColor = primaryColour
+    NextInstructionLabel.appearance(for: traitCollection).textColor = primaryTextColour
+    NextInstructionLabel.appearance(for: traitCollection).textColorHighlighted = primaryTextColour
+    NextInstructionLabel.appearance(for: traitCollection).normalTextColor = primaryTextColour
     NextInstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).font = fontMedium
     NextInstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).normalFont = fontMedium
-    NextInstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).textColor = primaryColour
-    NextInstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).textColorHighlighted = primaryColour
-    NextInstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).normalTextColor = primaryColour
+    NextInstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).textColor = primaryTextColour
+    NextInstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).textColorHighlighted = primaryTextColour
+    NextInstructionLabel.appearance(for: traitCollection, whenContainedInInstancesOf: [NextBannerView.self]).normalTextColor = primaryTextColour
   }
 }
 
@@ -1227,7 +1330,16 @@ class CustomNightStyle: CustomDayStyle {
     routeRestrictedAreaColor: UIColor,
     maneuverArrowColor: UIColor,
     maneuverArrowStrokeColor: UIColor,
-    instructionsCardRadius: CGFloat
+    instructionsCardRadius: CGFloat,
+    fontFamilyName: String?,
+    primaryColour: UIColor,
+    secondaryColour: UIColor,
+    primaryTextColour: UIColor,
+    secondaryTextColour: UIColor,
+    textSizeSmall: CGFloat,
+    textSizeMedium: CGFloat,
+    textSizeLarge: CGFloat,
+    textSizeXLarge: CGFloat
   ) {
     super.init(
       routeCasingColor: routeCasingColor,
@@ -1242,7 +1354,16 @@ class CustomNightStyle: CustomDayStyle {
       routeRestrictedAreaColor: routeRestrictedAreaColor,
       maneuverArrowColor: maneuverArrowColor,
       maneuverArrowStrokeColor: maneuverArrowStrokeColor,
-      instructionsCardRadius: instructionsCardRadius
+      instructionsCardRadius: instructionsCardRadius,
+      fontFamilyName: fontFamilyName,
+      primaryColour: primaryColour,
+      secondaryColour: secondaryColour,
+      primaryTextColour: primaryTextColour,
+      secondaryTextColour: secondaryTextColour,
+      textSizeSmall: textSizeSmall,
+      textSizeMedium: textSizeMedium,
+      textSizeLarge: textSizeLarge,
+      textSizeXLarge: textSizeXLarge
     )
     mapStyleURL = URL(string: StyleURI.dark.rawValue)!
     styleType = .night

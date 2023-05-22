@@ -158,6 +158,15 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var mute: Boolean = false
     private var darkMode: Boolean = false
     private var debug: Boolean = false
+    private var fontFamily: String? = null
+    private var primaryColour: String = "#303030"
+    private var secondaryColour: String = "#707070"
+    private var primaryTextColour: String = "#FFFFFF"
+    private var secondaryTextColour: String = "#9B9B9B"
+    private var textSizeSmall: Double = 14
+    private var textSizeMedium: Double = 16
+    private var textSizeLarge: Double = 20
+    private var textSizeXLarge: Double = 22
 
     private var isMapStyleLoaded: Boolean = false
     private var currentOrigin: Point? = null
@@ -1604,5 +1613,41 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     
     fun setDebug(debug: Boolean) {
         this.debug = debug
+    }
+
+    fun setFontFamily(fontFamily: String?) {
+        this.fontFamily = fontFamily
+    }
+
+    fun setPrimaryColour(primaryColour: String) {
+        this.primaryColour = primaryColour
+    }
+
+    fun setSecondaryColour(secondaryColour: String) {
+        this.secondaryColour = secondaryColour
+    }
+
+    fun setPrimaryTextColour(primaryTextColour: String) {
+        this.primaryTextColour = primaryTextColour
+    }
+
+    fun setSecondaryTextColour(secondaryTextColour: String) {
+        this.secondaryTextColour = secondaryTextColour
+    }
+
+    fun setTextSizeSmall(textSizeSmall: Double) {
+        this.textSizeSmall = textSizeSmall
+    }
+
+    fun setTextSizeMedium(textSizeMedium: Double) {
+        this.textSizeMedium = textSizeMedium
+    }
+    
+    fun setTextSizeLarge(textSizeLarge: Double) {
+        this.textSizeLarge = textSizeLarge
+    }
+    
+    fun setTextSizeXLarge(textSizeXLarge: Double) {
+        this.textSizeXLarge = textSizeXLarge
     }
 }

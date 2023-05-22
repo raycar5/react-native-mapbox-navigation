@@ -266,4 +266,49 @@ class MapboxNavigationFreeDriveManager(var mCallerContext: ReactApplicationConte
     fun setDebug(view: MapboxNavigationFreeDriveView, debug: Boolean) {
         view.setDebug(debug)
     }
+
+    @ReactProp(name = "fontFamily")
+    fun setFontFamily(view: MapboxNavigationFreeDriveView, fontFamily: String?) {
+        view.setFontFamily(fontFamily)
+    }
+
+    @ReactProp(name = "primaryColour")
+    fun setPrimaryColour(view: MapboxNavigationFreeDriveView, primaryColour: String) {
+        view.setPrimaryColour(primaryColour)
+    }
+
+    @ReactProp(name = "secondaryColour")
+    fun setSecondaryColour(view: MapboxNavigationFreeDriveView, secondaryColour: String) {
+        view.setSecondaryColour(secondaryColour)
+    }
+
+    @ReactProp(name = "primaryTextColour")
+    fun setPrimaryTextColour(view: MapboxNavigationFreeDriveView, primaryTextColour: String) {
+        view.setPrimaryTextColour(primaryTextColour)
+    }
+
+    @ReactProp(name = "secondaryTextColour")
+    fun setSecondaryTextColour(view: MapboxNavigationFreeDriveView, secondaryTextColour: String) {
+        view.setSecondaryTextColour(secondaryTextColour)
+    }
+
+    @ReactProp(name = "textSizeSmall")
+    fun setTextSizeSmall(view: MapboxNavigationFreeDriveView, textSizeSmall: Double) {
+        view.setTextSizeSmall(textSizeSmall)
+    }
+
+    @ReactProp(name = "textSizeMedium")
+    fun setTextSizeMedium(view: MapboxNavigationFreeDriveView, textSizeMedium: Double) {
+        view.setTextSizeMedium(textSizeMedium)
+    }
+    
+    @ReactProp(name = "textSizeLarge")
+    fun setTextSizeLarge(view: MapboxNavigationFreeDriveView, textSizeLarge: Double) {
+        view.setTextSizeLarge(textSizeLarge)
+    }
+    
+    @ReactProp(name = "textSizeXLarge")
+    fun setTextSizeXLarge(view: MapboxNavigationFreeDriveView, textSizeXLarge: Double) {
+        view.setTextSizeXLarge(textSizeXLarge)
+    }
 }

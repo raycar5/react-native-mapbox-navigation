@@ -44,6 +44,15 @@ RCT_EXPORT_VIEW_PROPERTY(waypointStrokeColor, NSString)
 RCT_EXPORT_VIEW_PROPERTY(mute, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(darkMode, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(debug, BOOL)
+RCT_EXPORT_VIEW_PROPERTY(fontFamily, NSString)
+RCT_EXPORT_VIEW_PROPERTY(primaryColour, NSString)
+RCT_EXPORT_VIEW_PROPERTY(secondaryColour, NSString)
+RCT_EXPORT_VIEW_PROPERTY(primaryTextColour, NSString)
+RCT_EXPORT_VIEW_PROPERTY(secondaryTextColour, NSString)
+RCT_EXPORT_VIEW_PROPERTY(textSizeSmall, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(textSizeMedium, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(textSizeLarge, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(textSizeXLarge, NSNumber)
 
 RCT_EXTERN_METHOD(
   showRouteViaManager: (nonnull NSNumber *)node 
