@@ -163,10 +163,10 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
     private var secondaryColour: String = "#707070"
     private var primaryTextColour: String = "#FFFFFF"
     private var secondaryTextColour: String = "#9B9B9B"
-    private var textSizeSmall: Double = 14
-    private var textSizeMedium: Double = 16
-    private var textSizeLarge: Double = 20
-    private var textSizeXLarge: Double = 22
+    private var textSizeSmall: Double = 14.0
+    private var textSizeMedium: Double = 16.0
+    private var textSizeLarge: Double = 20.0
+    private var textSizeXLarge: Double = 22.0
 
     private var isMapStyleLoaded: Boolean = false
     private var currentOrigin: Point? = null
