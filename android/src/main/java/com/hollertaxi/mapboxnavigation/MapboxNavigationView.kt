@@ -334,19 +334,24 @@ class MapboxNavigationView(private val context: ThemedReactContext, private val 
                 ).show()
             },
             {
-                //binding.maneuverView.visibility = View.VISIBLE
-                //binding.maneuverView.updatePrimaryManeuverTextAppearance(R.style.PrimaryManeuverTextAppearance)
-                //binding.maneuverView.updateSecondaryManeuverTextAppearance(R.style.ManeuverTextAppearance)
-                //binding.maneuverView.updateSubManeuverTextAppearance(R.style.ManeuverTextAppearance)
-                //binding.maneuverView.updateStepDistanceTextAppearance(R.style.StepDistanceRemainingAppearance)
-                //binding.maneuverView.renderManeuvers(maneuvers)
+                binding.maneuverView.visibility = View.VISIBLE
+                /*
+
+                binding.maneuverView.updatePrimaryManeuverTextAppearance(R.style.PrimaryManeuverTextAppearance)
+                binding.maneuverView.updateSecondaryManeuverTextAppearance(R.style.ManeuverTextAppearance)
+                binding.maneuverView.updateSubManeuverTextAppearance(R.style.ManeuverTextAppearance)
+                binding.maneuverView.updateStepDistanceTextAppearance(R.style.StepDistanceRemainingAppearance)
+                 */
+                binding.maneuverView.renderManeuvers(maneuvers)
             }
         )
 
-        // update bottom trip progress summary
-        //binding.tripProgressView.render(
+        //update bottom trip progress summary
+        /*
+        binding.tripProgressView.render(
             //tripProgressApi.getTripProgress(routeProgress)
-        //)
+        )
+        */
 
         val event = Arguments.createMap()
         event.putDouble("distanceTraveled", routeProgress.distanceTraveled.toDouble())

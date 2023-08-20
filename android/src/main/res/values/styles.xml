@@ -13,10 +13,15 @@
     <style name="SecondaryManeuverTextAppearance" parent="TextAppearance.AppCompat">
     </style>
 
+    <style name="ManeuverTextAppearance" parent="TextAppearance.AppCompat">
+    </style>
+
     <style name="SubManeuverTextAppearance" parent="TextAppearance.AppCompat">
     </style>
 
     <style name="StepDistanceTextAppearance" parent="TextAppearance.AppCompat">
+    </style>
+    <style name="StepDistanceRemainingAppearance" parent="TextAppearance.AppCompat">
     </style>
 
     <style name="UpcomingPrimaryManeuverTextAppearance" parent="TextAppearance.AppCompat">
